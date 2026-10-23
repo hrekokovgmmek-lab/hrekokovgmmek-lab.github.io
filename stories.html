@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Stories · Artem Vartanov</title>
+<meta name="description" content="Short stories from on-chain measurements: one wallet in 25 minutes, why 75% of pump.fun transactions fail, what terminals take.">
+<meta name="theme-color" content="#f4f2ec">
+<meta property="og:title" content="Stories · Artem Vartanov">
+<meta property="og:description" content="Short stories from on-chain measurements: one wallet in 25 minutes, why 75% of pump.fun transactions fail, what terminals take.">
+<meta property="og:image" content="https://artemvartanov.com/og.png">
+<link rel="canonical" href="https://artemvartanov.com/stories.html">
+<style>
+:root{--paper:#f4f2ec;--ink:#1f1f1f;--brick:#a84b36;--grey:#6f6b62;--rule:#dedad1;--ease:cubic-bezier(.2,.7,.2,1)}
+:root[data-lang=en] [data-l=ru],:root[data-lang=ru] [data-l=en]{display:none}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:#e9e6de;color:var(--ink);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+.stage{position:fixed;inset:0;display:grid;place-items:center}
+.frame{--fw:min(100vw,calc(100vh*9/16));--u:calc(var(--fw)/100);position:relative;width:var(--fw);height:calc(var(--fw)*16/9);background:var(--paper);overflow:hidden;
+  font-variant-numeric:tabular-nums}
+.story{position:absolute;inset:0;cursor:pointer;user-select:none;-webkit-user-select:none}
+.bars{position:absolute;left:calc(var(--u)*4);right:calc(var(--u)*4);top:calc(var(--u)*3);display:flex;gap:calc(var(--u)*1.2)}
+.bars span{flex:1;height:calc(var(--u)*0.6);background:var(--rule);overflow:hidden;border-radius:calc(var(--u)*0.3)}
+.bars i{display:block;height:100%;width:0;background:var(--ink)}
+.rec .bars{display:none}
+@keyframes fill{from{width:0}to{width:100%}}
+.hook{position:absolute;left:calc(var(--u)*8);right:calc(var(--u)*10);top:calc(var(--u)*13);margin:0;font-size:calc(var(--u)*7.6);line-height:1.12;font-weight:600;letter-spacing:-.01em}
+.hook em{display:block;font-family:"New York",Georgia,serif;font-weight:400;font-style:italic;letter-spacing:0}
+.slide{position:absolute;left:calc(var(--u)*8);right:calc(var(--u)*12);top:calc(var(--u)*54);bottom:calc(var(--u)*28);opacity:0;visibility:hidden}
+.wm{position:absolute;left:calc(var(--u)*8);top:calc(var(--u)*6.5);margin:0;font-size:calc(var(--u)*3.4);color:var(--grey);letter-spacing:.02em}
+.slide.on{opacity:1;visibility:visible;animation:sin .45s var(--ease) both}
+@keyframes sin{from{opacity:0;transform:translateY(calc(var(--u)*2))}to{opacity:1;transform:none}}
+.slide.on .pop{animation:pop .5s var(--ease) both;animation-delay:var(--d,0s)}
+@keyframes pop{from{opacity:0;transform:translateY(calc(var(--u)*1.6))}to{opacity:1;transform:none}}
+.slide.on .grow{animation:grow .9s var(--ease) both;animation-delay:var(--d,0s)}
+@keyframes grow{from{transform:scaleX(0)}to{transform:none}}
+.grow{transform-origin:0 50%}
+.dash{stroke-dasharray:var(--len);stroke-dashoffset:var(--len)}
+.slide.on .dash{animation:dash 2.2s cubic-bezier(.45,.05,.35,1) .2s forwards}
+@keyframes dash{to{stroke-dashoffset:0}}
+.kick{margin:0 0 calc(var(--u)*2.4);font-size:calc(var(--u)*4.2);color:var(--grey);letter-spacing:.02em}
+.big{margin:0;font-size:calc(var(--u)*28);line-height:1;font-weight:500;letter-spacing:-.03em}
+.big small{font-size:calc(var(--u)*7);letter-spacing:0;color:var(--grey);font-weight:400}
+.big.mid{font-size:calc(var(--u)*19)}
+.out{color:var(--brick)}
+.sub{margin:calc(var(--u)*3) 0 0;font-size:calc(var(--u)*5.4);line-height:1.35;color:#3a3833}
+.note{margin:0 0 calc(var(--u)*2.8);font-family:"New York",Georgia,serif;font-style:italic;font-size:calc(var(--u)*7.8);line-height:1.2}
+.schart{display:block;width:100%;height:auto;margin:calc(var(--u)*3) 0 0}
+.schart text{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:14px;fill:var(--grey)}
+.evdot{opacity:0;transition:opacity .2s}
+.evdot.on{opacity:1}
+.evbox{position:relative;height:calc(var(--u)*14);margin-top:calc(var(--u)*2)}
+.evlab{position:absolute;left:0;top:0;font-size:calc(var(--u)*6);font-weight:500;opacity:0;transform:translateY(calc(var(--u)*1));transition:opacity .25s,transform .25s}
+.evlab.on{opacity:1;transform:none}
+.pair{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--rule);padding:calc(var(--u)*2.6) 0}
+.pair span{font-size:calc(var(--u)*5.4);color:var(--grey)}
+.pair b{font-size:calc(var(--u)*10.5);font-weight:500}
+.pair.out b{color:var(--brick)}
+.pair.sum{border-bottom:2px solid var(--ink)}
+.pair.sum b{color:var(--brick)}
+.pair b small{font-size:calc(var(--u)*4);color:var(--grey);font-weight:400}
+.stack{display:flex;height:calc(var(--u)*11);margin:calc(var(--u)*5) 0 calc(var(--u)*3);gap:2px}
+.stack i{display:block;height:100%}
+.leg{margin:0 0 calc(var(--u)*2);font-size:calc(var(--u)*4.7);display:flex;align-items:center;gap:calc(var(--u)*2)}
+.leg i{width:calc(var(--u)*3.2);height:calc(var(--u)*3.2);flex:none}
+.leg b{margin-left:auto;font-weight:500}
+.brow{display:grid;grid-template-columns:calc(var(--u)*36) 1fr calc(var(--u)*15);align-items:center;gap:calc(var(--u)*2);margin:0 0 calc(var(--u)*3)}
+.bl{font-size:calc(var(--u)*5)}
+.bt{height:calc(var(--u)*4.4);background:transparent}
+.bt i{display:block;height:100%}
+.bv{text-align:right;font-size:calc(var(--u)*5.2);font-weight:500}
+.end .endbox{position:absolute;left:0;right:0;top:calc(var(--u)*6)}
+.url{margin:0;font-family:"New York",Georgia,serif;font-style:italic;font-size:calc(var(--u)*8.6);line-height:1.1}
+.end .sub{color:var(--grey)}
+.end .kick{margin-top:calc(var(--u)*6)}
+.menu .story{display:none}
+.menuwrap{display:none;position:absolute;inset:0;padding:calc(var(--u)*14) calc(var(--u)*8)}
+.menu .menuwrap{display:block}
+.menuwrap h1{margin:0 0 calc(var(--u)*2);font-size:calc(var(--u)*8);font-weight:600}
+.menuwrap h1 em{font-family:"New York",Georgia,serif;font-weight:400}
+.menuwrap p{margin:0 0 calc(var(--u)*6);color:var(--grey);font-size:calc(var(--u)*4.4)}
+.card{display:block;border:1px solid var(--rule);padding:calc(var(--u)*4) calc(var(--u)*5);margin:0 0 calc(var(--u)*3);color:var(--ink);text-decoration:none}
+.card b{display:block;font-size:calc(var(--u)*5.4);font-weight:500;margin-bottom:calc(var(--u)*1)}
+.card span{font-size:calc(var(--u)*3.8);color:var(--grey)}
+.back{position:absolute;left:calc(var(--u)*8);bottom:calc(var(--u)*8);font-size:calc(var(--u)*4);color:var(--grey)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01s!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="stage"><div class="frame">
+<article class="story" id="story-creator" hidden><div class="bars"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div><p class="wm">artemvartanov.com</p><p class="hook"><span data-l="en">one wallet. 25 minutes.</span><span data-l="ru">один кошелёк. 25 минут.</span> <em><span data-l="en">watch the balance.</span><span data-l="ru">следите за балансом.</span></em></p><section class="slide" data-dur="2000"><p class="kick pop"><span data-l="en">29 sep 2026 · on chain</span><span data-l="ru">29.09.2026 · с цепи</span></p>
+          <p class="big pop" style="--d:.1s">0<small> SOL</small></p>
+          <p class="sub pop" style="--d:.25s"><span data-l="en">a fresh wallet. no history.</span><span data-l="ru">новый кошелёк. никакой истории.</span></p></section><section class="slide" data-dur="9500" data-js="replay" data-ms="8600" data-t0="29010" data-t1="30600"
+          data-x0="40" data-x1="392" data-events='[[29074, 212.91], [29953, 126.84], [30311, 488.89], [30405, 506.82], [30567, 0.0]]'>
+          <p class="kick"><span class="clock">08:03:30</span> UTC</p>
+          <p class="big mid"><span class="bal">0.00</span><small> SOL</small></p>
+          <svg class="schart" viewBox="0 0 400 300" aria-hidden="true"><defs><clipPath id="rc"><rect class="clip" x="37" y="0" width="0" height="300"/></clipPath></defs><line x1="40" y1="276.0" x2="392" y2="276.0" stroke="#8a867d"/><text x="33" y="280.0" text-anchor="end">0</text><line x1="40" y1="158.1" x2="392" y2="158.1" stroke="#dedad1"/><text x="33" y="162.1" text-anchor="end">250</text><line x1="40" y1="40.3" x2="392" y2="40.3" stroke="#dedad1"/><text x="33" y="44.3" text-anchor="end">500</text><path d="M40.0,276.0 L54.2,276.0 L54.2,175.6 L248.8,175.6 L248.8,216.2 L328.0,216.2 L328.0,45.5 L348.8,45.5 L348.8,37.1 L384.7,37.1 L384.7,276.0 L392.0,276.0" clip-path="url(#rc)" fill="none" stroke="#1f1f1f" stroke-width="2.8" stroke-linejoin="round"/><circle class="evdot" cx="54.2" cy="175.6" r="5" fill="#1f1f1f"/><circle class="evdot" cx="248.8" cy="216.2" r="5" fill="#a84b36"/><circle class="evdot" cx="328.0" cy="45.5" r="5" fill="#1f1f1f"/><circle class="evdot" cx="348.8" cy="37.1" r="5" fill="#1f1f1f"/><circle class="evdot" cx="384.7" cy="276.0" r="5" fill="#a84b36"/></svg><div class="evbox"><span class="evlab" style="color:#1f1f1f"><span data-l="en">+212.9 sol in from a hub</span><span data-l="ru">+212,9 SOL от концентратора</span></span><span class="evlab" style="color:#a84b36"><span data-l="en">−86.1 creates a coin, buys 79% of it</span><span data-l="ru">−86,1 создаёт монету и покупает 79 %</span></span><span class="evlab" style="color:#1f1f1f"><span data-l="en">+362.1 sells all of it</span><span data-l="ru">+362,1 продаёт всё</span></span><span class="evlab" style="color:#1f1f1f"><span data-l="en">+17.9 creator fees</span><span data-l="ru">+17,9 комиссии создателя</span></span><span class="evlab" style="color:#a84b36"><span data-l="en">−506.8 back to the same hub</span><span data-l="ru">−506,8 обратно тому же концентратору</span></span></div></section><section class="slide" data-dur="3300"><p class="kick pop"><span data-l="en">in minus out, the whole story</span><span data-l="ru">приход минус расход, вся история</span></p>
+          <div class="pair pop" style="--d:.1s"><span><span data-l="en">creator</span><span data-l="ru">создатель</span></span><b>+<span class="count" data-to="293.91" data-nd="2">0</span> <small>SOL</small></b></div>
+          <div class="pair pop out" style="--d:.35s"><span><span data-l="en">the big buyer</span><span data-l="ru">крупный покупатель</span></span><b>−<span class="count" data-to="295.85" data-nd="2" data-delay="250">0</span> <small>SOL</small></b></div>
+          <div class="pair pop sum" style="--d:1.3s"><span><span data-l="en">together</span><span data-l="ru">вместе</span></span><b><span data-l="en">−1.94</span><span data-l="ru">−1,94</span> <small>SOL</small></b></div></section><section class="slide" data-dur="3000"><p class="note pop"><span data-l="en">one hub funded both sides.</span><span data-l="ru">обе стороны пополнил один концентратор.</span></p>
+          <p class="note pop" style="--d:.6s"><span data-l="en">the money went in a circle.</span><span data-l="ru">деньги просто сделали круг.</span></p>
+          <p class="sub pop" style="--d:1.3s"><span data-l="en">the 1,525 SOL “demand” in the pool was the same group.</span><span data-l="ru">«спрос» на 1 525 SOL в пуле — та же группа.</span></p></section><section class="slide end" data-dur="2600"><div class="endbox"><p class="url pop">artemvartanov.com</p><p class="sub pop" style="--d:.25s"><span data-l="en">every number measured on chain</span><span data-l="ru">каждая цифра измерена на цепи</span></p><p class="kick pop" style="--d:.5s"><span data-l="en">investigations · trading systems · research</span><span data-l="ru">расследования · торговые системы · исследования</span></p></div></section></article><article class="story" id="story-failures" hidden><div class="bars"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div><p class="wm">artemvartanov.com</p><p class="hook"><span data-l="en">75% of pump.fun transactions fail.</span><span data-l="ru">75 % транзакций pump.fun неудачные.</span> <em><span data-l="en">but not how you think.</span><span data-l="ru">но не так, как вы думаете.</span></em></p><section class="slide" data-dur="3000"><p class="kick pop"><span data-l="en">pump.fun curve · 23 oct 2026</span><span data-l="ru">кривая pump.fun · 23.10.2026</span></p>
+          <p class="big pop" style="--d:.1s"><span class="count" data-to="75" data-ms="1300">0</span>%</p>
+          <p class="sub pop" style="--d:.3s"><span data-l="en">of 120,000 transactions in ten minutes failed</span><span data-l="ru">из 120 000 транзакций за десять минут — неудачные</span></p></section><section class="slide" data-dur="3000"><p class="kick pop"><span data-l="en">share failed, every 1,000 transactions</span><span data-l="ru">доля неудачных на каждые 1 000 транзакций</span></p>
+          <svg class="schart" viewBox="0 0 400 280" aria-hidden="true"><line x1="46" y1="262.0" x2="392" y2="262.0" stroke="#8a867d"/><text x="39" y="266.0" text-anchor="end">0%</text><line x1="46" y1="136.0" x2="392" y2="136.0" stroke="#dedad1"/><text x="39" y="140.0" text-anchor="end">50%</text><line x1="46" y1="10.0" x2="392" y2="10.0" stroke="#dedad1"/><text x="39" y="14.0" text-anchor="end">100%</text><line x1="46" y1="71.2" x2="392" y2="71.2" stroke="#a84b36" stroke-dasharray="5 5"/><path class="dash" style="--len:1743" d="M46.0,92.2 L50.7,102.0 L55.7,91.6 L60.7,111.8 L65.4,81.6 L68.1,22.6 L69.0,19.3 L69.5,20.6 L70.4,22.3 L71.2,25.6 L72.0,23.1 L72.8,26.6 L73.4,23.1 L74.2,27.4 L75.1,26.6 L75.9,29.7 L77.0,40.2 L78.7,47.3 L81.2,68.7 L84.8,87.1 L88.4,67.2 L91.1,74.5 L94.2,82.6 L97.2,67.5 L100.5,82.1 L104.7,80.6 L109.4,95.9 L114.6,100.7 L119.1,60.1 L122.4,67.7 L125.7,66.7 L129.3,63.4 L132.9,69.2 L136.0,60.7 L138.5,61.7 L140.4,54.4 L143.4,99.2 L148.7,160.9 L155.3,159.9 L161.4,146.1 L165.9,90.1 L169.5,81.1 L173.1,73.5 L176.4,88.4 L179.4,96.9 L182.7,102.0 L185.8,71.2 L188.3,68.0 L190.8,71.5 L193.8,85.6 L196.6,37.0 L198.5,44.0 L199.9,77.5 L201.0,73.8 L202.4,80.6 L204.6,81.8 L208.2,105.8 L212.9,111.8 L217.1,83.3 L221.5,124.4 L227.6,149.4 L232.3,71.2 L235.9,100.7 L240.3,110.3 L244.7,143.1 L248.6,118.6 L253.0,122.4 L257.5,70.7 L259.7,47.8 L261.4,68.0 L263.8,60.9 L266.1,65.4 L268.8,82.3 L271.0,104.5 L273.8,119.9 L277.7,101.5 L281.8,90.6 L286.3,115.1 L289.9,84.3 L293.2,91.1 L296.5,65.2 L299.3,68.5 L302.3,78.3 L304.8,59.4 L306.2,34.9 L307.6,48.6 L309.8,72.2 L312.8,82.3 L316.2,77.8 L319.2,59.9 L322.2,61.4 L325.3,59.4 L327.8,39.7 L330.0,39.2 L331.9,45.0 L333.9,44.5 L336.1,42.8 L338.6,45.5 L341.1,45.0 L343.3,44.3 L345.2,40.7 L346.9,61.4 L348.3,78.8 L349.1,61.4 L349.9,71.2 L351.0,55.1 L352.4,50.8 L354.4,42.5 L356.8,49.6 L359.1,59.9 L361.3,74.3 L363.8,70.5 L366.3,71.7 L369.6,68.5 L373.5,85.1 L377.1,78.0 L380.4,78.0 L383.7,80.3 L387.6,81.8 L392.0,80.1" fill="none" stroke="#1f1f1f" stroke-width="2.2" stroke-linejoin="round"/></svg><p class="sub pop" style="--d:1.6s"><span data-l="en">40% to 96%, minute to minute</span><span data-l="ru">от 40 до 96 %, от минуты к минуте</span></p></section><section class="slide" data-dur="3900"><p class="big mid pop"><span data-l="en">9 in 10</span><span data-l="ru">9 из 10</span></p>
+          <p class="sub pop" style="--d:.15s"><span data-l="en">failures: the bot cancelled itself</span><span data-l="ru">неудач бот отменил сам</span></p>
+          <div class="stack"><i class="grow" style="width:45.8%;background:#1f1f1f;--d:0.20s"></i><i class="grow" style="width:43.8%;background:#6f6b62;--d:0.61s"></i><i class="grow" style="width:9.9%;background:#a84b36;--d:1.01s"></i><i class="grow" style="width:0.5%;background:#dedad1;--d:1.10s"></i></div><p class="leg pop" style="--d:0.90s"><i style="background:#1f1f1f"></i><span data-l="en">a check in front of the trade was false</span><span data-l="ru">проверка перед сделкой оказалась ложной</span> <b><span data-l="en">45.8%</span><span data-l="ru">45,8 %</span></b></p><p class="leg pop" style="--d:1.05s"><i style="background:#6f6b62"></i><span data-l="en">the bot's own program said no</span><span data-l="ru">своя программа бота сказала «нет»</span> <b><span data-l="en">43.8%</span><span data-l="ru">43,8 %</span></b></p><p class="leg pop" style="--d:1.20s"><i style="background:#a84b36"></i><span data-l="en">pump.fun refused: the price had moved</span><span data-l="ru">pump.fun отказал: цена ушла</span> <b><span data-l="en">9.9%</span><span data-l="ru">9,9 %</span></b></p></section><section class="slide" data-dur="3600"><p class="note pop"><span data-l="en">the same order, every slot.</span><span data-l="ru">одна и та же заявка, каждый слот.</span></p>
+          <p class="note pop" style="--d:.55s"><span data-l="en">a check in front of it.</span><span data-l="ru">перед ней — проверка.</span></p>
+          <p class="note pop" style="--d:1.1s"><span data-l="en">it fills only when the check is true.</span><span data-l="ru">исполняется, только когда проверка верна.</span></p>
+          <p class="sub pop" style="--d:1.8s"><span data-l="en">a failed copy costs 0.000005 SOL</span><span data-l="ru">неудачная копия стоит 0,000005 SOL</span></p></section><section class="slide" data-dur="2600"><p class="big pop">~<span class="count" data-to="7.5" data-nd="1">0</span>%</p>
+          <p class="sub pop" style="--d:.2s"><span data-l="en">of all transactions are real lost races</span><span data-l="ru">всех транзакций — настоящие проигранные гонки</span></p></section><section class="slide end" data-dur="2600"><div class="endbox"><p class="url pop">artemvartanov.com</p><p class="sub pop" style="--d:.25s"><span data-l="en">every number measured on chain</span><span data-l="ru">каждая цифра измерена на цепи</span></p><p class="kick pop" style="--d:.5s"><span data-l="en">investigations · trading systems · research</span><span data-l="ru">расследования · торговые системы · исследования</span></p></div></section></article><article class="story" id="story-fees" hidden><div class="bars"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div><p class="wm">artemvartanov.com</p><p class="hook"><span data-l="en">what your trading terminal takes.</span><span data-l="ru">сколько берёт ваш терминал.</span> <em><span data-l="en">every trade.</span><span data-l="ru">с каждой сделки.</span></em></p><section class="slide" data-dur="3600"><p class="kick pop"><span data-l="en">fee per trade, measured on chain</span><span data-l="ru">комиссия со сделки, замер на цепи</span></p>
+          <div class="bars2"><div class="brow pop" style="--d:0.15s"><span class="bl">Photon</span><span class="bt"><i class="grow" style="width:90.9%;background:#1f1f1f;--d:0.15s"></i></span><b class="bv"><span data-l="en">1.0%</span><span data-l="ru">1,0 %</span></b></div><div class="brow pop" style="--d:0.27s"><span class="bl">GMGN</span><span class="bt"><i class="grow" style="width:90.9%;background:#1f1f1f;--d:0.27s"></i></span><b class="bv"><span data-l="en">1.0%</span><span data-l="ru">1,0 %</span></b></div><div class="brow pop" style="--d:0.39s"><span class="bl">Trojan</span><span class="bt"><i class="grow" style="width:90.9%;background:#1f1f1f;--d:0.39s"></i></span><b class="bv"><span data-l="en">1.0%</span><span data-l="ru">1,0 %</span></b></div><div class="brow pop" style="--d:0.51s"><span class="bl">BONKbot</span><span class="bt"><i class="grow" style="width:90.9%;background:#1f1f1f;--d:0.51s"></i></span><b class="bv"><span data-l="en">1.0%</span><span data-l="ru">1,0 %</span></b></div><div class="brow pop" style="--d:0.63s"><span class="bl">Maestro</span><span class="bt"><i class="grow" style="width:90.9%;background:#1f1f1f;--d:0.63s"></i></span><b class="bv"><span data-l="en">1.0%</span><span data-l="ru">1,0 %</span></b></div><div class="brow pop" style="--d:0.75s"><span class="bl">Banana Gun</span><span class="bt"><i class="grow" style="width:90.9%;background:#1f1f1f;--d:0.75s"></i></span><b class="bv"><span data-l="en">1.0%</span><span data-l="ru">1,0 %</span></b></div><div class="brow pop" style="--d:0.87s"><span class="bl">Axiom</span><span class="bt"><i class="grow" style="width:90.9%;background:#1f1f1f;--d:0.87s"></i></span><b class="bv"><span data-l="en">1.0%</span><span data-l="ru">1,0 %</span></b></div><div class="brow pop" style="--d:0.99s"><span class="bl"><span data-l="en">pump.fun app</span><span data-l="ru">приложение pump.fun</span></span><span class="bt"><i class="grow" style="width:40.9%;background:#6f6b62;--d:0.99s"></i></span><b class="bv"><span data-l="en">0.45%</span><span data-l="ru">0,45 %</span></b></div></div></section><section class="slide" data-dur="2800"><p class="kick pop"><span data-l="en">then the pool takes its cut</span><span data-l="ru">потом свою долю берёт пул</span></p>
+          <p class="big pop" style="--d:.1s"><span class="count" data-to="1.25" data-nd="2">0</span>%</p>
+          <p class="sub pop" style="--d:.3s"><span data-l="en">each side, on a fresh PumpSwap coin</span><span data-l="ru">с каждой стороны, на свежей монете PumpSwap</span></p></section><section class="slide" data-dur="3300"><p class="kick pop"><span data-l="en">a buy and a sell, before the price moves</span><span data-l="ru">покупка и продажа, пока цена ещё не сдвинулась</span></p>
+          <p class="big pop out" style="--d:.1s">~<span class="count" data-to="4.5" data-nd="1" data-ms="1200">0</span>%</p>
+          <p class="sub pop" style="--d:.4s"><span data-l="en">(1% terminal + 1.25% pool) × 2 sides</span><span data-l="ru">(1 % терминалу + 1,25 % пулу) × 2 стороны</span></p></section><section class="slide" data-dur="3500"><p class="kick pop"><span data-l="en">who trades fresh coins, 69 trades</span><span data-l="ru">кто торгует свежими монетами, 69 сделок</span></p>
+          <div class="bars2"><div class="brow pop" style="--d:0.15s"><span class="bl"><span data-l="en">bots, direct</span><span data-l="ru">боты напрямую</span></span><span class="bt"><i class="grow" style="width:100.0%;background:#1f1f1f;--d:0.15s"></i></span><b class="bv">62%</b></div><div class="brow pop" style="--d:0.27s"><span class="bl"><span data-l="en">pump.fun app</span><span data-l="ru">приложение pump.fun</span></span><span class="bt"><i class="grow" style="width:37.2%;background:#6f6b62;--d:0.27s"></i></span><b class="bv">23%</b></div><div class="brow pop" style="--d:0.39s"><span class="bl"><span data-l="en">terminals</span><span data-l="ru">терминалы</span></span><span class="bt"><i class="grow" style="width:16.3%;background:#6f6b62;--d:0.39s"></i></span><b class="bv">10%</b></div><div class="brow pop" style="--d:0.51s"><span class="bl"><span data-l="en">Jupiter</span><span data-l="ru">Jupiter</span></span><span class="bt"><i class="grow" style="width:7.0%;background:#6f6b62;--d:0.51s"></i></span><b class="bv">4%</b></div></div>
+          <p class="note pop" style="--d:1.1s"><span data-l="en">most of the flow pays no terminal at all.</span><span data-l="ru">большая часть потока терминалу не платит вовсе.</span></p></section><section class="slide end" data-dur="2600"><div class="endbox"><p class="url pop">artemvartanov.com</p><p class="sub pop" style="--d:.25s"><span data-l="en">every number measured on chain</span><span data-l="ru">каждая цифра измерена на цепи</span></p><p class="kick pop" style="--d:.5s"><span data-l="en">investigations · trading systems · research</span><span data-l="ru">расследования · торговые системы · исследования</span></p></div></section></article>
+<div class="menuwrap"><h1><span data-l="en">Stories</span><span data-l="ru">Истории</span> <em><span data-l="en">in 20 seconds</span><span data-l="ru">за 20 секунд</span></em></h1>
+<p><span data-l="en">One fact per screen, measured on chain.</span><span data-l="ru">Один факт на экран, измерено на цепи.</span></p><a class="card" href="?s=creator"><b><span data-l="en">One wallet, 25 minutes</span><span data-l="ru">Один кошелёк, 25 минут</span></b><span><span data-l="en">tap to play</span><span data-l="ru">нажмите, чтобы смотреть</span> →</span></a><a class="card" href="?s=failures"><b><span data-l="en">Why 75% of pump.fun transactions fail</span><span data-l="ru">Почему 75 % транзакций pump.fun неудачные</span></b><span><span data-l="en">tap to play</span><span data-l="ru">нажмите, чтобы смотреть</span> →</span></a><a class="card" href="?s=fees"><b><span data-l="en">What your trading terminal takes</span><span data-l="ru">Сколько берёт ваш терминал</span></b><span><span data-l="en">tap to play</span><span data-l="ru">нажмите, чтобы смотреть</span> →</span></a>
+<a class="back" href="./">← artemvartanov.com</a></div>
+</div></div>
+<script>
+(function(){
+  var root=document.documentElement, q=new URLSearchParams(location.search);
+  var lang=q.get('lang')==='ru'||q.get('lang')==='en'?q.get('lang'):((navigator.language||'').toLowerCase().indexOf('ru')===0?'ru':'en');
+  root.setAttribute('data-lang',lang); root.lang=lang;
+  var rec=q.get('rec')==='1'; if(rec) root.classList.add('rec');
+  var id=q.get('s'), story=id&&document.getElementById('story-'+id);
+  if(!story){ root.classList.add('menu'); [].slice.call(document.querySelectorAll('.card')).forEach(function(c){ c.href+='&lang='+lang; }); return; }
+  story.hidden=false;
+  var all=function(s,el){ return [].slice.call((el||document).querySelectorAll(s)); };
+  var slides=all('.slide',story), bars=all('.bars i',story), k=-1, timer=null, alive=0;
+  window.__storyTotal=slides.reduce(function(s,x){ return s + +x.dataset.dur; },0);
+  var loc=lang==='ru'?'ru-RU':'en-US';
+  function fmt(v,nd){ return v.toLocaleString(loc,{minimumFractionDigits:nd,maximumFractionDigits:nd}); }
+  function count(el,run){
+    var to=+el.dataset.to, nd=+(el.dataset.nd||0), D=+(el.dataset.ms||1100), wait=+(el.dataset.delay||0)+250, t0=null;
+    el.textContent=fmt(0,nd);
+    setTimeout(function(){ requestAnimationFrame(function f(t){
+      if(run!==alive) return; if(t0===null) t0=t;
+      var p=Math.min(1,(t-t0)/D), e=1-Math.pow(1-p,3); el.textContent=fmt(to*e,nd); if(p<1) requestAnimationFrame(f);
+    }); }, wait);
+  }
+  function replay(sl,run){
+    var ev=JSON.parse(sl.dataset.events), D=+sl.dataset.ms, T0=+sl.dataset.t0, T1=+sl.dataset.t1, X0=+sl.dataset.x0, X1=+sl.dataset.x1;
+    var clip=sl.querySelector('.clip'), bal=sl.querySelector('.bal'), clock=sl.querySelector('.clock'), labs=all('.evlab',sl), dots=all('.evdot',sl);
+    var start=null, shown=-2, cur=0, from=0, to=0, tj=0;
+    labs.concat(dots).forEach(function(e){ e.classList.remove('on'); });
+    function hms(s){ s=Math.floor(s); var h=Math.floor(s/3600), m=Math.floor(s/60)%60, x=s%60; return [h,m,x].map(function(n){ return (n<10?'0':'')+n; }).join(':'); }
+    requestAnimationFrame(function f(now){
+      if(run!==alive) return; if(start===null) start=now+250;
+      var p=Math.max(0,Math.min(1,(now-start)/D)), t=T0+p*(T1-T0), j=-1;
+      clip.setAttribute('width',(X1-X0+6)*p);
+      clock.textContent=hms(t);
+      ev.forEach(function(e,i){ if(e[0]<=t) j=i; });
+      if(j!==shown){ shown=j; from=cur; to=j>=0?ev[j][1]:0; tj=now;
+        labs.forEach(function(l,i){ l.classList.toggle('on',i===j); }); dots.forEach(function(d,i){ d.classList.toggle('on',i<=j); }); }
+      var qq=Math.min(1,(now-tj)/380); cur=from+(to-from)*(1-Math.pow(1-qq,3)); bal.textContent=fmt(cur,2);
+      if(p<1||qq<1) requestAnimationFrame(f);
+    });
+  }
+  function show(n){
+    if(n<0) n=0; if(n>=slides.length) return;
+    clearTimeout(timer); k=n; alive++;
+    var run=alive;
+    slides.forEach(function(s,i){ s.classList.remove('on'); });
+    void story.offsetWidth;
+    slides[n].classList.add('on');
+    bars.forEach(function(b,i){ b.style.animation='none'; b.style.width=i<n?'100%':'0'; });
+    void bars[n].offsetWidth; bars[n].style.animation='fill '+slides[n].dataset.dur+'ms linear forwards';
+    all('.count',slides[n]).forEach(function(el){ count(el,run); });
+    if(slides[n].dataset.js==='replay') replay(slides[n],run);
+    if(n<slides.length-1) timer=setTimeout(function(){ show(n+1); }, +slides[n].dataset.dur);
+  }
+  story.addEventListener('click',function(e){
+    var r=story.getBoundingClientRect();
+    if(e.clientX<r.left+r.width*0.3) show(k-1); else show(k===slides.length-1?0:k+1);
+  });
+  document.addEventListener('keydown',function(e){ if(e.key==='ArrowRight') show(k+1); if(e.key==='ArrowLeft') show(k-1); });
+  setTimeout(function(){ show(0); }, rec?400:150);
+})();
+</script>
+</body>
+</html>
