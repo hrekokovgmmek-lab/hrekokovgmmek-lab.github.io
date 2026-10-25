@@ -195,7 +195,7 @@ async function run(input) {
     try { history.replaceState(null, "", `?mint=${mint}&lang=${lang()}`); } catch (e) {}
     render();
   } catch (e) {
-    status(tr(ERR[e?.code] ?? ERR.rpc), true);
+    status(ERR[e?.code] ? tr(ERR[e.code]) : `${lang() === "ru" ? "Проверка не удалась" : "The check failed"}: ${e?.message ?? e}`, true);
   } finally {
     btn.disabled = false;
   }
