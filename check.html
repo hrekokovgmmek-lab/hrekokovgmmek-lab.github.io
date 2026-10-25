@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Check a pump.fun coin · Artem Vartanov</title>
+<meta name="description" content="Paste a pump.fun coin address and see, from the Solana chain itself, whether the creator kept dangerous rights, how much is really in the pool, and who launched it with whose money.">
+<meta property="og:title" content="Check a pump.fun coin">
+<meta property="og:description" content="Paste a pump.fun coin address and see, from the Solana chain itself, whether the creator kept dangerous rights, how much is really in the pool, and who launched it with whose money.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="http://artemvartanov.com/og.png">
+<meta property="og:url" content="http://artemvartanov.com/check.html">
+<link rel="canonical" href="http://artemvartanov.com/check.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23f4f2ec'/%3E%3Ccircle cx='32' cy='32' r='14' fill='none' stroke='%23a84b36' stroke-width='6'/%3E%3C/svg%3E">
+<style>
+:root{--paper:#f4f2ec;--ink:#1f1f1f;--brick:#a84b36;--grey:#6f6b62;--rule:#dedad1;--ochre:#9a6b12;--moss:#4d6b3c}
+*{box-sizing:border-box}
+html{background:var(--paper);color:var(--ink);-webkit-text-size-adjust:100%}
+body{margin:0 auto;max-width:880px;padding:0 24px 48px;font:17px/1.6 "Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--paper)}
+:root[data-lang=en] [data-l=ru],:root[data-lang=ru] [data-l=en]{display:none}
+[hidden]{display:none!important}
+a{color:var(--ink);text-decoration-color:var(--brick);text-underline-offset:3px;transition:color .2s}
+a:hover{color:var(--brick)}
+.top{display:flex;align-items:center;gap:24px;padding:28px 0 0}
+.name{font-weight:500;text-decoration:none;white-space:nowrap}
+.lang{margin-left:auto;white-space:nowrap}
+.lang button{font:inherit;font-size:15px;background:none;border:0;padding:4px 6px;color:var(--grey);cursor:pointer}
+.lang button[aria-pressed=true]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--brick);text-underline-offset:4px}
+.hero{padding:56px 0 8px}
+h1{font-size:clamp(30px,5.4vw,46px);line-height:1.12;font-weight:500;margin:0 0 18px;letter-spacing:-.01em}
+h2{font-size:21px;font-weight:500;margin:36px 0 10px}
+.lead{font-size:clamp(18px,2.3vw,20px);line-height:1.5;margin:0 0 12px;max-width:40em}
+.note{font-family:"New York",Georgia,serif;font-style:italic;color:#3a3833;font-size:18px;margin:0}
+form{display:flex;gap:10px;flex-wrap:wrap;margin:32px 0 8px}
+input{flex:1 1 320px;min-width:0;font:16px/1.4 ui-monospace,"SF Mono",Menlo,Consolas,monospace;padding:11px 12px;border:1px solid var(--ink);
+  background:#fbfaf6;color:var(--ink);border-radius:0}
+input:focus{outline:2px solid var(--brick);outline-offset:1px}
+button.go{font:inherit;padding:10px 22px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;border-radius:0}
+button.go:hover{background:var(--brick);border-color:var(--brick)}
+button.go:disabled{opacity:.5;cursor:default}
+.hint{color:var(--grey);font-size:14px;margin:4px 0 0}
+.hint button{font:inherit;font-size:14px;background:none;border:0;padding:0;color:var(--grey);text-decoration:underline;text-decoration-color:var(--rule);cursor:pointer}
+.status{min-height:1.6em;color:var(--grey);font-size:15px;margin:18px 0 0}
+.status.err{color:var(--brick)}
+.verdict{margin:28px 0 0;padding:14px 0 14px 18px;border-left:4px solid var(--grey)}
+.verdict b{display:block;font-size:clamp(24px,3.6vw,30px);font-weight:500;line-height:1.2}
+.verdict span{color:var(--grey);font-size:15px;word-break:break-all}
+.verdict.danger{border-color:var(--brick)} .verdict.danger b{color:var(--brick)}
+.verdict.warn{border-color:var(--ochre)} .verdict.warn b{color:var(--ochre)}
+.verdict.ok{border-color:var(--moss)} .verdict.ok b{color:var(--moss)}
+.flags{list-style:none;padding:0;margin:18px 0 0}
+.flags li{position:relative;padding:6px 0 6px 22px;border-bottom:1px solid var(--rule)}
+.flags li::before{content:"";position:absolute;left:2px;top:15px;width:9px;height:9px;border-radius:50%;background:var(--grey)}
+.flags li.danger::before{background:var(--brick)} .flags li.warn::before{background:var(--ochre)} .flags li.info::before{background:var(--rule);border:1px solid var(--grey)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+td,th{padding:7px 8px 7px 0;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--grey);font-size:13px;text-transform:lowercase;letter-spacing:.03em}
+.facts td:first-child{color:var(--grey);width:45%}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:14px}
+tr.aside td{color:var(--grey)}
+.links{display:flex;gap:22px;flex-wrap:wrap;margin:22px 0 0}
+.btn{display:inline-block;padding:9px 16px;border:1px solid var(--ink);text-decoration:none;transition:background .2s,color .2s}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.fine{color:var(--grey);font-size:14px;margin:18px 0 0}
+.how{padding-left:1.2em;margin:12px 0 0}
+.how li{margin:0 0 8px}
+footer{margin:48px 0 0;padding:24px 0 0;color:var(--grey);font-size:14px;border-top:1px solid var(--rule)}
+@media (max-width:520px){body{padding:0 16px 40px} .facts td:first-child{width:50%} td,th{padding-right:6px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="name" href="./">Artem Vartanov</a>
+  <nav class="lang" aria-label="language"><button data-set="en">en</button><button data-set="ru">ru</button></nav>
+</header>
+
+<main>
+<section class="hero">
+  <h1><span data-l="en">Check a pump.fun coin</span><span data-l="ru">Проверка монеты pump.fun</span></h1>
+  <p class="lead" data-l="en">Paste a coin address. The page reads the Solana chain itself and shows the traps a buyer cannot see on the chart: rights the creator kept, token extensions that can block selling, how much is really in the pool, and who launched the coin with whose money.</p><p class="lead" data-l="ru">Вставьте адрес монеты. Страница сама читает цепь Solana и показывает ловушки, которых не видно на графике: права, оставленные создателем, расширения токена, которые могут запретить продажу, сколько на самом деле в пуле, кто запустил монету и на чьи деньги.</p>
+  <p class="note" data-l="en">Runs in your browser against the public Solana node. Nothing is sent to me and nothing is stored.</p><p class="note" data-l="ru">Работает в вашем браузере через публичный узел Solana. Мне ничего не отправляется и нигде не хранится.</p>
+</section>
+
+<form id="form" autocomplete="off">
+  <label for="mint" hidden><span data-l="en">coin address</span><span data-l="ru">адрес монеты</span></label>
+  <input id="mint" name="mint" spellcheck="false" autocapitalize="off" inputmode="text" placeholder="coin address or pump.fun link">
+  <button class="go" id="go" type="submit"><span data-l="en">Check</span><span data-l="ru">Проверить</span></button>
+</form>
+<p class="hint"><span data-l="en">For example</span><span data-l="ru">Например</span>: <button type="button" data-example="6xTAiLG4Qp7Aokm6jX6XC4pyMxNT9cnJaCuvG83tAVsB"><span data-l="en">a pump.fun coin</span><span data-l="ru">монета pump.fun</span></button> · <button type="button" data-example="2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo"><span data-l="en">a stablecoin whose issuer keeps every right</span><span data-l="ru">стейблкоин, у выпускающего которого все права</span></button></p>
+<noscript><p class="status err"><span data-l="en">The check runs in the browser and needs JavaScript.</span><span data-l="ru">Проверка работает в браузере и требует JavaScript.</span></p></noscript>
+<p class="status" id="status" role="status" aria-live="polite"></p>
+<div id="result" aria-live="polite" hidden></div>
+
+<h2><span data-l="en">What it reads</span><span data-l="ru">Что читается</span></h2>
+<ol class="how">
+  <li><span data-l="en">The mint: can new tokens still be printed, can your account be frozen, which Token-2022 extensions are on (transfer fee, transfer hook, permanent delegate, pause).</span><span data-l="ru">Минт: можно ли ещё выпускать токены, можно ли заморозить ваш счёт, какие расширения Token-2022 включены (комиссия за перевод, хук перевода, постоянный делегат, пауза).</span></li>
+  <li><span data-l="en">The pump.fun curve or the PumpSwap pool: how far the curve is, how much SOL is really in the pool, Mayhem mode, cashback, holder rewards.</span><span data-l="ru">Кривую pump.fun или пул PumpSwap: сколько пройдено, сколько SOL на самом деле в пуле, режим Mayhem, кэшбэк, награды держателям.</span></li>
+  <li><span data-l="en">Every token account, summed by owner: the curve, the pool and program accounts are set aside, so the shares are real wallets. This one is in the Telegram bot: free nodes do not give holder lists to a browser.</span><span data-l="ru">Все счета токена, сложенные по владельцам: кривая, пул и счета программ отделены, поэтому доли — это настоящие кошельки. Это — в Telegram-боте: бесплатные узлы не отдают список держателей браузеру.</span></li>
+  <li><span data-l="en">The creation transaction: who signed it, how many other trades landed in the same block, and where the creator's first SOL came from.</span><span data-l="ru">Транзакцию создания: кто её подписал, сколько ещё сделок попало в тот же блок и откуда пришли первые SOL создателя.</span></li>
+  <li><span data-l="en">The latest trades: which terminal they came through.</span><span data-l="ru">Последние сделки: через какой терминал они прошли.</span></li>
+</ol>
+
+</main>
+
+<footer><p data-l="en">Read-only: no wallet, no keys, no trackers, no cookies. The check sees how a coin is built, not what people intend; it is not advice to buy.</p><p data-l="ru">Только чтение: без кошелька, ключей, счётчиков и cookies. Проверка видит устройство монеты, а не намерения людей; это не совет покупать.</p></footer>
+<script type="module">const PAGE_RPC = "https://solana-rpc.publicnode.com", PAGE_HOLDERS = false, BOT = "";
+
+import { checkCoin, describe, makeRpc, parseMintInput } from "./coincheck.mjs";
+
+const root = document.documentElement;
+const $ = (s) => document.querySelector(s);
+const all = (s) => Array.from(document.querySelectorAll(s));
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const short = (a) => `${a.slice(0, 4)}…${a.slice(-4)}`;
+const solscan = (a) => `https://solscan.io/account/${a}`;
+const lang = () => root.getAttribute("data-lang") || "en";
+
+let labels = { terminals: {}, exchanges: {} };
+const labelsReady = fetch("labels.json").then((r) => r.json()).then((j) => { labels = j; }).catch(() => {});
+let last = null;
+
+const STEPS = {
+  mint: ["reading the mint", "читаю минт"], pool: ["reading the pool", "читаю пул"], launch: ["reading the coin's history", "читаю историю монеты"],
+  holders: ["reading every holder", "читаю всех держателей"], creator: ["tracing the creator's first money", "ищу первые деньги создателя"],
+  terminals: ["reading the latest trades", "читаю последние сделки"],
+};
+const ERR = {
+  bad_address: ["That is not a coin address. Paste a mint or a pump.fun link.", "Это не адрес монеты. Вставьте минт или ссылку pump.fun."],
+  not_found: ["No such account on chain.", "Такого счёта в сети нет."],
+  not_mint: ["This is not a token (mint) address: a wallet or a pool?", "Это не адрес токена (минта): может, кошелёк или пул?"],
+  rpc: ["The public Solana node did not answer. Try again in a minute.", "Публичный узел Solana не ответил. Попробуйте через минуту."],
+};
+const KIND = {
+  curve: ["pump.fun curve", "кривая pump.fun"], pool: ["PumpSwap pool", "пул PumpSwap"], program: ["program account", "счёт программы"], wallet: ["", ""],
+};
+const tr = (pair) => pair[lang() === "ru" ? 1 : 0];
+
+function status(text, isErr) {
+  const s = $("#status");
+  s.textContent = text || "";
+  s.classList.toggle("err", !!isErr);
+}
+
+function render() {
+  const out = $("#result");
+  if (!last) { out.hidden = true; return; }
+  const r = last;
+  const l = lang();
+  const d = describe(r, l);
+  const name = [r.token.name, r.token.symbol ? "$" + r.token.symbol : ""].filter(Boolean).join(" ");
+  let h = `<div class="verdict ${d.level}"><b>${esc(d.verdict)}</b><span>${esc(name)}${name ? " · " : ""}<span class="mono">${esc(r.mint)}</span></span></div>`;
+  const flags = d.flags.filter((f) => PAGE_HOLDERS || f.code !== "missing:holders");
+  if (flags.length) h += `<ul class="flags">${flags.map((f) => `<li class="${f.level}">${esc(f.text)}</li>`).join("")}</ul>`;
+  h += `<h2>${l === "ru" ? "Что видно на цепи" : "What the chain shows"}</h2><table class="facts"><tbody>`;
+  for (const [k, v] of d.facts) h += `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`;
+  h += `</tbody></table>`;
+  if (r.creator?.funding) {
+    const f = r.creator.funding;
+    h += `<p class="fine">${l === "ru" ? "Откуда первые деньги создателя" : "Where the creator's first money came from"}: <a class="mono" href="${solscan(f.from)}">${esc(f.label ?? short(f.from))}</a> → <a class="mono" href="${solscan(r.creator.address)}">${short(r.creator.address)}</a></p>`;
+  }
+  if (r.holders?.top?.length) {
+    h += `<h2>${l === "ru" ? "Крупнейшие держатели" : "Largest holders"}</h2><table><thead><tr><th>#</th><th>${l === "ru" ? "адрес" : "address"}</th><th class="num">${l === "ru" ? "доля" : "share"}</th><th>${l === "ru" ? "кто" : "who"}</th></tr></thead><tbody>`;
+    r.holders.top.slice(0, 15).forEach((x, i) => {
+      const who = [tr(KIND[x.kind]), x.label, x.isCreator ? (l === "ru" ? "создатель" : "creator") : ""].filter(Boolean).join(", ");
+      const pct = x.pct.toLocaleString(l === "ru" ? "ru-RU" : "en-US", { maximumFractionDigits: 2 });
+      h += `<tr class="${x.kind === "wallet" ? "" : "aside"}"><td>${i + 1}</td><td><a class="mono" href="${solscan(x.owner)}">${short(x.owner)}</a></td><td class="num">${pct}${l === "ru" ? " %" : "%"}</td><td>${esc(who)}</td></tr>`;
+    });
+    h += `</tbody></table><p class="fine">${l === "ru" ? `Всего счетов с токенами: ${r.holders.accounts}. Серым — кривая, пул и счета программ: они не люди и в долю кошельков не входят.` : `Accounts holding the token: ${r.holders.accounts}. Grey rows are the curve, the pool and program accounts: not people, so not counted as wallets.`}</p>`;
+  }
+  if (r.missing.includes("holders")) {
+    const via = BOT ? ` <a href="https://t.me/${BOT}?start=${r.mint}">${l === "ru" ? "в Telegram-боте" : "in the Telegram bot"}</a>` : (l === "ru" ? " в Telegram-боте" : " in the Telegram bot");
+    h += `<p class="fine">${l === "ru" ? "Список держателей бесплатный узел браузеру не отдаёт. Доли кошельков показывает та же проверка" : "Free nodes do not give holder lists to a browser. Wallet shares are shown by the same check"}${via}.</p>`;
+  }
+  h += `<p class="links"><a href="${d.links.pump}">pump.fun</a><a href="${d.links.solscan}">Solscan</a></p>`;
+  h += `<p class="note">${esc(d.note)}</p>`;
+  const t = new Date(r.checkedAt);
+  h += `<p class="fine">${l === "ru" ? "Проверено" : "Checked"} ${t.toISOString().replace("T", " ").slice(0, 19)} UTC · ${r.calls} ${l === "ru" ? "запросов к узлу" : "node requests"} · ${(r.ms / 1000).toLocaleString(l === "ru" ? "ru-RU" : "en-US", { maximumFractionDigits: 1 })} ${l === "ru" ? "с" : "s"}</p>`;
+  out.innerHTML = h;
+  out.hidden = false;
+}
+
+async function run(input) {
+  const mint = parseMintInput(input);
+  if (!mint) { status(tr(ERR.bad_address), true); return; }
+  const btn = $("#go");
+  btn.disabled = true;
+  last = null;
+  render();
+  status(tr(STEPS.mint) + "…");
+  try {
+    await labelsReady;
+    last = await checkCoin(mint, { rpc: makeRpc(PAGE_RPC, { gapMs: 120, timeoutMs: 12000, retries: [1500, 4000] }), labels, onStep: (s) => status(tr(STEPS[s] ?? [s, s]) + "…") });
+    status("");
+    try { history.replaceState(null, "", `?mint=${mint}&lang=${lang()}`); } catch (e) {}
+    render();
+  } catch (e) {
+    status(tr(ERR[e?.code] ?? ERR.rpc), true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* language, the same switch as the main page */
+let pick = null;
+try { const q = new URLSearchParams(location.search).get("lang"); if (q === "ru" || q === "en") pick = q; } catch (e) {}
+if (!pick) { try { pick = localStorage.getItem("lang"); } catch (e) {} }
+if (pick !== "ru" && pick !== "en") pick = (navigator.language || "").toLowerCase().indexOf("ru") === 0 ? "ru" : "en";
+function setLang(l) {
+  root.setAttribute("data-lang", l); root.lang = l;
+  all("[data-set]").forEach((b) => b.setAttribute("aria-pressed", b.getAttribute("data-set") === l ? "true" : "false"));
+  $("#mint").placeholder = l === "ru" ? "адрес монеты или ссылка pump.fun" : "coin address or pump.fun link";
+  if (last) { try { history.replaceState(null, "", `?mint=${last.mint}&lang=${l}`); } catch (e) {} }
+  render();
+}
+setLang(pick);
+all("[data-set]").forEach((b) => b.addEventListener("click", () => { const l = b.getAttribute("data-set"); setLang(l); try { localStorage.setItem("lang", l); } catch (e) {} }));
+
+$("#form").addEventListener("submit", (e) => { e.preventDefault(); run($("#mint").value); });
+all("[data-example]").forEach((b) => b.addEventListener("click", () => { $("#mint").value = b.getAttribute("data-example"); run(b.getAttribute("data-example")); }));
+const start = new URLSearchParams(location.search).get("mint");
+if (start) { $("#mint").value = start; run(start); }
+</script>
+</body>
+</html>
