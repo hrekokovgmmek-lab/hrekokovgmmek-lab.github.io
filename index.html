@@ -20,7 +20,7 @@
 :root{--paper:#f4f2ec;--ink:#1f1f1f;--brick:#a84b36;--grey:#6f6b62;--rule:#dedad1;--ochre:#9a6b12;--moss:#4d6b3c;--card:#fbfaf6;--sand:#cdbf9f;
   --ease:cubic-bezier(.2,.7,.2,1);--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
 *{box-sizing:border-box}
-html{background:var(--paper);color:var(--ink);-webkit-text-size-adjust:100%}
+html{background:var(--paper);color:var(--ink);-webkit-text-size-adjust:100%;overflow-x:clip}
 body{margin:0 auto;max-width:1200px;padding:0 16px 40px;font:16px/1.5 "Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--paper)}
 :root[data-lang=en] [data-l=ru],:root[data-lang=ru] [data-l=en]{display:none}
 [hidden]{display:none!important}
@@ -88,7 +88,8 @@ button.go{font:inherit;padding:9px 16px;border:1px solid var(--ink);background:v
 .tfs .sep{flex:1}
 .tfs #mode{color:var(--ink);border:1px solid var(--ink);padding:3px 9px;margin:0 2px 0 6px;border-bottom-width:1px}
 .tfs #fit{color:var(--ink);font-size:15px;padding:3px 8px}
-.chartcard{margin:20px 0 0}
+/* the chart runs edge to edge of the window, past the page column */
+.chartcard{margin:20px calc(50% - 50vw) 0;width:100vw;max-width:100vw;padding:10px 16px 0}
 .chartwrap{position:relative;height:clamp(380px,62vh,620px)}
 .chart{position:absolute;inset:0}
 .legend{position:absolute;left:4px;top:6px;z-index:3;font:11px var(--mono);color:var(--grey);pointer-events:none;white-space:nowrap;overflow:hidden;max-width:calc(100% - 80px)}
@@ -138,9 +139,11 @@ button.go{font:inherit;padding:9px 16px;border:1px solid var(--ink);background:v
 .flags li{position:relative;padding:5px 0 5px 20px;border-bottom:1px solid var(--rule);font-size:14px}
 .flags li::before{content:"";position:absolute;left:2px;top:12px;width:8px;height:8px;border-radius:50%;background:var(--grey)}
 .flags li.danger::before{background:var(--brick)} .flags li.warn::before{background:var(--ochre)} .flags li.info::before{background:var(--rule);border:1px solid var(--grey)}
-table{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0 0}
-td{padding:6px 8px 6px 0;border-bottom:1px solid var(--rule);vertical-align:top;overflow-wrap:anywhere}
-td:first-child{color:var(--grey);width:46%}
+/* only the facts table: the chart library draws inside a table of its own, and a 46% first column there left the
+   left half of the chart empty */
+.facts{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0 0}
+.facts td{padding:6px 8px 6px 0;border-bottom:1px solid var(--rule);vertical-align:top;overflow-wrap:anywhere}
+.facts td:first-child{color:var(--grey);width:46%}
 .reveal{opacity:0;transform:translateY(10px);animation:rise .7s var(--ease) forwards}
 footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:var(--grey);font-size:13px}
 @keyframes rise{to{opacity:1;transform:none}}
@@ -233,7 +236,7 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
 <section class="card reveal" id="check" style="order:11" hidden>
       <h2><span data-l="en">On-chain check</span><span data-l="ru">Проверка по цепи</span></h2>
       <ul class="flags" id="flags"></ul>
-      <table><tbody id="facts"></tbody></table>
+      <table class="facts"><tbody id="facts"></tbody></table>
       <p class="fine" id="checkNote"></p>
       <p class="fine"><a id="botlink" href="#" data-ext><span data-l="en">Holders by wallet and alerts are in the Telegram bot</span><span data-l="ru">Держатели по кошелькам и уведомления — в Telegram-боте</span></a></p>
     </section>
