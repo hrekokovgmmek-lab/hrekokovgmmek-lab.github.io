@@ -53,6 +53,37 @@ function poolOf(p) {
     createdAt: a.pool_created_at ? Date.parse(a.pool_created_at) : null,
     buys24: a.transactions?.h24?.buys ?? null,
     sells24: a.transactions?.h24?.sells ?? null,
+    // per window: { buys, sells, buyers, sellers } and volume in USD, windows m5 m15 m30 h1 h6 h24
+    tx: Object.fromEntries(Object.entries(a.transactions ?? {}).map(([k, v]) => [k, {
+      buys: v?.buys ?? null, sells: v?.sells ?? null, buyers: v?.buyers ?? null, sellers: v?.sellers ?? null }])),
+    volume: Object.fromEntries(Object.entries(a.volume_usd ?? {}).map(([k, v]) => [k, num(v)])),
+  };
+}
+
+/**
+ * What GeckoTerminal knows about the token itself: holders and how the supply is spread (its own count), the
+ * developer's share, the pump.fun curve's progress, picture and links. null when the token is unknown to it.
+ */
+export async function tokenInfo(mint) {
+  const j = await get(`/tokens/${mint}/info`);
+  const a = j?.data?.attributes;
+  if (!a) return null;
+  const d = a.holders?.distribution_percentage ?? {};
+  const lp = a.launchpad_details ?? null;
+  return {
+    name: a.name ?? null,
+    symbol: a.symbol ?? null,
+    image: a.image_url && a.image_url !== "missing.png" ? a.image_url : null,
+    holders: a.holders?.count ?? null,
+    spread: { top10: num(d.top_10), next10: num(d["11_20"]), next20: num(d["21_40"]), rest: num(d.rest) },
+    devPct: num(a.developer_holding_percentage),
+    curvePct: lp ? num(lp.graduation_percentage) : null,
+    curveDone: lp ? !!lp.completed : null,
+    curveDoneAt: lp?.completed_at ? Date.parse(lp.completed_at) : null,
+    twitter: a.twitter_handle ?? null,
+    telegram: a.telegram_handle ?? null,
+    websites: Array.isArray(a.websites) ? a.websites.filter((u) => /^https?:\/\//.test(u)).slice(0, 2) : [],
+    honeypot: a.is_honeypot === "yes" ? true : a.is_honeypot === "no" ? false : null,
   };
 }
 

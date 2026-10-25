@@ -25,7 +25,7 @@ const POOL_DISCRIMINATOR = "f19a6d0411b16dbc";
 const TOP_OWNERS = 20;
 const ONE_WALLET_DANGER_PCT = 50;
 const THIN_POOL_SOL = 5;
-const SAME_BLOCK_WARN = 5;
+export const SAME_BLOCK_WARN = 5;
 const HOLDERS_TIMEOUT_MS = 15000;
 const LAUNCH_PAGES = 3;                           // signature pages of 1000 read to reach the creation transaction
 
