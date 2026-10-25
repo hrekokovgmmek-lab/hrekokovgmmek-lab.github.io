@@ -49,6 +49,8 @@ function poolOf(p) {
     volume24: num(a.volume_usd?.h24),
     liquidityUsd: num(a.reserve_in_usd),
     marketCapUsd: num(a.market_cap_usd) ?? num(a.fdv_usd),
+    fdvUsd: num(a.fdv_usd),
+    createdAt: a.pool_created_at ? Date.parse(a.pool_created_at) : null,
     buys24: a.transactions?.h24?.buys ?? null,
     sells24: a.transactions?.h24?.sells ?? null,
   };
@@ -79,7 +81,7 @@ export async function candles(pool, timeframe = "minute", aggregate = 1, limit =
     .sort((a, b) => a.t - b.t);
 }
 
-/** Latest trades, newest first: { at (ms), side, sol, usd, tokens, wallet, tx }. */
+/** Latest trades (up to 300 within a day), newest first: { at (ms), side, sol, usd, tokens, priceUsd, wallet, tx }. */
 export async function trades(pool, mint) {
   const j = await get(`/pools/${pool}/trades`);
   return (j?.data ?? []).map((d) => {
@@ -91,6 +93,7 @@ export async function trades(pool, mint) {
       sol: num(buy ? a.from_token_amount : a.to_token_amount),
       usd: num(a.volume_in_usd),
       tokens: num(buy ? a.to_token_amount : a.from_token_amount),
+      priceUsd: num(buy ? a.price_to_in_usd : a.price_from_in_usd),
       wallet: a.tx_from_address,
       tx: a.tx_hash,
       mintSide: buy ? a.to_token_address === mint : a.from_token_address === mint,
@@ -116,4 +119,22 @@ export function signedPct(x, lang = "en") {
   if (x == null || !Number.isFinite(x)) return "?";
   const s = Math.abs(x).toLocaleString(lang === "ru" ? "ru-RU" : "en-US", { maximumFractionDigits: Math.abs(x) < 10 ? 1 : 0 });
   return `${x > 0 ? "+" : x < 0 ? "−" : ""}${s}${lang === "ru" ? " %" : "%"}`;
+}
+
+/**
+ * Candles built from trades, oldest first: { t (seconds), o, h, l, c, v (USD) }. GeckoTerminal's own second candles are
+ * paid, so second timeframes come from the latest trades; `step` is the candle length in seconds.
+ */
+export function candlesFromTrades(list, step) {
+  const out = [];
+  for (const x of [...list].filter((x) => x.priceUsd > 0 && Number.isFinite(x.at)).sort((a, b) => a.at - b.at)) {
+    const t = Math.floor(x.at / 1000 / step) * step;
+    const last = out[out.length - 1];
+    if (last && last.t === t) {
+      last.h = Math.max(last.h, x.priceUsd); last.l = Math.min(last.l, x.priceUsd); last.c = x.priceUsd; last.v += x.usd ?? 0;
+    } else {
+      out.push({ t, o: last ? last.c : x.priceUsd, h: Math.max(x.priceUsd, last ? last.c : x.priceUsd), l: Math.min(x.priceUsd, last ? last.c : x.priceUsd), c: x.priceUsd, v: x.usd ?? 0 });
+    }
+  }
+  return out;
 }
