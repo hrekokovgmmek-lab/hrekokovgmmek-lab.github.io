@@ -27,7 +27,7 @@ body{margin:0 auto;max-width:1200px;padding:0 16px 40px;font:16px/1.5 "Helvetica
 a{color:var(--ink);text-decoration-color:var(--brick);text-underline-offset:3px}
 .top{display:flex;align-items:center;gap:18px;padding:16px 0 4px;flex-wrap:wrap}
 .name{font-weight:500;text-decoration:none;font-size:15px}
-.nav{display:flex;gap:14px;font-size:14px}
+.nav{display:flex;gap:14px;font-size:14px;flex-wrap:wrap}
 .nav a{text-decoration:none;color:var(--grey)}
 .nav a[aria-current=page]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--brick);text-underline-offset:4px}
 .lang{margin-left:auto}
@@ -36,6 +36,7 @@ a{color:var(--ink);text-decoration-color:var(--brick);text-underline-offset:3px}
 .hero h1{font-size:clamp(28px,5vw,44px);font-weight:500;line-height:1.1;letter-spacing:-.015em;margin:26px 0 6px}
 .hero p{color:var(--grey);margin:0;max-width:640px}
 body.has-coin .hero{display:none}
+.hero .more{margin:10px 0 0;font-size:15px}
 form{display:flex;gap:8px;margin:14px 0 0;max-width:760px}
 input{flex:1;min-width:0;font:15px/1.4 var(--mono);padding:10px 11px;border:1px solid var(--ink);background:var(--card);color:var(--ink);border-radius:0}
 input:focus{outline:2px solid var(--brick);outline-offset:1px}
@@ -157,13 +158,14 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
 <body>
 <header class="top">
   <a class="name" href="./">Artem Vartanov</a>
-  <nav class="nav" aria-label="site"><a href="./" aria-current="page"><span data-l="en">Check a coin</span><span data-l="ru">Проверить монету</span></a><a href="stories.html"><span data-l="en">Stories</span><span data-l="ru">Истории</span></a><a href="about.html"><span data-l="en">About</span><span data-l="ru">Обо мне</span></a></nav>
+  <nav class="nav" aria-label="site"><a href="./" aria-current="page"><span data-l="en">Check a coin</span><span data-l="ru">Проверить монету</span></a><a href="about.html#market"><span data-l="en">Launchpad numbers</span><span data-l="ru">Замеры площадок</span></a><a href="stories.html"><span data-l="en">Stories</span><span data-l="ru">Истории</span></a><a href="about.html"><span data-l="en">About</span><span data-l="ru">Обо мне</span></a></nav>
   <nav class="lang" aria-label="language"><button data-set="en">en</button><button data-set="ru">ru</button></nav>
 </header>
 
 <section class="hero">
   <h1><span data-l="en">Is this coin a trap?</span><span data-l="ru">Монета — ловушка или нет?</span></h1>
   <p data-l="en">Paste a pump.fun coin address or link. The chain answers in big letters, then the live market cap, the chart, who holds it and who trades it. Free, nothing to sign.</p><p data-l="ru">Вставьте адрес монеты pump.fun или ссылку. Ответ по цепи — большими буквами, а ниже капитализация вживую, график, у кого монеты и кто торгует. Бесплатно, ничего подписывать не нужно.</p>
+  <p class="more"><a href="about.html#market"><span data-l="en">All my launchpad numbers on one page: PumpSwap, pump.fun, Meteora, LaunchLab, Moonit →</span><span data-l="ru">Все мои замеры по лаунчпадам на одной странице: PumpSwap, pump.fun, Meteora, LaunchLab, Moonit →</span></a></p>
 </section>
 <form id="form" autocomplete="off">
   <label for="q" hidden><span data-l="en">coin address</span><span data-l="ru">адрес монеты</span></label>
