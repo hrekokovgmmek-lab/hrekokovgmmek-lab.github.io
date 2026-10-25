@@ -65,7 +65,7 @@ button.go{font:inherit;padding:9px 16px;border:1px solid var(--ink);background:v
 .tip{position:absolute;top:0;pointer-events:none;font:12px var(--mono);background:var(--ink);color:var(--paper);padding:3px 7px;white-space:nowrap;transform:translateX(-50%)}
 .empty{color:var(--grey);font-size:14px;padding:40px 0;text-align:center}
 h2{font-size:18px;font-weight:500;margin:28px 0 8px}
-.buy{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.buy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .buy a{display:block;text-align:center;padding:10px 8px;border:1px solid var(--ink);text-decoration:none;transition:background .2s,color .2s}
 .buy a:hover,.buy a:active{background:var(--ink);color:var(--paper)}
 .buy a.ref::after{content:" ·";color:var(--brick)}
@@ -150,7 +150,7 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
 </main>
 
 <footer><p data-l="en">Price, chart and trades: GeckoTerminal. Chain: a public Solana node, read in your browser. Nothing is stored. Not advice to buy.</p><p data-l="ru">Цена, график и сделки — GeckoTerminal. Цепь — публичный узел Solana, читается в вашем браузере. Ничего не сохраняется. Не совет покупать.</p></footer>
-<script type="module">const PAGE_RPC = "https://solana-rpc.publicnode.com", BOT = "artem_coinchek_bot", REFS = {"gmgn": "", "axiom": "", "photon": "", "trojan": "", "bonkbot": ""}, LABELS = {
+<script type="module">const PAGE_RPC = "https://solana-rpc.publicnode.com", BOT = "artem_coinchek_bot", REFS = {"gmgn": "Ri639FUK", "axiom": "https://axiom.trade/@peni3", "trojan": "https://trojan.com/@ArtemVartanov", "pump": "AjarTestedFibre"}, LABELS = {
 "_about":"Public labels for the pump.fun coin check: terminals (programs and fee wallets) and exchange/bridge wallets. Built by build_labels.py from a white list.",
 "terminals":{
 "2416yFoX5ep69Ae8u4EoWN2b1jRMC8diygQDf4zqNAQG":"Ave.ai",
@@ -400,7 +400,7 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
 
 import { checkCoin, describe, makeRpc, parseMintInput } from "./coincheck.mjs";
 import { candles, marketOf, money, poolNow, signedPct, trades } from "./market.mjs";
-import { buyLinks, signupLinks } from "./links.mjs";
+import { buyLinks, pumpCode, signupLinks } from "./links.mjs";
 
 const root = document.documentElement;
 const $ = (s) => document.querySelector(s);
@@ -558,7 +558,11 @@ function renderBuy() {
   const links = buyLinks(S.mint, pair, REFS);
   $("#buy").innerHTML = links.map((l) => `<a href="${esc(l.url)}" class="${l.ref ? "ref" : ""}" data-ext>${esc(l.name)}</a>`).join("");
   const su = signupLinks(REFS);
-  $("#signup").innerHTML = su.map((s) => `<a href="${esc(s.url)}" data-ext>${T(`No ${esc(s.name)} account? Sign up`, `Нет аккаунта в ${esc(s.name)}? Регистрация`)}</a>`).join(" · ");
+  const code = pumpCode(REFS);
+  $("#signup").innerHTML = [
+    ...su.map((s) => `<a href="${esc(s.url)}" data-ext>${T(`No ${esc(s.name)} account? Sign up`, `Нет аккаунта в ${esc(s.name)}? Регистрация`)}</a>`),
+    ...(code ? [T(`New to pump.fun? Invite code in the app: <b>${esc(code)}</b>`, `Впервые на pump.fun? Код приглашения в приложении: <b>${esc(code)}</b>`)] : []),
+  ].join("<br>");
   $("#botlink").href = `https://t.me/${BOT}?start=${S.mint}`;
   $("#botlink").parentElement.hidden = inTg;
 }
