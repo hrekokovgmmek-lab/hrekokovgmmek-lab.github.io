@@ -87,7 +87,9 @@ button.go{font:inherit;padding:9px 16px;border:1px solid var(--ink);background:v
 .tfs button:hover{color:var(--ink)}
 .tfs .sep{flex:1}
 .tfs #mode{color:var(--ink);border:1px solid var(--ink);padding:3px 9px;margin:0 2px 0 6px;border-bottom-width:1px}
-.chartwrap{position:relative;height:440px}
+.tfs #fit{color:var(--ink);font-size:15px;padding:3px 8px}
+.chartcard{margin:20px 0 0}
+.chartwrap{position:relative;height:clamp(380px,62vh,620px)}
 .chart{position:absolute;inset:0}
 .legend{position:absolute;left:4px;top:6px;z-index:3;font:11px var(--mono);color:var(--grey);pointer-events:none;white-space:nowrap;overflow:hidden;max-width:calc(100% - 80px)}
 .legend b{font-weight:400;color:var(--ink)}
@@ -146,7 +148,7 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
 @keyframes slide{from{opacity:0;transform:translateY(-8px);background:#ebe7dc}to{opacity:1;transform:none;background:transparent}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}
   .reveal{opacity:1;transform:none}}
-@media (max-width:560px){.chartwrap{height:330px} .legend{font-size:10px} .tiles b{font-size:16px} .row{grid-template-columns:44px minmax(0,1fr) auto;font-size:12px}}
+@media (max-width:560px){.chartwrap{height:360px} .legend{font-size:10px} .tiles b{font-size:16px} .row{grid-template-columns:44px minmax(0,1fr) auto;font-size:12px}}
 </style>
 </head>
 <body>
@@ -180,14 +182,14 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
       <div class="chips" id="chips"></div>
     </div>
   </section>
+  <section class="card reveal chartcard">
+    <div class="panel">
+      <div class="tfs" role="group" aria-label="timeframe"><button type="button" data-tf="1s" aria-pressed="false">1s</button><button type="button" data-tf="15s" aria-pressed="false">15s</button><button type="button" data-tf="30s" aria-pressed="false">30s</button><button type="button" data-tf="1m" aria-pressed="true">1m</button><button type="button" data-tf="5m" aria-pressed="false">5m</button><button type="button" data-tf="15m" aria-pressed="false">15m</button><button type="button" data-tf="1h" aria-pressed="false">1h</button><span class="sep"></span><button type="button" id="fit" title="fit the whole width">⤢</button><button type="button" id="mode" title="market cap / price">MC</button></div>
+      <div class="chartwrap"><div class="chart" id="chart"></div><div class="legend" id="legend"></div><p class="chartnote" id="chartNote"></p></div>
+    </div>
+  </section>
   <div class="grid">
     <div class="col">
-<section class="card reveal" style="order:1">
-      <div class="panel">
-        <div class="tfs" role="group" aria-label="timeframe"><button type="button" data-tf="1s" aria-pressed="false">1s</button><button type="button" data-tf="15s" aria-pressed="false">15s</button><button type="button" data-tf="30s" aria-pressed="false">30s</button><button type="button" data-tf="1m" aria-pressed="true">1m</button><button type="button" data-tf="5m" aria-pressed="false">5m</button><button type="button" data-tf="15m" aria-pressed="false">15m</button><button type="button" data-tf="1h" aria-pressed="false">1h</button><span class="sep"></span><button type="button" id="mode" title="market cap / price">MC</button></div>
-        <div class="chartwrap"><div class="chart" id="chart"></div><div class="legend" id="legend"></div><p class="chartnote" id="chartNote"></p></div>
-      </div>
-    </section>
 <section class="card reveal" id="flowCard" style="order:6" hidden>
       <h2><span data-l="en">Money in and out</span><span data-l="ru">Деньги: заходят или выходят</span></h2><p class="hint" data-l="en">Every buy adds its dollars, every sell takes them away. The line goes up while more money comes in than leaves.</p><p class="hint" data-l="ru">Каждая покупка прибавляет свои доллары, каждая продажа вычитает. Линия растёт, пока денег заходит больше, чем выходит.</p>
       <div class="flow" id="flow"></div>
@@ -575,6 +577,9 @@ function makeChart() {
       vertLine: { color: TXT, width: 1, style: LW.LineStyle.Dashed, labelBackgroundColor: INK },
       horzLine: { color: TXT, width: 1, style: LW.LineStyle.Dashed, labelBackgroundColor: INK } },
     localization: { priceFormatter: axisFmt, timeFormatter: fullTime },
+    // the wheel and a vertical swipe scroll the page: over a chart that zoomed instead, the candles shrank into a strip
+    handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
+    handleScale: { mouseWheel: false, pinch: true, axisPressedMouseMove: true, axisDoubleClickReset: true },
   });
   C.candles = C.chart.addCandlestickSeries({ upColor: UP, downColor: DOWN, wickUpColor: UP, wickDownColor: DOWN, borderVisible: false,
     priceFormat: { type: "custom", formatter: axisFmt, minMove: 1e-12 } });
@@ -582,7 +587,7 @@ function makeChart() {
   C.volume.priceScale().applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
   // the chart sizes itself after layout: fit again then, and stop once the user takes over
   new ResizeObserver(() => requestAnimationFrame(refit)).observe(el);
-  for (const ev of ["wheel", "pointerdown", "touchstart"]) el.addEventListener(ev, () => { S.autoFit = false; }, { passive: true });
+  for (const ev of ["pointerdown", "touchstart"]) el.addEventListener(ev, () => { S.autoFit = false; }, { passive: true });
   C.chart.subscribeCrosshairMove((p) => legend(p && p.time != null ? p.seriesData.get(C.candles) : null, p && p.time != null ? p.seriesData.get(C.volume) : null));
 }
 /**
@@ -592,8 +597,11 @@ function makeChart() {
 function refit() {
   if (!C.chart || !S.autoFit) return;
   const n = S.bars.length;
+  // room for the next candles: six of them on a full chart, one when a young coin has only a dozen
+  const room = Math.max(1, Math.min(6, Math.round(n / 25)));
+  C.chart.timeScale().applyOptions({ rightOffset: room });
   if (n <= 160) C.chart.timeScale().fitContent();
-  else C.chart.timeScale().setVisibleLogicalRange({ from: n - 160, to: n + 6 });
+  else C.chart.timeScale().setVisibleLogicalRange({ from: n - 160, to: n + room });
 }
 const toBar = (k) => { const m = scaleBy(); return { time: k.t, open: k.o * m, high: k.h * m, low: k.l * m, close: k.c * m }; };
 const toVol = (k) => ({ time: k.t, value: k.v, color: k.c >= k.o ? "rgba(77,107,60,.32)" : "rgba(168,75,54,.32)" });
@@ -657,6 +665,12 @@ async function loadBars(fit) {
   paint(fit);
   if (raw?.failed) retryMinute(S.run, S.tf);
 }
+let refitQueued = false;
+function scheduleRefit() {
+  if (refitQueued) return;
+  refitQueued = true;
+  requestAnimationFrame(() => { refitQueued = false; refit(); });
+}
 /** One new trade into the last candle, as terminals do between candle refreshes. */
 function applyTrade(x) {
   if (!(x.priceUsd > 0)) return;
@@ -669,6 +683,9 @@ function applyTrade(x) {
     const o = last ? last.c : x.priceUsd;
     last = { t, o, h: o, l: o, c: o, v: 0 };
     S.bars.push(last);
+    // a young coin's chart grows from its trades: without a fit the new candles bunch up at the right edge
+    $("#chartNote").textContent = "";
+    if (S.autoFit) scheduleRefit();
   }
   last.h = Math.max(last.h, x.priceUsd); last.l = Math.min(last.l, x.priceUsd); last.c = x.priceUsd; last.v += x.usd || 0;
   C.candles.update(toBar(last)); C.volume.update(toVol(last));
@@ -938,7 +955,10 @@ function renderRecent() {
 /** Market data again after a pause while this coin is still open: the free API sometimes refuses a burst. */
 async function retrying(fn, run) {
   for (const wait of [0, 8000, 20000]) {
-    if (wait) { $("#chartNote").textContent = T("Market data is busy, trying again…", "Данные рынка заняты, пробую ещё раз…"); await new Promise((r) => setTimeout(r, wait)); }
+    if (wait) {
+      if (!S.bars.length) $("#chartNote").textContent = T("Market data is busy, trying again…", "Данные рынка заняты, пробую ещё раз…");
+      await new Promise((r) => setTimeout(r, wait));
+    }
     if (run !== S.run) throw new Error("closed");
     try { return await fn(); } catch (e) { if (wait === 20000) throw e; }
   }
@@ -951,6 +971,56 @@ function poolsOf(m) {
   if (!m?.main) return null;
   const curve = m.main.dex === "pumpswap" ? m.pools.filter((p) => p.dex === "pump-fun" && p.createdAt && p.createdAt <= (m.main.createdAt ?? Infinity)).sort((a, b) => a.createdAt - b.createdAt)[0] : null;
   return { main: m.main.address, curve: curve ? curve.address : null, createdAt: curve?.createdAt ?? m.main.createdAt ?? null };
+}
+
+/** The pool's numbers on the page: market cap, tiles, buys and sells; the pools remembered for the next visit. */
+function showMarket(m, cached, mint) {
+  S.market = m.main;
+  if (m.main.fdvUsd && m.main.priceUsd) S.supply = m.main.fdvUsd / m.main.priceUsd;
+  renderMarket(m.main, true);
+  renderTiles(); renderPressure();
+  if (!cached) { const pp = poolsOf(m); if (pp) savePools(mint, pp); }
+  else if (!cached.createdAt && m.main.createdAt) savePools(mint, { ...cached, createdAt: m.main.createdAt });
+  if (S.bars.length) paint(false);    // the market cap scale needs the supply
+  renderBuy();
+}
+
+/** The chart and the trades of a pool GeckoTerminal knows. */
+async function startChart(run, mint, pp) {
+  Object.assign(S, { pool: pp.main, curvePool: pp.curve, createdAt: pp.createdAt });
+  setTf(pp.createdAt ? defaultTf((Date.now() - pp.createdAt) / 1000) : "1m");
+  const tf = TF[S.tf];
+  const [got, raw] = await Promise.all([trades(S.pool, mint).catch(() => null), tf.trades ? null : rawMinute(tf)]);
+  if (run !== S.run) return;
+  const list = got ?? [];
+  if (!got) retryTrades(run);
+  addTrades(list);
+  S.tradesDone = !!got;
+  renderTrades(list, true);
+  renderFlow(); renderSizes(); renderWhales();
+  S.bars = tf.trades ? candlesFromTrades(S.trades, tf.trades) : finishMinute(raw, tf);
+  paint(true);
+  if (raw?.failed) retryMinute(run, S.tf);
+  if (!pp.createdAt && S.bars.length && defaultTf(Date.now() / 1000 - S.bars[0].t) === "1s") { setTf("1s"); await loadBars(true); }
+}
+
+/**
+ * A coin a few minutes old is not on GeckoTerminal yet: look again every 30 s for ten minutes and start the chart
+ * as soon as it is listed, instead of leaving the page without one.
+ */
+async function waitListing(run, mint, attempt) {
+  $("#chartNote").textContent = T("GeckoTerminal does not list this coin yet (new coins appear within a few minutes). The chart starts by itself.",
+    "GeckoTerminal ещё не знает эту монету (новые появляются через несколько минут). График включится сам.");
+  if (attempt > 20) { $("#chartNote").textContent = T("GeckoTerminal does not list this coin.", "GeckoTerminal не знает эту монету."); S.tradesDone = true; renderFlow(); return; }
+  await new Promise((r) => setTimeout(r, 30000));
+  if (run !== S.run) return;
+  let m = null;
+  try { m = await marketOf(mint); } catch (e) { /* busy: next round */ }
+  if (run !== S.run) return;
+  const pp = poolsOf(m);
+  if (!pp?.main) return waitListing(run, mint, attempt + 1);
+  showMarket(m, null, mint);
+  await startChart(run, mint, pp);
 }
 
 async function open(input) {
@@ -991,38 +1061,19 @@ async function open(input) {
     : retrying(() => marketOf(mint), run);
   const poolsP = cached ? Promise.resolve(cached) : marketP.then(poolsOf);
 
-  const chartP = poolsP.then(async (pp) => {
+  const chartP = poolsP.then((pp) => {
     if (run !== S.run) return;
-    if (!pp?.main) { $("#chartNote").textContent = T("GeckoTerminal does not list this coin yet.", "GeckoTerminal ещё не знает эту монету."); S.tradesDone = true; renderFlow(); return; }
-    Object.assign(S, { pool: pp.main, curvePool: pp.curve, createdAt: pp.createdAt });
-    setTf(pp.createdAt ? defaultTf((Date.now() - pp.createdAt) / 1000) : "1m");
-    const tf = TF[S.tf];
-    const [list, raw] = await Promise.all([trades(S.pool, mint).catch(() => []), tf.trades ? null : rawMinute(tf)]);
-    if (run !== S.run) return;
-    addTrades(list);
-    S.tradesDone = true;
-    renderTrades(list, true);
-    renderFlow(); renderSizes(); renderWhales();
-    S.bars = tf.trades ? candlesFromTrades(S.trades, tf.trades) : finishMinute(raw, tf);
-    paint(true);
-    if (raw?.failed) retryMinute(run, S.tf);
-    if (!pp.createdAt && S.bars.length && defaultTf(Date.now() / 1000 - S.bars[0].t) === "1s") { setTf("1s"); await loadBars(true); }
+    if (!pp?.main) { waitListing(run, mint, 1); return; }
+    return startChart(run, mint, pp);
   });
 
   marketP.then((m) => {
     if (run !== S.run || !m?.main) return;
-    S.market = m.main;
-    if (m.main.fdvUsd && m.main.priceUsd) S.supply = m.main.fdvUsd / m.main.priceUsd;
-    renderMarket(m.main, true);
-    renderTiles(); renderPressure();
-    if (!cached) { const pp = poolsOf(m); if (pp) savePools(mint, pp); }
-    else if (!cached.createdAt && m.main.createdAt) savePools(mint, { ...cached, createdAt: m.main.createdAt });
-    if (S.bars.length) paint(false);    // the market cap scale needs the supply
-    renderBuy();
+    showMarket(m, cached, mint);
   }).catch(() => { if (run === S.run && !S.bars.length) $("#chartNote").textContent = T("Market data did not load.", "Данные рынка не загрузились."); });
 
   // holders' spread, the developer's share, the curve, picture and links: one more request, after the chart's
-  retrying(() => tokenInfo(mint), run).then((info) => {
+  chartP.catch(() => {}).then(() => retrying(() => tokenInfo(mint), run)).then((info) => {
     if (run !== S.run) return;
     S.info = info; S.infoDone = true;
     renderHead(); renderVerdict(); renderTiles(); renderSpread(); renderCurve();
@@ -1048,6 +1099,19 @@ async function open(input) {
   S.timer = setInterval(() => liveTrades(run), 5000);     // new trades move the last candle
   S.slow = setInterval(() => liveMarket(run), 15000);     // market cap, changes, buys and sells
   checkP.then(() => {});
+}
+
+/** The first trades were refused (a burst limit): ask again after 3, 6, 9 and 12 s. */
+async function retryTrades(run, attempt = 1) {
+  await new Promise((r) => setTimeout(r, attempt * 3000));
+  if (run !== S.run || !S.pool) return;
+  let list;
+  try { list = await trades(S.pool, S.mint); } catch (e) { if (attempt < 4) retryTrades(run, attempt + 1); return; }
+  if (run !== S.run) return;
+  addTrades(list);
+  S.tradesDone = true;
+  renderTrades(list, true); renderFlow(); renderSizes(); renderWhales();
+  if (TF[S.tf].trades) { S.bars = candlesFromTrades(S.trades, TF[S.tf].trades); paint(S.autoFit); }
 }
 
 async function liveTrades(run) {
@@ -1095,6 +1159,7 @@ all("[data-set]").forEach((b) => b.addEventListener("click", () => { const l = b
 $("#form").addEventListener("submit", (e) => { e.preventDefault(); haptic(); open($("#q").value); });
 $("#recent").addEventListener("click", (e) => { const m = e.target.closest("[data-mint]")?.dataset.mint; if (m) { $("#q").value = m; open(m); } });
 all(".tfs button[data-tf]").forEach((b) => b.addEventListener("click", () => { haptic(); setTf(b.dataset.tf); loadBars(true); }));
+$("#fit").addEventListener("click", () => { haptic(); S.autoFit = true; refit(); });
 $("#mode").addEventListener("click", () => {
   haptic(); S.mode = S.mode === "mc" ? "price" : "mc";
   $("#mode").textContent = S.mode === "mc" ? "MC" : T("Price", "Цена");

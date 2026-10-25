@@ -23,11 +23,22 @@ async function getOnce(path, timeoutMs) {
   }
 }
 
+// In a browser the page's requests go one after another with a gap: the free tier answers a burst of four or five at
+// once with 429 (worse behind a shared VPN address). The bot asks rarely and keeps no gap.
+const GAP_MS = typeof window === "undefined" ? 0 : 350;
+let queue = Promise.resolve();
+function spaced(fn) {
+  if (!GAP_MS) return fn();
+  const run = queue.then(fn);
+  queue = run.catch(() => {}).then(() => new Promise((r) => setTimeout(r, GAP_MS)));
+  return run;
+}
+
 /** One request, retried twice on a rate limit or a network error: the free tier refuses bursts. */
 async function get(path, timeoutMs = 12000) {
   for (const wait of [0, 2000, 6000]) {
     if (wait) await new Promise((r) => setTimeout(r, wait));
-    const r = await getOnce(path, timeoutMs);
+    const r = await spaced(() => getOnce(path, timeoutMs));
     if (!r.error) return r.body;
     if (!r.retry || wait === 6000) throw new Error(r.error);
   }
