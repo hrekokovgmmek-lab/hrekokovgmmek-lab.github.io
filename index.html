@@ -2,6 +2,7 @@
 <html lang="en" data-lang="en">
 <head>
 <meta charset="utf-8">
+<script>(function(){var r=document.documentElement,l=null;try{l=new URLSearchParams(location.search).get('lang')}catch(e){}if(l!=='ru'&&l!=='en'){try{l=localStorage.getItem('lang')}catch(e){}}if(l!=='ru'&&l!=='en')l=(navigator.language||'').toLowerCase().indexOf('ru')===0?'ru':'en';r.setAttribute('data-lang',l);r.lang=l})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Coin check · Artem Vartanov</title>
 <meta name="description" content="Paste a pump.fun coin: a big verdict from the chain, the live market cap and chart, who holds it and who trades it. Free, nothing to sign, no keys.">
@@ -162,6 +163,7 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
   <nav class="lang" aria-label="language"><button data-set="en">en</button><button data-set="ru">ru</button></nav>
 </header>
 
+<main>
 <section class="hero">
   <h1><span data-l="en">Is this coin a trap?</span><span data-l="ru">Монета — ловушка или нет?</span></h1>
   <p data-l="en">Paste a pump.fun coin address or link. The chain answers in big letters, then the live market cap, the chart, who holds it and who trades it. Free, nothing to sign.</p><p data-l="ru">Вставьте адрес монеты pump.fun или ссылку. Ответ по цепи — большими буквами, а ниже капитализация вживую, график, у кого монеты и кто торгует. Бесплатно, ничего подписывать не нужно.</p>
@@ -176,7 +178,7 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
 <noscript><p class="status err"><span data-l="en">The page needs JavaScript.</span><span data-l="ru">Странице нужен JavaScript.</span></p></noscript>
 <p class="status" id="status" role="status" aria-live="polite"></p>
 
-<main id="coin" hidden>
+<div id="coin" hidden>
   <section class="verdict reveal" id="verdict" aria-live="polite"><b id="vText"></b><span id="vWhy"></span><small id="vNote"></small></section>
   <section class="head reveal">
     <div class="who"><img class="logo" id="logo" alt="" hidden referrerpolicy="no-referrer">
@@ -244,6 +246,7 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
     </section>
     </div>
   </div>
+</div>
 </main>
 
 <footer><p data-l="en">Market cap, chart, trades, holders' spread: GeckoTerminal. Chain: a public Solana node, read in your browser. Nothing is stored. Not advice to buy.</p><p data-l="ru">Капитализация, график, сделки, распределение держателей — GeckoTerminal. Цепь — публичный узел Solana, читается в вашем браузере. Ничего не сохраняется. Не совет покупать.</p></footer>
