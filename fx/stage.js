@@ -11,6 +11,9 @@
 //   const s = stage.add({ el, setup({ THREE, renderer, color }) {…}, frame(t, dt, w, h, renderer) {…}, dispose() {…} });
 //   s.remove();
 // A scene that keeps this.scene and this.camera after setup gets its shaders compiled at once, before it is seen.
+// still(t) → true: the scene would draw the same as last frame. When every scene on screen says so and no box has
+// moved, the frame is skipped and the canvas keeps its picture — a chart at rest costs no drawing; after NAP such
+// frames the loop sleeps until the page scrolls or is resized, or a scene calls wake() (something in it changed).
 import * as THREE from './three-0.185.1/three.module.min.js';
 
 export { THREE };
@@ -19,13 +22,14 @@ const FX = window.FX || { on: false, off() {} };
 const DPR_MAX = 2;
 const LOSSES_MAX = 2;          // the third lost context in one visit ends the effects
 const AHEAD = '25% 0px';       // a scene starts a little before its element scrolls in
+const NAP = 20;                // frames in a row with nothing new to draw, then the loop sleeps
 const CSS = '#fx-canvas{position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:-1;'
   + 'pointer-events:none;visibility:hidden}html.fx-live #fx-canvas{visibility:visible}'
   + 'html.fx-live body{background:transparent}';   // html carries the same paper, so no pixel changes
 
 let canvas = null, renderer = null, closed = !FX.on;
 let lost = false, losses = 0, hidden = document.visibilityState === 'hidden';
-let raf = 0, last = 0, frames = 0, live = false, dirty = false;
+let raf = 0, last = 0, frames = 0, skipped = 0, naps = 0, idle = 0, live = false, dirty = false, drew = '';
 const scenes = new Set();
 const io = new IntersectionObserver((entries) => {
   for (const e of entries) for (const s of scenes) if (s.el === e.target) s.seen = e.isIntersecting;
@@ -81,6 +85,8 @@ function size() {
   const dpr = Math.min(window.devicePixelRatio || 1, DPR_MAX);
   if (renderer.getPixelRatio() !== dpr) renderer.setPixelRatio(dpr);
   renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+  drew = '';                     // a resized canvas starts blank
+  wake();
 }
 
 export function add(def) {
@@ -105,7 +111,15 @@ function drop(s) {
   update();
 }
 
+export function wake() { idle = 0; if (!raf) update(); }
+
+function nap() {               // the canvas keeps its picture; scroll, resize or wake() start the loop again
+  if (++idle < NAP) return;
+  cancelAnimationFrame(raf); raf = 0; naps++;
+}
+
 function update() {
+  drew = ''; idle = 0;           // a scene came or went, the page was hidden, the context came back: draw afresh
   const want = !!renderer && FX.on && !lost && !hidden && [...scenes].some((s) => s.seen);
   if (want && !raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
   if (!want) {
@@ -134,9 +148,14 @@ function tick(now) {
   }
   if (!boxes.length) {           // on its way in (AHEAD) but not yet on screen: nothing to draw
     if (dirty) { renderer.setScissorTest(false); renderer.clear(); dirty = false; }
+    drew = '';
     show(false);
+    nap();
     return;
   }
+  const key = `${W}x${H}@${renderer.getPixelRatio()}|` + boxes.map((b) => b.slice(1).join(',')).join('|');
+  if (key === drew && boxes.every(([s]) => s.def.still && s.def.still(now / 1000))) { skipped++; nap(); return; }
+  drew = key; idle = 0;
   renderer.setScissorTest(false);
   renderer.clear();
   renderer.setScissorTest(true);
@@ -154,12 +173,13 @@ function tick(now) {
 export function state() {
   return {
     on: FX.on, gl: renderer ? 'ok' : closed ? 'off' : 'not opened', lost, losses, hidden, running: !!raf, live,
-    frames, dpr: renderer ? renderer.getPixelRatio() : 0, scenes: scenes.size,
+    frames, skipped, naps, asleep: !raf && !!renderer && !lost && !hidden && [...scenes].some((s) => s.seen), dpr: renderer ? renderer.getPixelRatio() : 0, scenes: scenes.size,
     seen: [...scenes].filter((s) => s.seen).length,
   };
 }
 
 document.addEventListener('visibilitychange', () => { hidden = document.visibilityState === 'hidden'; update(); });
+addEventListener('scroll', () => wake(), { passive: true, capture: true });
 
 document.addEventListener('fx:off', () => {
   closed = true;

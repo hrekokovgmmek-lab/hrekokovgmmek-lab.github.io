@@ -7,7 +7,9 @@
 // Bars and segments grow through their own geometry (width, height, x, y), not transforms: gsap writes SVG transforms
 // as an attribute, and the page's CSS transform rules would override it. A chart that was on screen, or had played,
 // when this started is left as it is. The rule of each chart is below, under its data-fx name.
-import { ready } from './scroll.js';
+// Nothing is loaded or built until the first chart or table comes within a window's height of the screen: the charts
+// are below the first screen, and ScrollTrigger and the timelines (one task of ~70 ms on a slow phone) are not needed
+// before then — measured 04.11 on the live site, Lighthouse TBT 20 ms when they were set up at load.
 import { load } from './gsap.js';
 
 const FX = window.FX || { on: false };
@@ -240,7 +242,7 @@ function onScreen(el) {
 
 async function init() {
   if (off) return;
-  const { gsap, ScrollTrigger, add } = await ready;
+  const { gsap, ScrollTrigger, add } = await (await import('./scroll.js')).ready;
   if (off) return;
   const style = document.createElement('style');
   style.id = 'fx-charts-style';
@@ -265,7 +267,25 @@ async function init() {
     });
     undo.push(() => chart.classList.remove('fx-chart'));
   }
-  FX.charts = { ready: true };
+  FX.charts.ready = true;
 }
 
-export const started = init();
+// wait until a chart or a table is within a window's height below the screen (a tab opened with them near the top
+// counts at once), then set everything up; start() does it now (the tests)
+let begun = null;
+const start = () => begun || (begun = init());
+FX.charts = { ready: false, start };
+(() => {
+  if (off) return;
+  const near = [...document.querySelectorAll('.chart[data-fx], table.ledger, table.market')];
+  if (!near.length) return;
+  const io = new IntersectionObserver((entries) => {
+    if (!entries.some((e) => e.isIntersecting)) return;
+    io.disconnect();
+    start();
+  }, { rootMargin: '0px 0px 100% 0px' });
+  for (const el of near) io.observe(el);
+  undo.push(() => io.disconnect());
+})();
+
+export { start };
