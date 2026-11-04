@@ -4,6 +4,43 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Stories · Artem Vartanov</title>
+<script>(function () {
+  var root = document.documentElement, nav = navigator, net = nav.connection || {}, why = [], q = null, mq = null;
+  try { q = new URLSearchParams(location.search).get('fx'); } catch (e) {}
+  try { mq = matchMedia('(prefers-reduced-motion: reduce)'); } catch (e) {}
+  if (q === '0') why.push('param');
+  if (mq && mq.matches) why.push('motion');
+  if (typeof WebGL2RenderingContext !== 'function') why.push('webgl');
+  if (net.saveData) why.push('save-data');
+  if (/(^|-)2g$/.test(net.effectiveType || '')) why.push('network');
+  if (nav.deviceMemory && nav.deviceMemory < 4) why.push('memory');
+  if (nav.deviceMemory && nav.hardwareConcurrency && nav.hardwareConcurrency < 4) why.push('cores');
+  var FX = window.FX = { on: !why.length, why: why, test: q === 'test' };
+  if (FX.on) root.classList.add('fx-on');
+  FX.off = function (reason) {
+    if (reason && why.indexOf(reason) < 0) why.push(reason);
+    if (!FX.on) return;
+    FX.on = false;
+    root.classList.remove('fx-on');
+    document.dispatchEvent(new CustomEvent('fx:off', { detail: { why: why.slice() } }));
+  };
+  if (mq) {
+    var calm = function (e) { if (e.matches) FX.off('motion'); };
+    if (mq.addEventListener) mq.addEventListener('change', calm); else if (mq.addListener) mq.addListener(calm);
+  }
+  var painted = null, mods = {};
+  function afterPaint() {
+    return painted || (painted = new Promise(function (go) {
+      function next() { requestAnimationFrame(function () { setTimeout(go, 0); }); }
+      if (document.readyState === 'complete') next(); else addEventListener('load', next, { once: true });
+    }));
+  }
+  FX.use = function (name) {
+    if (!FX.on) return Promise.resolve(null);
+    return mods[name] || (mods[name] = afterPaint().then(function () { return FX.on ? import('./fx/' + name + '.js') : null; }));
+  };
+  if (FX.on && FX.test) FX.use('probe');
+})();</script>
 <meta name="description" content="Short stories from on-chain measurements: one wallet in 25 minutes, why 75% of pump.fun transactions fail, what terminals take.">
 <meta name="theme-color" content="#f4f2ec">
 <meta property="og:title" content="Stories · Artem Vartanov">
