@@ -1,4 +1,4 @@
-GSAP 3.15.0 and its ScrollTrigger and ScrambleTextPlugin plugins (npm package "gsap", https://gsap.com), Copyright 2026, GreenSock.
+GSAP 3.15.0 and its ScrollTrigger, ScrambleTextPlugin and Flip plugins (npm package "gsap", https://gsap.com), Copyright 2026, GreenSock.
 
 The package ships no licence file. Its package.json says:
   "license": "Standard 'no charge' license: https://gsap.com/standard-license."
@@ -8,4 +8,4 @@ and the header of each file here says:
 
 The terms are on that page. The files are copied unchanged, headers included, from the npm tarball
 https://registry.npmjs.org/gsap/-/gsap-3.15.0.tgz (dist/gsap.min.js, dist/ScrollTrigger.min.js,
-dist/ScrambleTextPlugin.min.js).
+dist/ScrambleTextPlugin.min.js, dist/Flip.min.js).
