@@ -583,7 +583,8 @@ function status(text, isErr) { const s = $("#status"); s.textContent = text || "
 function countTo(el, to, fmt) {
   const from = Number(el.dataset.v ?? to);
   el.dataset.v = to;
-  if (reduce || !Number.isFinite(from) || from === to) { el.textContent = fmt(to); return; }
+  // with fx/coin.js on (class fx-coin) the number is final at once and the effect rolls its digits over it
+  if (reduce || root.classList.contains("fx-coin") || !Number.isFinite(from) || from === to) { el.textContent = fmt(to); return; }
   const t0 = performance.now();
   const step = (t) => {
     const k = Math.min(1, (t - t0) / 700);
@@ -1071,6 +1072,7 @@ async function waitListing(run, mint, attempt) {
 async function open(input) {
   const mint = parseMintInput(input);
   if (!mint) { status(T("That is not a coin address.", "Это не адрес монеты."), true); return; }
+  if (window.FX) FX.use("coin").catch(() => {});   // fx/coin.js: effects on only, after the first paint; the empty page never loads it
   const run = ++S.run;
   clearInterval(S.timer); clearInterval(S.slow);
   // pools handed over by the bot (it already read the chain); only for the coin they came with
@@ -1171,6 +1173,15 @@ async function liveTrades(run) {
   if (!C.chart) return;
   for (const x of fresh) applyTrade(x);
   legend(null, null);
+  if (root.classList.contains("fx-coin")) tradeMark(fresh[fresh.length - 1]);
+}
+/** For fx/coin.js: where the newest trade landed on the chart — the last candle at its new close. */
+function tradeMark(x) {
+  const last = S.bars[S.bars.length - 1];
+  if (!x || !last) return;
+  const px = C.chart.timeScale().timeToCoordinate(last.t), py = C.candles.priceToCoordinate(toBar(last).close);
+  if (px == null || py == null) return;
+  document.dispatchEvent(new CustomEvent("coin:trade", { detail: { x: px, y: py, side: x.side } }));
 }
 
 async function liveMarket(run) {
