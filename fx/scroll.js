@@ -10,7 +10,7 @@
 //   import { ready } from './scroll.js';
 //   const { gsap, ScrollTrigger, add } = await ready;
 //   add(() => gsap.to(el, { scrollTrigger: { trigger: el, scrub: true }, … }));
-const DIR = new URL('./gsap-3.15.0/', import.meta.url);
+import { load } from './gsap.js';
 
 // effects may go off while gsap is still loading (no GL, reduced motion): listen from the start, and after that
 // add() does nothing, so no trigger outlives the effects
@@ -18,21 +18,9 @@ let off = !(window.FX && window.FX.on);
 const undo = [];
 document.addEventListener('fx:off', () => { off = true; for (const f of undo.splice(0)) f(); }, { once: true });
 
-function script(file) {
-  return new Promise((ok, fail) => {
-    const s = document.createElement('script');
-    s.src = new URL(file, DIR).href;
-    s.onload = ok;
-    s.onerror = () => fail(new Error('fx: cannot load ' + s.src));
-    document.head.appendChild(s);
-  });
-}
-
 async function boot() {
-  if (!window.gsap) await script('gsap.min.js');
-  if (!window.ScrollTrigger) await script('ScrollTrigger.min.js');
-  const { gsap, ScrollTrigger } = window;
-  gsap.registerPlugin(ScrollTrigger);
+  const gsap = await load('ScrollTrigger');
+  const { ScrollTrigger } = window;
   ScrollTrigger.config({ ignoreMobileResize: true });   // a phone's address bar coming and going is not a new layout
   const ctx = gsap.context(() => {});
   const add = (fn) => (off ? undefined : ctx.add(fn));
