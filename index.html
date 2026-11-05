@@ -40,6 +40,7 @@
   };
   if (FX.on && FX.test) FX.use('probe');
 })();</script>
+<script>(function(){try{if(/(^|[\s\/?=&#])[1-9A-HJ-NP-Za-km-z]{43,44}([\s\/?=&#]|$)/.test(new URLSearchParams(location.search).get('mint')||''))document.documentElement.classList.add('coin-link')}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Coin check · Artem Vartanov</title>
 <meta name="description" content="Paste a pump.fun coin: a big verdict from the chain, the live market cap and chart, who holds it and who trades it. Free, nothing to sign, no keys.">
@@ -74,6 +75,21 @@ a{color:var(--ink);text-decoration-color:var(--brick);text-underline-offset:3px}
 .hero h1{font-size:clamp(28px,5vw,44px);font-weight:500;line-height:1.1;letter-spacing:-.015em;margin:26px 0 6px}
 .hero p{color:var(--grey);margin:0;max-width:640px}
 body.has-coin .hero{display:none}
+/* a coin opened from a link (COIN_EARLY): no welcome block from the first paint, the footer below the fold until the
+   coin's place is taken, so that nothing on screen moves when the page script opens the coin; that script waits for
+   telegram.org, seconds at times, so a line says what the page is doing */
+.coin-link .hero{display:none}
+.coin-link body:not(.has-coin) main{min-height:100vh}
+.coin-link body:not(.has-coin) .status::before{content:"Loading the coin…"}
+.coin-link[data-lang=ru] body:not(.has-coin) .status::before{content:"Загружаю монету…"}
+/* and the places of what the answers fill in, each gone as soon as it is taken: the recent coins' row and the verdict's
+   note (the chain's answer brings both), the market's line and changes, the picture (until the answer about the token,
+   when the holders' card shows, with data or without) */
+.coin-link:has(.verdict.checking) .recent:empty{min-height:25px}
+.coin-link .verdict.checking small,.coin-link .sub:empty{min-height:1.5em}
+.coin-link .sub:empty+.chips{min-height:25.5px}
+.coin-link:has(#spreadCard[hidden]) .who:has(.logo[hidden])::before{content:"";flex:none;width:56px;height:56px}
+@media (max-width:560px){.coin-link .verdict.checking small,.coin-link .sub:empty{min-height:3em}}
 .hero .more{margin:10px 0 0;font-size:15px}
 form{display:flex;gap:8px;margin:14px 0 0;max-width:760px}
 input{flex:1;min-width:0;font:15px/1.4 var(--mono);padding:10px 11px;border:1px solid var(--ink);background:var(--card);color:var(--ink);border-radius:0}
@@ -1071,7 +1087,7 @@ async function waitListing(run, mint, attempt) {
 
 async function open(input) {
   const mint = parseMintInput(input);
-  if (!mint) { status(T("That is not a coin address.", "Это не адрес монеты."), true); return; }
+  if (!mint) { root.classList.remove("coin-link"); status(T("That is not a coin address.", "Это не адрес монеты."), true); return; }
   if (window.FX) FX.use("coin").catch(() => {});   // fx/coin.js: effects on only, after the first paint; the empty page never loads it
   const run = ++S.run;
   clearInterval(S.timer); clearInterval(S.slow);
