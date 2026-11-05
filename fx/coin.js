@@ -25,7 +25,7 @@
 // The page loads this when a coin opens (FX.use('coin')). 'fx:off' stops everything and takes every trace away.
 const FX = window.FX || { on: false };
 const root = document.documentElement;
-const CSS = 'html.fx-coin #verdict,html.fx-coin #price{position:relative}'
+const CSS = 'html.fx-coin #verdict{position:relative}'
   + 'fx-scan{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}'
   + 'fx-glyph{position:absolute;display:block;overflow:hidden;text-align:center;white-space:nowrap;visibility:hidden}'
   + 'fx-odo{position:absolute;display:block;overflow:hidden;pointer-events:none;color:inherit}'
@@ -161,7 +161,9 @@ function odometer() {
   const own = () => { const n = price.firstChild; return n && n.nodeType === 3 ? n.data : ''; };
   let last = own(), lastLang = root.getAttribute('data-lang'), lastV = Number(price.dataset.v), patches = [];
   const shape = (s) => s.replace(/[0-9]/g, '0');
-  const clear = () => { for (const p of patches) p.remove(); patches = []; };
+  // the patches need the number positioned, but only while they are there: a number positioned at rest counts as one
+  // more thing that moves when the blocks above it grow, and that shift scored 3× higher on a phone (docs/stage-5.md)
+  const clear = () => { for (const p of patches) p.remove(); patches = []; price.removeAttribute('style'); };
 
   // the window a strip shows through: the band where the ink of `text` lies (a counter's window), not the whole
   // height of the line — so mid-roll only the digits coming and going show, nothing above or below the number
@@ -204,6 +206,7 @@ function odometer() {
     clear();
     const node = price.firstChild;
     if (!node || node.nodeType !== 3 || !price.getClientRects().length) return;
+    price.setAttribute('style', 'position:relative');
     const pr = price.getBoundingClientRect(), bg = getComputedStyle(document.body).backgroundColor;
     const runs = [];
     if (shape(from) === shape(to)) {
