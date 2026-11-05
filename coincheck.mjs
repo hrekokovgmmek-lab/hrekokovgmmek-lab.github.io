@@ -2,8 +2,8 @@
  * pump.fun coin check: what a buyer should know before buying, read from the chain.
  *
  * One module for the Telegram bot (Node >= 20) and the site page (browser), no dependencies. Read-only: no wallet,
- * no keys. Only methods the free public node serves are used; it refuses getTokenLargestAccounts, so holders come
- * from getProgramAccounts with a 40-byte slice of each token account.
+ * no keys. Holders come from getProgramAccounts with a 40-byte slice of each token account: the page's main node
+ * refuses it, so the page reads the list from a second node (`holdersRpc`). Measured in HOLDERS-RPC-2026-11.md.
  *
  * Nothing here is taken from the trading bot: no price formula, no entry or exit thresholds. Account layouts are
  * pump.fun's public IDL.
@@ -26,8 +26,16 @@ const TOP_OWNERS = 20;
 const ONE_WALLET_DANGER_PCT = 50;
 const THIN_POOL_SOL = 5;
 export const SAME_BLOCK_WARN = 5;
-const HOLDERS_TIMEOUT_MS = 15000;
+const HOLDERS_TIMEOUT_MS = 20000;
+const HOLDERS_MAX_BYTES = 20_000_000;             // about 70 000 token accounts; a visitor's phone pays for the rest
+const ACCOUNTS_PER_CALL = 10;                     // PublicNode answers 403 to more in one getMultipleAccounts
 const LAUNCH_PAGES = 3;                           // signature pages of 1000 read to reach the creation transaction
+// System-owned, so they look like plain wallets, but nobody's money. Measured 05.11.2026: pump.fun's Mayhem agent holds
+// about half of a fresh Mayhem coin; one Meteora authority holds the unsold tokens of its bonding curves.
+const NOT_WALLETS = {
+  BwWK17cbHxwWBKZkUYvzxLcNQ1YVyaFezduWbtm2de6s: { kind: "agent" },
+  FhVo3mqL8PW5pH5U2CN4XE33DokiyZnUwuGpH2hmHLuM: { kind: "program", label: "Meteora" },
+};
 
 // ---------- base58, sha256, program addresses ----------
 
@@ -226,7 +234,23 @@ export function makeRpc(url = PUBLIC_RPC, { gapMs = 150, timeoutMs = 25000, retr
   let last = 0;
   let calls = 0;
 
-  async function once(method, params, ms) {
+  /** The answer's text, or null past maxBytes: the rest of the download stops there. */
+  async function textOf(res, maxBytes) {
+    if (!maxBytes || !res.body?.getReader) return res.text();
+    const reader = res.body.getReader();
+    const parts = [];
+    let size = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.length;
+      if (size > maxBytes) { await reader.cancel(); return null; }
+      parts.push(value);
+    }
+    return new TextDecoder().decode(concat(...parts));
+  }
+
+  async function once(method, params, ms, maxBytes) {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), ms);
     try {
@@ -236,7 +260,8 @@ export function makeRpc(url = PUBLIC_RPC, { gapMs = 150, timeoutMs = 25000, retr
         body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
         signal: ctl.signal,
       });
-      const text = await res.text();
+      const text = await textOf(res, maxBytes);
+      if (text === null) return { retry: false, error: "the answer is too long" };
       let body;
       try { body = JSON.parse(text); } catch { body = null; }
       if (res.status === 429 || res.status >= 500) return { retry: true, error: `HTTP ${res.status}` };
@@ -250,7 +275,7 @@ export function makeRpc(url = PUBLIC_RPC, { gapMs = 150, timeoutMs = 25000, retr
     }
   }
 
-  /** `opts.timeoutMs` and `opts.retries` override the defaults for one call. */
+  /** `opts.timeoutMs` and `opts.retries` override the defaults for one call; `opts.maxBytes` caps the answer. */
   function call(method, params, opts = {}) {
     const delays = opts.retries ?? retries;
     const run = queue.then(async () => {
@@ -259,7 +284,7 @@ export function makeRpc(url = PUBLIC_RPC, { gapMs = 150, timeoutMs = 25000, retr
         if (wait > 0) await sleep(wait);
         last = Date.now();
         calls++;
-        const r = await once(method, params, opts.timeoutMs ?? timeoutMs);
+        const r = await once(method, params, opts.timeoutMs ?? timeoutMs, opts.maxBytes);
         if (!r.error) return r.result;
         if (!r.retry || attempt >= delays.length) throw new CheckError("rpc", `${method}: ${r.error}`);
         await sleep(delays[attempt]);
@@ -349,9 +374,10 @@ function readMint(acc) {
 async function readHolders(rpc, mint, program) {
   const filters = [{ memcmp: { offset: 0, bytes: mint } }];
   if (program === TOKEN) filters.push({ dataSize: 165 });
-  // A coin with hundreds of thousands of accounts takes the node minutes or is refused: one short try only.
+  // A coin with hundreds of thousands of accounts stops at the cap, for good. A big list sometimes stalls halfway (2 tries
+  // of 8 on a 17 MB list, 05.11.2026), and the node may say "too fast": either is worth one more try.
   const rows = await rpc.call("getProgramAccounts", [program, { encoding: "base64", dataSlice: { offset: 32, length: 40 }, filters }],
-    { timeoutMs: HOLDERS_TIMEOUT_MS, retries: [] });
+    { timeoutMs: HOLDERS_TIMEOUT_MS, retries: [1500], maxBytes: HOLDERS_MAX_BYTES });
   const byOwner = new Map();
   let accounts = 0;
   for (const r of rows) {
@@ -365,6 +391,15 @@ async function readHolders(rpc, mint, program) {
   }
   const owners = [...byOwner].sort((a, b) => (b[1] > a[1] ? 1 : b[1] < a[1] ? -1 : 0));
   return { accounts, owners };
+}
+
+/** Each key's account (who owns it, its lamports, 8 bytes at offset 64: a token account's amount) into the map. */
+async function readAccounts(rpc, keys, into) {
+  for (let i = 0; i < keys.length; i += ACCOUNTS_PER_CALL) {
+    const part = keys.slice(i, i + ACCOUNTS_PER_CALL);
+    const got = (await rpc.call("getMultipleAccounts", [part, { encoding: "base64", dataSlice: { offset: 64, length: 8 } }])).value;
+    part.forEach((k, j) => into.set(k, got[j]));
+  }
 }
 
 /** Where the creator's first SOL came from: the system transfer into it in its oldest transaction. */
@@ -471,12 +506,16 @@ async function readTerminals(rpc, sigs, labels, sample) {
 /**
  * Check one coin. Returns a report; `describe(report, lang)` turns it into text. Partial reads are kept: if the node
  * refuses one step, the report says what is missing instead of failing.
+ *
+ * `holdersRpc` is the node for the holder list, `rpc` by default. The list comes last and can take seconds, so
+ * `onEarly(report)` gets everything else as soon as it is known; the promise then resolves with the full report.
  */
-export async function checkCoin(input, { rpc = makeRpc(), labels = {}, onStep = () => {}, sampleTx = 6 } = {}) {
+export async function checkCoin(input, { rpc = makeRpc(), holdersRpc = rpc, labels = {}, onStep = () => {}, sampleTx = 6, onEarly = null } = {}) {
   const mint = parseMintInput(input);
   if (!mint) throw new CheckError("bad_address");
   const t0 = Date.now();
-  const calls0 = rpc.calls;
+  const spent = () => rpc.calls + (holdersRpc === rpc ? 0 : holdersRpc.calls);
+  const calls0 = spent();
   const r = { mint, checkedAt: new Date().toISOString(), missing: [] };
 
   onStep("mint");
@@ -530,23 +569,11 @@ export async function checkCoin(input, { rpc = makeRpc(), labels = {}, onStep = 
   }
   const feeTo = r.pool?.creator ?? r.curve?.creator ?? null;
 
-  onStep("holders");
-  let holders = null;
-  try {
-    holders = await readHolders(rpc, mint, mintAcc.owner);
-  } catch (e) {
-    r.missing.push("holders");
-    r.holdersError = String(e.message ?? e);
-  }
-
-  const top = holders ? holders.owners.slice(0, TOP_OWNERS) : [];
-  const extra = [launcher, feeTo, r.pool?.baseVault, r.pool?.quoteVault].filter(Boolean);
-  const keys = [...new Set([...top.map(([o]) => o), ...extra])];
+  // A refusal here costs a few facts (the pool's contents, the creator's balance), not the whole check.
   const accs = new Map();
-  if (keys.length) {
-    const got = (await rpc.call("getMultipleAccounts", [keys, { encoding: "base64", dataSlice: { offset: 64, length: 8 } }])).value;
-    keys.forEach((k, i) => accs.set(k, got[i]));
-  }
+  try {
+    await readAccounts(rpc, [...new Set([launcher, feeTo, r.pool?.baseVault, r.pool?.quoteVault].filter(Boolean))], accs);
+  } catch { r.missing.push("accounts"); }
   const isWallet = (a) => !!a && a.owner === SYSTEM;
 
   if (r.pool) {
@@ -568,28 +595,8 @@ export async function checkCoin(input, { rpc = makeRpc(), labels = {}, onStep = 
   }
   const creator = launcher ?? (r.feeRecipient?.kind === "wallet" ? feeTo : null);
   if (creator) {
-    r.creator = { address: creator, fromCreateTx: !!launcher, sol: (accs.get(creator)?.lamports ?? 0) / 1e9 };
+    r.creator = { address: creator, fromCreateTx: !!launcher, sol: accs.has(creator) ? (accs.get(creator)?.lamports ?? 0) / 1e9 : null };
     if (r.feeRecipient) r.feeRecipient.isCreator = feeTo === creator;
-  }
-
-  if (holders) {
-    r.holders = {
-      accounts: holders.accounts,
-      top: top.map(([owner, amount]) => {
-        const a = accs.get(owner);
-        let kind = "wallet";
-        if (owner === curve) kind = "curve";
-        else if (owner === r.pool?.address || a?.owner === PUMP_AMM) kind = "pool";
-        else if (a && a.owner !== SYSTEM) kind = "program";
-        const label = labels.exchanges?.[owner] ?? labels.terminals?.[owner] ?? (kind === "program" ? labels.terminals?.[a.owner] ?? null : null);
-        return { owner, pct: pct(amount, supply), kind, label, isCreator: owner === creator };
-      }),
-    };
-    const wallets = r.holders.top.filter((h) => h.kind === "wallet");
-    r.holders.topWalletPct = wallets[0]?.pct ?? 0;
-    r.holders.top10WalletsPct = Math.round(wallets.slice(0, 10).reduce((s, h) => s + h.pct, 0) * 100) / 100;
-    const own = holders.owners.find(([o]) => o === creator);
-    r.holders.creatorPct = own ? pct(own[1], supply) : 0;
   }
 
   if (r.creator) {
@@ -605,10 +612,47 @@ export async function checkCoin(input, { rpc = makeRpc(), labels = {}, onStep = 
     try { r.terminals = await readTerminals(rpc, recent, labels, sampleTx); } catch { r.missing.push("terminals"); }
   }
 
-  r.calls = rpc.calls - calls0;
-  r.ms = Date.now() - t0;
-  r.flags = flagsOf(r);
-  r.level = r.flags.some((f) => f.level === "danger") ? "danger" : r.flags.some((f) => f.level === "warn") ? "warn" : "ok";
+  const sumUp = () => {
+    r.calls = spent() - calls0;
+    r.ms = Date.now() - t0;
+    r.flags = flagsOf(r);
+    r.level = r.flags.some((f) => f.level === "danger") ? "danger" : r.flags.some((f) => f.level === "warn") ? "warn" : "ok";
+  };
+  if (onEarly) {
+    sumUp();
+    onEarly({ ...r, missing: [...r.missing] });
+  }
+
+  onStep("holders");
+  try {
+    const holders = await readHolders(holdersRpc, mint, mintAcc.owner);
+    const top = holders.owners.slice(0, TOP_OWNERS);
+    await readAccounts(rpc, top.map(([o]) => o).filter((o) => !accs.has(o)), accs);
+    r.holders = {
+      accounts: holders.accounts,
+      top: top.map(([owner, amount]) => {
+        const a = accs.get(owner);
+        const known = NOT_WALLETS[owner];
+        let kind = "wallet";
+        if (owner === curve) kind = "curve";
+        else if (owner === r.pool?.address || a?.owner === PUMP_AMM) kind = "pool";
+        else if (known) kind = known.kind;
+        else if (a && a.owner !== SYSTEM) kind = "program";
+        const label = known?.label ?? labels.exchanges?.[owner] ?? labels.terminals?.[owner] ?? (kind === "program" ? labels.terminals?.[a.owner] ?? null : null);
+        return { owner, pct: pct(amount, supply), kind, label, isCreator: owner === creator };
+      }),
+    };
+    const wallets = r.holders.top.filter((h) => h.kind === "wallet");
+    r.holders.topWalletPct = wallets[0]?.pct ?? 0;
+    r.holders.top10WalletsPct = Math.round(wallets.slice(0, 10).reduce((s, h) => s + h.pct, 0) * 100) / 100;
+    const own = holders.owners.find(([o]) => o === creator);
+    r.holders.creatorPct = own ? pct(own[1], supply) : 0;
+  } catch (e) {
+    r.missing.push("holders");
+    r.holdersError = String(e.message ?? e);
+  }
+
+  sumUp();
   return r;
 }
 
@@ -648,8 +692,8 @@ export function flagsOf(r) {
 }
 
 const MISSING = {
-  ru: { holders: "держателей (узел отказал)", creator: "историю создателя", launch: "начало истории монеты", terminals: "последние сделки" },
-  en: { holders: "holders (the node refused)", creator: "the creator's history", launch: "the coin's early history", terminals: "the latest trades" },
+  ru: { holders: "держателей (узел отказал или список слишком велик)", accounts: "содержимое пула и баланс создателя", creator: "историю создателя", launch: "начало истории монеты", terminals: "последние сделки" },
+  en: { holders: "holders (the node refused, or the list is too long)", accounts: "the pool's contents and the creator's balance", creator: "the creator's history", launch: "the coin's early history", terminals: "the latest trades" },
 };
 
 const VERDICT = {
@@ -688,6 +732,8 @@ export function describe(r, lang = "ru") {
     facts.push([L("Держателей (счетов)", "Holders (accounts)"), fmt(h.accounts, 0)]);
     facts.push([L("Крупнейший кошелёк (без кривой и пула)", "Largest wallet (curve and pool excluded)"), L(`${fmt(h.topWalletPct, 2)} %`, `${fmt(h.topWalletPct, 2)}%`)]);
     facts.push([L("10 крупнейших кошельков", "Top 10 wallets"), L(`${fmt(h.top10WalletsPct, 2)} %`, `${fmt(h.top10WalletsPct, 2)}%`)]);
+    const agent = h.top.find((x) => x.kind === "agent");
+    if (agent) facts.push([L("Агент Mayhem держит (pump.fun)", "The Mayhem agent holds (pump.fun)"), L(`${fmt(agent.pct, 2)} %`, `${fmt(agent.pct, 2)}%`)]);
   }
   if (r.creator) {
     const c = r.creator;

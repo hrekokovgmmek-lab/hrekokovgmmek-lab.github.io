@@ -302,8 +302,8 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
 </div>
 </main>
 
-<footer><p data-l="en">Market cap, chart, trades, holders' spread: GeckoTerminal. Chain: a public Solana node, read in your browser. Nothing is stored. Not advice to buy.</p><p data-l="ru">Капитализация, график, сделки, распределение держателей — GeckoTerminal. Цепь — публичный узел Solana, читается в вашем браузере. Ничего не сохраняется. Не совет покупать.</p></footer>
-<script type="module">const PAGE_RPC = "https://solana-rpc.publicnode.com", BOT = "artem_coinchek_bot", REFS = {"gmgn": "Ri639FUK", "axiom": "https://axiom.trade/@peni3", "trojan": "https://trojan.com/@ArtemVartanov", "pump": "AjarTestedFibre"}, LABELS = {
+<footer><p data-l="en">Market cap, chart, trades, holders' spread: GeckoTerminal. Chain: public Solana nodes, read in your browser. Nothing is stored. Not advice to buy.</p><p data-l="ru">Капитализация, график, сделки, распределение держателей — GeckoTerminal. Цепь — публичные узлы Solana, читается в вашем браузере. Ничего не сохраняется. Не совет покупать.</p></footer>
+<script type="module">const PAGE_RPC = "https://solana-rpc.publicnode.com", HOLDERS_RPC = "https://public.rpc.solanavibestation.com/", BOT = "artem_coinchek_bot", REFS = {"gmgn": "Ri639FUK", "axiom": "https://axiom.trade/@peni3", "trojan": "https://trojan.com/@ArtemVartanov", "pump": "AjarTestedFibre"}, LABELS = {
 "_about":"Public labels for the pump.fun coin check: terminals (programs and fee wallets) and exchange/bridge wallets. Built by build_labels.py from a white list.",
 "terminals":{
 "2416yFoX5ep69Ae8u4EoWN2b1jRMC8diygQDf4zqNAQG":"Ave.ai",
@@ -788,8 +788,13 @@ function renderVerdict() {
   v.className = `verdict ${level}`;
   $("#vText").textContent = T(...BIG[level]);
   $("#vWhy").textContent = why;
-  $("#vNote").textContent = level === "ok" || level === "warn" || level === "danger"
-    ? T("This is how the coin is built on chain, not a promise it goes up: memecoins fall without traps too.", "Это устройство монеты на цепи, а не обещание роста: мемкоины падают и без ловушек.") : "";
+  // the plaque says what it has not seen yet: the holder list comes after the verdict and can raise it, or fail.
+  // Three notes of about one length: the verdict's height must not change with them (docs/coin-link.md)
+  const unread = r && !r.holders && level !== "danger";
+  $("#vNote").textContent = level !== "ok" && level !== "warn" && level !== "danger" ? ""
+    : unread && r.missing.includes("holders") ? T("The biggest wallets could not be read, so this verdict does not take them into account.", "Крупнейшие кошельки прочитать не удалось, поэтому этот вердикт их не учитывает.")
+    : unread ? T("Still reading the biggest wallets, which takes a few seconds: the verdict may get stricter.", "Ещё читаю крупнейшие кошельки, это несколько секунд: вердикт может стать строже.")
+    : T("This is how the coin is built on chain, not a promise it goes up: memecoins fall without traps too.", "Это устройство монеты на цепи, а не обещание роста: мемкоины падают и без ловушек.");
 }
 
 // ---------- market block: the market cap, live ----------
@@ -815,10 +820,11 @@ function renderTiles() {
   const r = S.report, i = S.info, m = S.market;
   const t = r?.token;
   const tx24 = m?.tx?.h24;
+  const h = r?.holders;   // read from the chain just now; GeckoTerminal's holder numbers can be a day old
   const tiles = [
-    [T("top 10 hold", "топ-10 держат"), i?.spread?.top10 != null ? pct(i.spread.top10) : "…", ""],
-    [T("developer holds", "создатель держит"), i?.devPct != null ? pct(i.devPct) : r?.holders ? pct(r.holders.creatorPct) : "…", ""],
-    [T("holders", "держателей"), i?.holders != null ? intl(i.holders) : "…", ""],
+    [T("top 10 hold", "топ-10 держат"), h ? pct(h.top10WalletsPct) : i?.spread?.top10 != null ? pct(i.spread.top10) : "…", ""],
+    [T("developer holds", "создатель держит"), h && r.creator ? pct(h.creatorPct) : i?.devPct != null ? pct(i.devPct) : "…", ""],
+    [T("holders", "держателей"), h ? intl(h.accounts) : i?.holders != null ? intl(i.holders) : "…", ""],
     [T("new tokens", "выпуск новых"), t ? (t.mintAuthority ? T("ON", "ВКЛЮЧЁН") : T("off", "отключён")) : "…", t ? (t.mintAuthority ? "danger" : "ok") : ""],
     [T("freezing", "заморозка"), t ? (t.freezeAuthority ? T("ON", "ВКЛЮЧЕНА") : T("off", "отключена")) : "…", t ? (t.freezeAuthority ? "danger" : "ok") : ""],
     [T("trades in creation block", "сделок в блоке создания"), r?.launch?.reached ? intl(r.launch.sameBlock) : r ? "?" : "…", r?.launch?.reached && r.launch.sameBlock >= SAME_BLOCK_WARN ? "warn" : ""],
@@ -980,7 +986,7 @@ function renderCheck() {
   const r = S.report;
   if (!r) return;
   const d = describe(r, lang());
-  $("#flags").innerHTML = d.flags.filter((f) => f.code !== "missing:holders").map((f) => `<li class="${f.level}">${esc(f.text)}</li>`).join("");
+  $("#flags").innerHTML = d.flags.map((f) => `<li class="${f.level}">${esc(f.text)}</li>`).join("");
   $("#facts").innerHTML = d.facts.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join("");
   $("#checkNote").textContent = d.note;
   $("#check").hidden = false;
@@ -1142,15 +1148,22 @@ async function open(input) {
     renderHead(); renderVerdict(); renderTiles(); renderSpread(); renderCurve();
   }).catch(() => { if (run === S.run) { S.infoDone = true; renderSpread(); } });
 
-  const checkP = checkCoin(mint, { rpc: makeRpc(PAGE_RPC, { gapMs: 120, timeoutMs: 12000, retries: [1500, 4000] }), labels: LABELS, sampleTx: 0 })
-    .then((r) => {
+  const showReport = (r) => { S.report = r; renderVerdict(); renderTiles(); renderCurve(); renderCheck(); };
+  const checkP = checkCoin(mint, {
+    rpc: makeRpc(PAGE_RPC, { gapMs: 120, timeoutMs: 12000, retries: [1500, 4000] }),
+    holdersRpc: makeRpc(HOLDERS_RPC),
+    labels: LABELS,
+    sampleTx: 0,
+    // the verdict does not wait for the holder list, which takes seconds on a big coin; the full report may raise it
+    onEarly: (r) => {
       if (run !== S.run) return;
-      S.report = r;
       const name = [r.token.name, r.token.symbol ? "$" + r.token.symbol : ""].filter(Boolean).join(" ");
       if (name) $("#title").textContent = name;
       remember(mint, r.token.symbol ? "$" + r.token.symbol : r.token.name);
-      renderVerdict(); renderTiles(); renderCurve(); renderCheck(); renderBuy(); renderRecent();
-    })
+      showReport(r); renderBuy(); renderRecent();
+    },
+  })
+    .then((r) => { if (run === S.run) showReport(r); })
     .catch((e) => {
       if (run !== S.run) return;
       S.checkFailed = true; renderVerdict();
