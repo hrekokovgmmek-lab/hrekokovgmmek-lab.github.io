@@ -1,1267 +1,164 @@
 <!doctype html>
-<html lang="en" data-lang="en">
+<html lang="en" data-lang="en" class="no-js">
 <head>
 <meta charset="utf-8">
-<script>(function(){var r=document.documentElement,l=null;try{l=new URLSearchParams(location.search).get('lang')}catch(e){}if(l!=='ru'&&l!=='en'){try{l=localStorage.getItem('lang')}catch(e){}}if(l!=='ru'&&l!=='en')l=(navigator.language||'').toLowerCase().indexOf('ru')===0?'ru':'en';r.setAttribute('data-lang',l);r.lang=l})();</script>
-<script>(function () {
-  var root = document.documentElement, nav = navigator, net = nav.connection || {}, why = [], q = null, mq = null;
-  try { q = new URLSearchParams(location.search).get('fx'); } catch (e) {}
-  try { mq = matchMedia('(prefers-reduced-motion: reduce)'); } catch (e) {}
-  if (q === '0') why.push('param');
-  if (mq && mq.matches) why.push('motion');
-  if (typeof WebGL2RenderingContext !== 'function') why.push('webgl');
-  if (net.saveData) why.push('save-data');
-  if (/(^|-)2g$/.test(net.effectiveType || '')) why.push('network');
-  if (nav.deviceMemory && nav.deviceMemory < 4) why.push('memory');
-  if (nav.deviceMemory && nav.hardwareConcurrency && nav.hardwareConcurrency < 4) why.push('cores');
-  var FX = window.FX = { on: !why.length, why: why, test: q === 'test' };
-  if (FX.on) root.classList.add('fx-on');
-  FX.off = function (reason) {
-    if (reason && why.indexOf(reason) < 0) why.push(reason);
-    if (!FX.on) return;
-    FX.on = false;
-    root.classList.remove('fx-on');
-    document.dispatchEvent(new CustomEvent('fx:off', { detail: { why: why.slice() } }));
-  };
-  if (mq) {
-    var calm = function (e) { if (e.matches) FX.off('motion'); };
-    if (mq.addEventListener) mq.addEventListener('change', calm); else if (mq.addListener) mq.addListener(calm);
-  }
-  var painted = null, mods = {};
-  function afterPaint() {
-    return painted || (painted = new Promise(function (go) {
-      function next() { requestAnimationFrame(function () { setTimeout(go, 0); }); }
-      if (document.readyState === 'complete') next(); else addEventListener('load', next, { once: true });
-    }));
-  }
-  FX.use = function (name) {
-    if (!FX.on) return Promise.resolve(null);
-    return mods[name] || (mods[name] = afterPaint().then(function () { return FX.on ? import('./fx/' + name + '.js') : null; }));
-  };
-  if (FX.on && FX.test) FX.use('probe');
-})();</script>
-<script>(function(){try{if(/(^|[\s\/?=&#])[1-9A-HJ-NP-Za-km-z]{43,44}([\s\/?=&#]|$)/.test(new URLSearchParams(location.search).get('mint')||''))document.documentElement.classList.add('coin-link')}catch(e){}})();</script>
+<script>/* ссылки бота на проверку монеты (?mint=, ?c=, ?p=) — на старую страницу проверки */(function(){try{var q=new URLSearchParams(location.search);if(q.has("mint")||q.has("c")||q.has("p"))location.replace("/coin.html"+location.search+location.hash)}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Coin check · Artem Vartanov</title>
-<meta name="description" content="Paste a pump.fun coin: a big verdict from the chain, the live market cap and chart, who holds it and who trades it. Free, nothing to sign, no keys.">
-<meta name="theme-color" content="#f4f2ec">
-<meta property="og:title" content="Is this pump.fun coin a trap? · Coin check">
-<meta property="og:description" content="Paste a pump.fun coin: a big verdict from the chain, the live market cap and chart, who holds it and who trades it. Free, nothing to sign, no keys.">
-<meta property="og:image" content="https://artemvartanov.com/og.png">
-<meta property="og:url" content="https://artemvartanov.com/">
+<title>Artem Vartanov</title>
+<meta name="description" content="On-chain analyst and Solana developer: fund-flow investigations, anti-fraud checks, fast trading systems. Every number measured.">
 <link rel="canonical" href="https://artemvartanov.com/">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23f4f2ec'/%3E%3Cpath d='M10 44 L24 30 L34 38 L54 18' fill='none' stroke='%23a84b36' stroke-width='6'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://api.geckoterminal.com" crossorigin>
-<link rel="preconnect" href="https://solana-rpc.publicnode.com" crossorigin>
-<script defer src="https://telegram.org/js/telegram-web-app.js"></script>
-<script defer src="lwc.js"></script>
-<style>
-:root{--paper:#f4f2ec;--ink:#1f1f1f;--brick:#a84b36;--grey:#6f6b62;--rule:#dedad1;--ochre:#9a6b12;--moss:#4d6b3c;--card:#fbfaf6;--sand:#cdbf9f;
-  --ease:cubic-bezier(.2,.7,.2,1);--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
-*{box-sizing:border-box}
-html{background:var(--paper);color:var(--ink);-webkit-text-size-adjust:100%;overflow-x:clip}
-body{margin:0 auto;max-width:1200px;padding:0 16px 40px;font:16px/1.5 "Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--paper)}
-:root[data-lang=en] [data-l=ru],:root[data-lang=ru] [data-l=en]{display:none}
-[hidden]{display:none!important}
-a{color:var(--ink);text-decoration-color:var(--brick);text-underline-offset:3px}
-.top{display:flex;align-items:center;gap:18px;padding:16px 0 4px;flex-wrap:wrap}
-.name{font-weight:500;text-decoration:none;font-size:15px}
-.nav{display:flex;gap:14px;font-size:14px;flex-wrap:wrap}
-.nav a{text-decoration:none;color:var(--grey)}
-.nav a[aria-current=page]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--brick);text-underline-offset:4px}
-.lang{margin-left:auto}
-.lang button{font:inherit;font-size:14px;background:none;border:0;padding:4px 6px;color:var(--grey);cursor:pointer}
-.lang button[aria-pressed=true]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--brick);text-underline-offset:4px}
-.hero h1{font-size:clamp(28px,5vw,44px);font-weight:500;line-height:1.1;letter-spacing:-.015em;margin:26px 0 6px}
-.hero p{color:var(--grey);margin:0;max-width:640px}
-body.has-coin .hero{display:none}
-/* a coin opened from a link (COIN_EARLY): no welcome block from the first paint, the footer below the fold until the
-   coin's place is taken, so that nothing on screen moves when the page script opens the coin; that script waits for
-   telegram.org, seconds at times, so a line says what the page is doing */
-.coin-link .hero{display:none}
-.coin-link body:not(.has-coin) main{min-height:100vh}
-.coin-link body:not(.has-coin) .status::before{content:"Loading the coin…"}
-.coin-link[data-lang=ru] body:not(.has-coin) .status::before{content:"Загружаю монету…"}
-/* and the places of what the answers fill in, each gone as soon as it is taken: the recent coins' row and the verdict's
-   note (the chain's answer brings both), the market's line and changes, the picture (until the answer about the token,
-   when the holders' card shows, with data or without) */
-.coin-link:has(.verdict.checking) .recent:empty{min-height:25px}
-.coin-link .verdict.checking small,.coin-link .sub:empty{min-height:1.5em}
-.coin-link .sub:empty+.chips{min-height:25.5px}
-.coin-link:has(#spreadCard[hidden]) .who:has(.logo[hidden])::before{content:"";flex:none;width:56px;height:56px}
-@media (max-width:560px){.coin-link .verdict.checking small,.coin-link .sub:empty{min-height:3em}}
-.hero .more{margin:10px 0 0;font-size:15px}
-form{display:flex;gap:8px;margin:14px 0 0;max-width:760px}
-input{flex:1;min-width:0;font:15px/1.4 var(--mono);padding:10px 11px;border:1px solid var(--ink);background:var(--card);color:var(--ink);border-radius:0}
-input:focus{outline:2px solid var(--brick);outline-offset:1px}
-button.go{font:inherit;padding:9px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;border-radius:0}
-.recent{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
-.recent button{font:13px var(--mono);background:none;border:1px solid var(--rule);padding:4px 8px;cursor:pointer;color:var(--ink)}
-.status{color:var(--grey);font-size:14px;min-height:1.5em;margin:10px 0 0}
-.status.err{color:var(--brick)}
-.verdict{margin:14px 0 0;padding:16px 18px;background:var(--grey);color:var(--paper);display:flex;flex-direction:column;gap:4px}
-.verdict b{font-size:clamp(30px,7vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.01em;text-transform:uppercase}
-.verdict span{font-size:15px;opacity:.95}
-.verdict small{font-size:12px;opacity:.8}
-.verdict.danger{background:var(--brick)} .verdict.warn{background:var(--ochre)} .verdict.ok{background:var(--moss)}
-.head{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin:18px 0 0}
-.who{display:flex;gap:12px;align-items:flex-start;flex:1 1 300px;min-width:0}
-.logo{width:56px;height:56px;object-fit:cover;border:1px solid var(--rule);background:var(--card);flex:none}
-.coin h1{font-size:clamp(22px,4.5vw,32px);font-weight:500;line-height:1.15;margin:0;letter-spacing:-.01em;overflow-wrap:anywhere}
-.mint{font:12px var(--mono);color:var(--grey);background:none;border:0;padding:4px 0;cursor:pointer;text-align:left;overflow-wrap:anywhere}
-.socials{display:flex;gap:10px;font-size:13px;flex-wrap:wrap}
-.pricebox{flex:1 1 260px;min-width:0}
-.mc{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.mc b{font-size:clamp(34px,7vw,52px);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.015em;line-height:1;transition:color .6s}
-.mc b.up{color:var(--moss)} .mc b.down{color:var(--brick)}
-.mc em{font-style:normal;color:var(--grey);font-size:13px}
-.live{font-size:12px;color:var(--grey);display:inline-flex;align-items:center;gap:6px}
-.live i{width:7px;height:7px;border-radius:50%;background:var(--moss);display:inline-block;animation:pulse 2s infinite}
-.sub{color:var(--grey);font-size:14px;margin:4px 0 6px;font-variant-numeric:tabular-nums}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{font-size:13px;padding:2px 8px;border:1px solid var(--rule);font-variant-numeric:tabular-nums}
-.chip.up{color:var(--moss)} .chip.down{color:var(--brick)}
-.grid{display:flex;flex-direction:column;gap:22px;margin:20px 0 0}
-.col{display:contents}
-@media (min-width:980px){.grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px;align-items:start}
-  .col{display:flex;flex-direction:column;gap:22px}}
-.card{border-top:1px solid var(--ink);padding:10px 0 0;min-width:0}
-.card h2{font-size:17px;font-weight:500;margin:0 0 2px}
-.hint{color:var(--grey);font-size:13px;margin:0 0 10px}
-.src{color:var(--grey);font-size:12px;margin:8px 0 0}
-.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule)}
-.tiles div{background:var(--paper);padding:8px 10px;min-width:0}
-.tiles span{display:block;color:var(--grey);font-size:12px;text-transform:lowercase;line-height:1.25}
-.tiles b{font-weight:500;font-size:18px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.tiles .danger b{color:var(--brick)} .tiles .warn b{color:var(--ochre)} .tiles .ok b{color:var(--moss)}
-.panel{background:var(--paper);border-bottom:1px solid var(--rule)}
-.tfs{display:flex;gap:2px;align-items:center;border-bottom:1px solid var(--rule);overflow-x:auto;scrollbar-width:none}
-.tfs::-webkit-scrollbar{display:none}
-.tfs button{font:13px var(--mono);background:none;border:0;padding:9px 9px 7px;color:var(--grey);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
-.tfs button[aria-pressed=true]{color:var(--ink);border-color:var(--brick)}
-.tfs button:hover{color:var(--ink)}
-.tfs .sep{flex:1}
-.tfs #mode{color:var(--ink);border:1px solid var(--ink);padding:3px 9px;margin:0 2px 0 6px;border-bottom-width:1px}
-.tfs #fit{color:var(--ink);font-size:15px;padding:3px 8px}
-/* the chart runs edge to edge of the window, past the page column */
-.chartcard{margin:20px calc(50% - 50vw) 0;width:100vw;max-width:100vw;padding:10px 16px 0}
-.chartwrap{position:relative;height:clamp(380px,62vh,620px)}
-.chart{position:absolute;inset:0}
-.legend{position:absolute;left:4px;top:6px;z-index:3;font:11px var(--mono);color:var(--grey);pointer-events:none;white-space:nowrap;overflow:hidden;max-width:calc(100% - 80px)}
-.legend b{font-weight:400;color:var(--ink)}
-.legend .up{color:var(--moss)} .legend .down{color:var(--brick)}
-.legend .lbl{color:var(--ink);margin-right:4px}
-.chartnote{position:absolute;left:0;right:0;top:45%;text-align:center;color:var(--grey);font-size:14px;margin:0;pointer-events:none;z-index:2}
-.stack{display:flex;height:26px;border:1px solid var(--rule);background:var(--card)}
-.stack i{display:block;height:100%;transition:width .9s var(--ease)}
-.keys{list-style:none;padding:0;margin:8px 0 0;display:grid;grid-template-columns:repeat(2,1fr);gap:4px 12px;font-size:13px}
-.keys li{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
-.keys s{width:10px;height:10px;display:inline-block;flex:none}
-.rows{display:flex;flex-direction:column;gap:7px}
-.row{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:13px;font-variant-numeric:tabular-nums}
-.row .n{text-align:right;color:var(--grey);white-space:nowrap}
-.split{display:flex;height:16px;background:var(--rule)}
-.split i{display:block;height:100%;transition:width .9s var(--ease)}
-.split .b{background:var(--moss)} .split .s{background:var(--brick)}
-.fly{display:grid;grid-template-columns:1fr 78px 1fr;gap:6px;align-items:center;font-size:12px;font-variant-numeric:tabular-nums}
-.fly .l{display:flex;justify-content:flex-end;align-items:center;gap:5px} .fly .r{display:flex;align-items:center;gap:5px}
-.fly .mid{text-align:center;color:var(--grey)}
-.fly i{display:block;height:14px;transition:width .9s var(--ease)}
-.fly .l i{background:var(--brick)} .fly .r i{background:var(--moss)}
-.whale{display:grid;grid-template-columns:86px 1fr 74px;gap:8px;align-items:center;font-size:13px;font-variant-numeric:tabular-nums}
-.whale a{font:12px var(--mono)}
-.whale .net{text-align:right}
-.up{color:var(--moss)} .down{color:var(--brick)}
-.flow svg{display:block;width:100%;height:150px;background:var(--card);border:1px solid var(--rule)}
-.flowsum{font-size:15px;margin:0 0 8px;font-variant-numeric:tabular-nums}
-.progress{height:18px;border:1px solid var(--ink);background:var(--card);position:relative}
-.progress i{position:absolute;left:0;top:0;bottom:0;background:var(--moss);transition:width 1s var(--ease)}
-.progress span{position:absolute;right:6px;top:-1px;font-size:12px;font-variant-numeric:tabular-nums}
-.empty{color:var(--grey);font-size:14px;padding:18px 0;text-align:center}
-.buy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.buy a{display:block;text-align:center;padding:10px 8px;border:1px solid var(--ink);text-decoration:none;transition:background .2s,color .2s}
-.buy a:hover,.buy a:active{background:var(--ink);color:var(--paper)}
-.buy a.ref::after{content:" ·";color:var(--brick)}
-.fine{color:var(--grey);font-size:13px;margin:8px 0 0}
-.feed{list-style:none;padding:0;margin:0}
-.feed li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--rule);font-size:14px}
-.feed li.new{animation:slide .6s var(--ease)}
-.feed .side{font-size:12px;width:52px}
-.feed .buy-s{color:var(--moss)} .feed .sell-s{color:var(--brick)}
-.feed .amt{font-variant-numeric:tabular-nums}
-.feed .ago{color:var(--grey);font-size:12px;font-variant-numeric:tabular-nums}
-.flags{list-style:none;padding:0;margin:0}
-.flags li{position:relative;padding:5px 0 5px 20px;border-bottom:1px solid var(--rule);font-size:14px}
-.flags li::before{content:"";position:absolute;left:2px;top:12px;width:8px;height:8px;border-radius:50%;background:var(--grey)}
-.flags li.danger::before{background:var(--brick)} .flags li.warn::before{background:var(--ochre)} .flags li.info::before{background:var(--rule);border:1px solid var(--grey)}
-/* only the facts table: the chart library draws inside a table of its own, and a 46% first column there left the
-   left half of the chart empty */
-.facts{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0 0}
-.facts td{padding:6px 8px 6px 0;border-bottom:1px solid var(--rule);vertical-align:top;overflow-wrap:anywhere}
-.facts td:first-child{color:var(--grey);width:46%}
-.reveal{opacity:0;transform:translateY(10px);animation:rise .7s var(--ease) forwards}
-footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:var(--grey);font-size:13px}
-@keyframes rise{to{opacity:1;transform:none}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-@keyframes slide{from{opacity:0;transform:translateY(-8px);background:#ebe7dc}to{opacity:1;transform:none;background:transparent}}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}
-  .reveal{opacity:1;transform:none}}
-@media (max-width:560px){.chartwrap{height:360px} .legend{font-size:10px} .tiles b{font-size:16px} .row{grid-template-columns:44px minmax(0,1fr) auto;font-size:12px}}
-</style>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Artem Vartanov">
+<meta property="og:description" content="On-chain analyst and Solana developer: fund-flow investigations, anti-fraud checks, fast trading systems. Every number measured.">
+<meta property="og:url" content="https://artemvartanov.com/">
+<meta property="og:image" content="https://artemvartanov.com/assets/og.jpg">
+<meta property="og:image:alt" content="Artem Vartanov: half photo, half its machine version">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://artemvartanov.com/assets/og.jpg">
+<meta name="theme-color" content="#100F0D">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/roboto-flex-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/geist-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/css/fonts.css?v=792e9bf5c8">
+<link rel="stylesheet" href="/css/site.css?v=63e66b6131">
+<style>:root{--studio:#F4F2EC;--ink:#100F0D;--paper:#F3EFE6;--soft:#8F8A7F;--line:#2A2723;--signal:#FF6B3D}html[data-lang="en"] [data-l]:not([data-l="en"]){display:none!important}html[data-lang="ru"] [data-l]:not([data-l="ru"]){display:none!important}</style>
+<script>(function(){var d=document.documentElement,L=["en", "ru"],l=null;d.classList.remove('no-js');d.classList.add('js');try{var q=new URLSearchParams(location.search).get('lang');if(L.indexOf(q)>=0)l=q}catch(e){}if(!l){try{l=localStorage.getItem('lang')}catch(e){}}if(L.indexOf(l)<0){var n=(navigator.language||'').toLowerCase();l=L.indexOf('ru')>=0&&n.indexOf('ru')===0?'ru':L[0]}d.lang=l;d.setAttribute('data-lang',l);if(!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('anim');if(!location.hash)d.classList.add('intro')}if(!location.hash&&'scrollRestoration' in history)history.scrollRestoration='manual'})();</script>
+<script type="importmap">{"imports": {"/js/field-lite.js": "/js/field-lite.js?v=cd86bececf", "/js/fx.js": "/js/fx.js?v=eec02841e8", "/js/hero/canvases.js": "/js/hero/canvases.js?v=019b7c9fc0", "/js/hero/fluid.js": "/js/hero/fluid.js?v=76f45bdca0", "/js/hero/glsl.js": "/js/hero/glsl.js?v=1703db7d9c", "/js/hero/hud.js": "/js/hero/hud.js?v=d265411c98", "/js/hero/palettes.js": "/js/hero/palettes.js?v=5a8bba6796", "/js/hero/portrait.js": "/js/hero/portrait.js?v=6a488b8b9f", "/js/hero/stage.js": "/js/hero/stage.js?v=fbee642003", "/js/main.js": "/js/main.js?v=f6a9d3c316", "/js/story-art.js": "/js/story-art.js?v=74ca79edc9", "/js/story.js": "/js/story.js?v=d380c84e88", "/vendor/three-0.185.1/three.core.min.js": "/vendor/three-0.185.1/three.core.min.js?v=05b2609338", "/vendor/three-0.185.1/three.module.min.js": "/vendor/three-0.185.1/three.module.min.js?v=86bcee248b", "/vendor/lenis-1.1.13/lenis.mjs": "/vendor/lenis-1.1.13/lenis.mjs?v=1f6d3de9b2"}}</script>
+<script type="module" src="/js/main.js?v=f6a9d3c316"></script>
+<script type="application/json" id="site-config">{"langs": ["en", "ru"], "domain": "artemvartanov.com", "theme": {"studio": "#F4F2EC", "ink": "#100F0D", "paper": "#F3EFE6", "soft": "#8F8A7F", "line": "#2A2723", "signal": "#FF6B3D", "palette": "amber"}, "hero": {"headline": {"left": {"en": ["On-chain", "analyst."], "ru": ["Ончейн-", "аналитик."]}, "right": {"en": ["Solana", "developer."], "ru": ["Разработчик", "на Solana."]}}, "hint": {"mouse": {"en": ["Move the cursor to open", "Scroll for the story"], "ru": ["Проведи — откроется", "Листай глубже"]}, "touch": {"en": ["Tap to open", "Scroll for the story"], "ru": ["Коснись", "Листай глубже"]}}, "readout": {"title": {"en": "Mesh · 478 points", "ru": "Сетка лица · 478 точек"}, "yaw": "Yaw", "pitch": "Pitch", "states": {"tracking": "Tracking", "scanning": "Scanning", "split": "Split", "converting": "Converting", "dissolving": "Dissolving", "offline": "Offline"}, "tracked": [[468, "R EYE"], [473, "L EYE"], [1, "NOSE"], [61, ""], [291, ""], [152, "CHIN"]]}, "tuning": {"stageVh": 420, "beats": [0.1, 0.35, 0.53, 0.72], "storyEntersAt": 0.4, "depthStrength": 0.22, "planeSegments": [200, 300], "fovDeg": 28, "cropDesktop": [0.07, 0.86], "phone": {"breakpoint": 760, "hairTopV": 0.185, "hairTopScreen": 0.2, "minTopPx": 135, "perPxFactor": 0.508}, "dprMax": {"phone": 1.5, "desktop": 2}, "turn": {"yawRad": 0.27, "pitchRad": 0.105, "ease": 0.05, "idleAfterS": 4, "drift": {"yaw": 0.05, "pitch": 0.02, "touchYaw": 0.13, "touchPitch": 0.05}}, "fluid": {"simRes": 128, "dyeRes": 512, "pressureIters": 18, "curl": 5, "fade": 0.985, "fadeTouch": 0.9785, "ink": 1.8, "stepPx": 14, "maxSteps": 12, "force": 4200, "sleepSteps": 260, "inkRadius": 0.00026, "pushRadius": 0.00038, "squash": 2.6, "blurPasses": 3}, "mask": {"inkCut": [0.16, 0.19], "codeRim": [0.08, 0.12, 0.15, 0.18], "codeHz": 9}, "field": {"scalePx": 560, "levels": 13, "cell": [7, 14], "gridPx": 28, "swirlSigma2": 40000, "swirlAmt": 0.15, "bitHz": 1.2}, "eyes": {"radius": 0.024, "lookMax": 0.011, "lookEase": 0.15, "glow": [1.0, 0.6, 0.22]}, "machineCutV": 0.104, "scan": {"firstAtS": 2, "sweepS": 2.7, "pauseS": 1.0}, "dissolve": {"from": 0.23, "to": 1.22, "cameraPullback": 0.06}, "nameDecode": {"holdMs": 350, "durMs": 1100, "stepMs": 55, "fallbackMs": 5000}, "backShadow": 0.28, "faceBrightness": 0.9}, "machineConcept": "robot", "assets": {"face": "/assets/hero/face.webp?v=fa868ee5be", "machine": "/assets/hero/machine.webp?v=5a118910fe", "depth": "/assets/hero/depth.webp?v=785a9c841d", "mesh": "/assets/hero/mesh.json?v=c3fb53e485", "fallback": "/assets/hero/face.webp?v=fa868ee5be", "shadow": "/assets/hero/shadow.webp?v=37bb5fc9e1"}, "points": {"1": [0.50392, 0.48998], "10": [0.4991, 0.31891], "61": [0.44248, 0.54965], "152": [0.50606, 0.64387], "234": [0.33018, 0.46038], "291": [0.56809, 0.54991], "454": [0.67564, 0.45699], "468": [0.41904, 0.41331], "473": [0.58065, 0.41344]}}, "story": {"years": ["2023", "2025", "2025", "2026", "2026", "2026", "2026", "2026"], "fullTimeFrom": null, "stagger": [-1, 0.6, -1, 1, -0.6, 0.8, -0.8, 0]}}</script>
 </head>
 <body>
-<header class="top">
-  <a class="name" href="./">Artem Vartanov</a>
-  <nav class="nav" aria-label="site"><a href="./" aria-current="page"><span data-l="en">Check a coin</span><span data-l="ru">Проверить монету</span></a><a href="about.html#market"><span data-l="en">Launchpad numbers</span><span data-l="ru">Замеры площадок</span></a><a href="stories.html"><span data-l="en">Stories</span><span data-l="ru">Истории</span></a><a href="about.html"><span data-l="en">About</span><span data-l="ru">Обо мне</span></a></nav>
-  <nav class="lang" aria-label="language"><button data-set="en">en</button><button data-set="ru">ru</button></nav>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-github" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol><symbol id="i-instagram" viewBox="0 0 24 24"><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></symbol><symbol id="i-telegram" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></symbol><symbol id="i-web" viewBox="0 0 24 24"><path d="M12 1.5a10.5 10.5 0 1 0 0 21 10.5 10.5 0 0 0 0-21zm0 1.8c.9 0 2.3 2 2.9 5.7H9.1C9.7 5.3 11.1 3.3 12 3.3zM8.7 3.9C8 5.2 7.5 7 7.3 9H3.9a8.7 8.7 0 0 1 4.8-5.1zm6.6 0A8.7 8.7 0 0 1 20.1 9h-3.4c-.2-2-.7-3.8-1.4-5.1zM3.5 10.8h3.7a22 22 0 0 0 0 2.4H3.5a8.7 8.7 0 0 1 0-2.4zm5.5 0h6a20 20 0 0 1 0 2.4H9a20 20 0 0 1 0-2.4zm7.8 0h3.7a8.7 8.7 0 0 1 0 2.4h-3.7a22 22 0 0 0 0-2.4zM3.9 15h3.4c.2 2 .7 3.8 1.4 5.1A8.7 8.7 0 0 1 3.9 15zm5.2 0h5.8c-.6 3.7-2 5.7-2.9 5.7s-2.3-2-2.9-5.7zm7.6 0h3.4a8.7 8.7 0 0 1-4.8 5.1c.7-1.3 1.2-3.1 1.4-5.1z"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></symbol></svg>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="topblur" aria-hidden="true"></div>
+<div class="svh-probe" aria-hidden="true"></div>
+<header class="chrome" id="chrome">
+  <a class="wordmark" href="#top" aria-label="Artem Vartanov"><span class="wm-line">Artem</span><span class="wm-line">Vartanov</span></a>
+  <nav class="nav" aria-label="menu"><a href="#story"><span data-l="en">Story</span><span data-l="ru">История</span></a><a href="#today"><span data-l="en">Where to find me</span><span data-l="ru">Где меня найти</span></a><span class="langs mono-ui"><button type="button" data-set-lang="en" aria-label="English">EN</button><span class="sep">·</span><button type="button" data-set-lang="ru" aria-label="Русский">RU</button></span></nav>
 </header>
-
-<main>
-<section class="hero">
-  <h1><span data-l="en">Is this coin a trap?</span><span data-l="ru">Монета — ловушка или нет?</span></h1>
-  <p data-l="en">Paste a pump.fun coin address or link. The chain answers in big letters, then the live market cap, the chart, who holds it and who trades it. Free, nothing to sign.</p><p data-l="ru">Вставьте адрес монеты pump.fun или ссылку. Ответ по цепи — большими буквами, а ниже капитализация вживую, график, у кого монеты и кто торгует. Бесплатно, ничего подписывать не нужно.</p>
-  <p class="more"><a href="about.html#market"><span data-l="en">All my launchpad numbers on one page: PumpSwap, pump.fun, Meteora, LaunchLab, Moonit →</span><span data-l="ru">Все мои замеры по лаунчпадам на одной странице: PumpSwap, pump.fun, Meteora, LaunchLab, Moonit →</span></a></p>
-</section>
-<form id="form" autocomplete="off">
-  <label for="q" hidden><span data-l="en">coin address</span><span data-l="ru">адрес монеты</span></label>
-  <input id="q" spellcheck="false" autocapitalize="off" placeholder="pump.fun coin address or link">
-  <button class="go" type="submit"><span data-l="en">Check</span><span data-l="ru">Проверить</span></button>
-</form>
-<div class="recent" id="recent"></div>
-<noscript><p class="status err"><span data-l="en">The page needs JavaScript.</span><span data-l="ru">Странице нужен JavaScript.</span></p></noscript>
-<p class="status" id="status" role="status" aria-live="polite"></p>
-
-<div id="coin" hidden>
-  <section class="verdict reveal" id="verdict" aria-live="polite"><b id="vText"></b><span id="vWhy"></span><small id="vNote"></small></section>
-  <section class="head reveal">
-    <div class="who"><img class="logo" id="logo" alt="" hidden referrerpolicy="no-referrer">
-      <div class="coin"><h1 id="title"></h1><button class="mint" id="mintBtn" type="button" title="copy"></button><div class="socials" id="socials"></div></div></div>
-    <div class="pricebox">
-      <div class="mc"><b id="price">…</b><em><span data-l="en">market cap</span><span data-l="ru">капитализация</span></em><span class="live"><i></i><span data-l="en">live</span><span data-l="ru">вживую</span></span></div>
-      <div class="sub" id="sub"></div>
-      <div class="chips" id="chips"></div>
-    </div>
+<main id="top">
+<div class="stage" id="stage">
+  <section class="hero" id="hero" aria-label="A 3D portrait of Artem Vartanov. The cursor opens a second, machine version of his face." data-en="A 3D portrait of Artem Vartanov. The cursor opens a second, machine version of his face." data-ru="3D-портрет Артёма Вартанова. Курсор открывает вторую, машинную версию лица.">
+    <div class="hero-static"><img class="hero-fallback" src="/assets/hero/face.webp?v=fa868ee5be" alt="A 3D portrait of Artem Vartanov. The cursor opens a second, machine version of his face." data-en="A 3D portrait of Artem Vartanov. The cursor opens a second, machine version of his face." data-ru="3D-портрет Артёма Вартанова. Курсор открывает вторую, машинную версию лица." width="1200" height="1600" decoding="async" fetchpriority="high"><h1 class="hero-head"><span class="hh hh-l"><span data-l="en" class="ls"><span class="l1"><span>On-chain</span></span><span class="l2"><span>analyst.</span></span></span><span data-l="ru" class="ls"><span class="l1"><span>Ончейн-</span></span><span class="l2"><span>аналитик.</span></span></span></span><span class="hh hh-r"><span data-l="en" class="ls"><span class="l1"><span>Solana</span></span><span class="l2"><span>developer.</span></span></span><span data-l="ru" class="ls"><span class="l1"><span>Разработчик</span></span><span class="l2"><span>на Solana.</span></span></span></span></h1></div>
+    <canvas id="hud" aria-hidden="true"></canvas>
+    <div class="readout mono" id="readout" aria-hidden="true"><div><span data-l="en">Mesh · 478 points</span><span data-l="ru">Сетка лица · 478 точек</span></div><div><span id="ro-yaw">Yaw 0.0°</span> · <span id="ro-pitch">Pitch 0.0°</span> · <span id="ro-state">Tracking</span></div></div>
+    <div class="hint mono" id="hint" aria-hidden="true"><span class="h-mouse"><span data-l="en" class="ls"><span class="hl"><span>Move the cursor to open</span></span><span class="hl"><span>Scroll for the story</span></span></span><span data-l="ru" class="ls"><span class="hl"><span>Проведи — откроется</span></span><span class="hl"><span>Листай глубже</span></span></span></span><span class="h-touch"><span data-l="en" class="ls"><span class="hl"><span>Tap to open</span></span><span class="hl"><span>Scroll for the story</span></span></span><span data-l="ru" class="ls"><span class="hl"><span>Коснись</span></span><span class="hl"><span>Листай глубже</span></span></span></span></div>
   </section>
-  <section class="card reveal chartcard">
-    <div class="panel">
-      <div class="tfs" role="group" aria-label="timeframe"><button type="button" data-tf="1s" aria-pressed="false">1s</button><button type="button" data-tf="15s" aria-pressed="false">15s</button><button type="button" data-tf="30s" aria-pressed="false">30s</button><button type="button" data-tf="1m" aria-pressed="true">1m</button><button type="button" data-tf="5m" aria-pressed="false">5m</button><button type="button" data-tf="15m" aria-pressed="false">15m</button><button type="button" data-tf="1h" aria-pressed="false">1h</button><span class="sep"></span><button type="button" id="fit" title="fit the whole width">⤢</button><button type="button" id="mode" title="market cap / price">MC</button></div>
-      <div class="chartwrap"><div class="chart" id="chart"></div><div class="legend" id="legend"></div><p class="chartnote" id="chartNote"></p></div>
-    </div>
-  </section>
-  <div class="grid">
-    <div class="col">
-<section class="card reveal" id="flowCard" style="order:6" hidden>
-      <h2><span data-l="en">Money in and out</span><span data-l="ru">Деньги: заходят или выходят</span></h2><p class="hint" data-l="en">Every buy adds its dollars, every sell takes them away. The line goes up while more money comes in than leaves.</p><p class="hint" data-l="ru">Каждая покупка прибавляет свои доллары, каждая продажа вычитает. Линия растёт, пока денег заходит больше, чем выходит.</p>
-      <div class="flow" id="flow"></div>
-    </section>
-<section class="card reveal" id="sizeCard" style="order:8" hidden>
-      <h2><span data-l="en">Trade sizes</span><span data-l="ru">Размеры сделок</span></h2><p class="hint" data-l="en">Who is trading now: small buyers or whales. Big red bars at the bottom mean large sells.</p><p class="hint" data-l="ru">Кто торгует сейчас: мелкие покупатели или киты. Длинные красные полосы внизу — крупные продажи.</p>
-      <div id="sizes"></div>
-    </section>
-<section class="card reveal" id="whaleCard" style="order:9" hidden>
-      <h2><span data-l="en">Biggest wallets right now</span><span data-l="ru">Крупнейшие кошельки сейчас</span></h2><p class="hint" data-l="en">Wallets with the most money in the latest trades: green bought, red sold, the number is what they put in or took out.</p><p class="hint" data-l="ru">Кошельки с наибольшими суммами в последних сделках: зелёное — купили, красное — продали, справа — сколько вложили или вывели.</p>
-      <div id="whales"></div>
-    </section>
-<section class="card reveal" style="order:10">
-      <h2><span data-l="en">Latest trades</span><span data-l="ru">Последние сделки</span></h2>
-      <ul class="feed" id="feed"></ul>
-    </section>
-    </div>
-    <div class="col">
-<section class="card reveal" style="order:2">
-      <h2><span data-l="en">Key numbers</span><span data-l="ru">Главные цифры</span></h2>
-      <div class="tiles" id="tiles"></div>
-    </section>
-<section class="card reveal" style="order:3">
-      <h2><span data-l="en">Buy</span><span data-l="ru">Купить</span></h2>
-      <div class="buy" id="buy"></div>
-      <p class="fine" id="signup"></p>
-      <p class="fine" data-l="en">Opens a trading terminal with this coin. Nothing is bought here and no keys are asked for.</p><p class="fine" data-l="ru">Откроется торговый терминал с этой монетой. Здесь ничего не покупается и ключи не нужны.</p>
-    </section>
-<section class="card reveal" id="spreadCard" style="order:4" hidden>
-      <h2><span data-l="en">Who holds the coin</span><span data-l="ru">У кого монеты</span></h2><p class="hint" data-l="en">How the supply is spread. The bigger the red part, the fewer wallets can crash the price by selling.</p><p class="hint" data-l="ru">Как распределены монеты. Чем больше красная часть, тем меньше кошельков нужно, чтобы обрушить цену продажей.</p>
-      <div id="spread"></div>
-    </section>
-<section class="card reveal" id="pressCard" style="order:5" hidden>
-      <h2><span data-l="en">Buys against sells</span><span data-l="ru">Покупки против продаж</span></h2><p class="hint" data-l="en">Number of trades in each window: green buys, red sells. More green means buyers are in charge.</p><p class="hint" data-l="ru">Число сделок за каждый период: зелёное — покупки, красное — продажи. Больше зелёного — покупатели сильнее.</p>
-      <div id="press"></div>
-    </section>
-<section class="card reveal" id="curveCard" style="order:7" hidden>
-      <h2><span data-l="en">pump.fun curve</span><span data-l="ru">Кривая pump.fun</span></h2><p class="hint" data-l="en">How much of the coin is sold on its launch curve.</p><p class="hint" data-l="ru">Сколько монет продано на стартовой кривой.</p>
-      <div id="curve"></div>
-    </section>
-<section class="card reveal" id="check" style="order:11" hidden>
-      <h2><span data-l="en">On-chain check</span><span data-l="ru">Проверка по цепи</span></h2>
-      <ul class="flags" id="flags"></ul>
-      <table class="facts"><tbody id="facts"></tbody></table>
-      <p class="fine" id="checkNote"></p>
-      <p class="fine"><a id="botlink" href="#" data-ext><span data-l="en">Holders by wallet and alerts are in the Telegram bot</span><span data-l="ru">Держатели по кошелькам и уведомления — в Telegram-боте</span></a></p>
-    </section>
-    </div>
-  </div>
 </div>
+<section class="story" id="story" aria-label="The path.">
+  <div class="story-pin">
+    <h2 class="story-title"><span data-l="en" class="ls"><span class="l1"><span>The</span></span><span class="l2 outline"><span>path.</span></span></span><span data-l="ru" class="ls"><span class="l1"><span>Путь</span></span><span class="l2 outline"><span>дальше.</span></span></span></h2>
+    <div class="track" id="track"><article class="card wide" style="--ar:1.7778;--st:-1" data-i="0" data-year="2023">
+  <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-web"/></svg></span><span class="yr mono">2023</span></div>
+    <div class="frame" data-art="/assets/story/art-store.json?v=0a00b5f661" data-ov-en="/assets/story/art-store-en.webp?v=2cfcb5d94c" data-ov-ru="/assets/story/art-store-ru.webp?v=df023ebd1f"><img class="media" data-l="en" src="/assets/story/2023-store-en.webp?v=bd46669008" alt="Clothing store" data-en="Clothing store" data-ru="Магазин одежды" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2023-store-ru.webp?v=70af3cb264" alt="Clothing store" data-en="Clothing store" data-ru="Магазин одежды" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+  <div class="cap"><div class="cap-year">2023</div><div class="cap-plat mono"><span data-l="en">Own online store</span><span data-l="ru">Свой интернет-магазин</span></div>
+    <h3 class="cap-title"><span data-l="en">Clothing store</span><span data-l="ru">Магазин одежды</span></h3><p class="cap-line"><span data-l="en">Started a clothing store on my own: <b>buying in China</b>, delivery, margins and customers.</span><span data-l="ru">Сам запустил магазин одежды: <b>закупки в Китае</b>, доставка, расчёт прибыли и клиенты.</span></p></div>
+</article>
+<article class="card wide" style="--ar:1.7778;--st:0.6" data-i="1" data-year="2025">
+  <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-web"/></svg></span><span class="yr mono">2025</span></div>
+    <div class="frame" data-art="/assets/story/art-hand.json?v=20c3024f6c" data-ov-en="/assets/story/art-hand-en.webp?v=54dc7c3f5e" data-ov-ru="/assets/story/art-hand-ru.webp?v=83bdb5a12c"><img class="media" data-l="en" src="/assets/story/2025-hand-en.webp?v=6875bec81e" alt="Trading by hand" data-en="Trading by hand" data-ru="Торговля руками" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2025-hand-ru.webp?v=dbb6cdaeb4" alt="Trading by hand" data-en="Trading by hand" data-ru="Торговля руками" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+  <div class="cap"><div class="cap-year">2025</div><div class="cap-plat mono"><span data-l="en">Axiom · DEX Screener</span><span data-l="ru">Axiom · DEX Screener</span></div>
+    <h3 class="cap-title"><span data-l="en">Trading by hand</span><span data-l="ru">Торговля руками</span></h3><p class="cap-line"><span data-l="en">Traded pump.fun coins by hand and followed wallets; <b>that journal</b> became the spec for my own system.</span><span data-l="ru">Торговал монетами pump.fun вручную и следил за кошельками; из <b>этого журнала</b> выросли требования к своей системе.</span></p></div>
+</article>
+<article class="card wide" style="--ar:2.0382;--st:-1" data-i="2" data-year="2025">
+  <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg></span><span class="handle">memesniper</span><span class="yr mono">2025</span></div>
+    <div class="frame"><img class="media" src="/assets/story/2025-memesniper.webp?v=a2eec52049" alt="memesniper" data-en="memesniper" data-ru="memesniper" width="1280" height="628" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+  <div class="cap"><div class="cap-year">2025</div><div class="cap-plat mono"><span data-l="en">TypeScript · Node.js · Electron</span><span data-l="ru">TypeScript · Node.js · Electron</span></div>
+    <h3 class="cap-title"><span data-l="en">memesniper</span><span data-l="ru">memesniper</span></h3><p class="cap-line"><span data-l="en">My bot for pump.fun → PumpSwap migrations: its own pool decoding, <b>under 1 s</b> from a signal to a sent transaction.</span><span data-l="ru">Мой бот для миграций pump.fun → PumpSwap: свой разбор пула, <b>меньше 1 с</b> от сигнала до отправленной транзакции.</span></p></div>
+</article>
+<article class="card wide" style="--ar:1.7778;--st:1" data-i="3" data-year="2026">
+  <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-web"/></svg></span><span class="handle">memesniper</span><span class="yr mono">2026</span></div>
+    <div class="frame"><img class="media" data-l="en" src="/assets/story/2026-live-trades-en.webp?v=d16bb1a24f" alt="1,263 live trades" data-en="1,263 live trades" data-ru="1 263 живых сделки" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2026-live-trades-ru.webp?v=ccbecc7485" alt="1,263 live trades" data-en="1,263 live trades" data-ru="1 263 живых сделки" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+  <div class="cap"><div class="cap-year">2026</div><div class="cap-plat mono"><span data-l="en">Solana mainnet</span><span data-l="ru">Основная сеть Solana</span></div>
+    <h3 class="cap-title"><span data-l="en">1,263 live trades</span><span data-l="ru">1 263 живых сделки</span></h3><p class="cap-line"><span data-l="en">Live trades on mainnet from 3 to 19 Sep 2026, paper since; <b>682 tests</b> and 32 preregistered experiments.</span><span data-l="ru">Живые сделки в основной сети с 3 по 19.09.2026, дальше бумага; <b>682 автотеста</b> и 32 предрегистрированных опыта.</span></p></div>
+</article>
+<article class="card wide" style="--ar:1.7778;--st:-0.6" data-i="4" data-year="2026">
+  <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-web"/></svg></span><span class="yr mono">2026</span></div>
+    <div class="frame"><img class="media" data-l="en" src="/assets/story/2026-showcase-pools-en.webp?v=68f34ede76" alt="Showcase pools" data-en="Showcase pools" data-ru="Пулы-витрины" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2026-showcase-pools-ru.webp?v=b69c20610f" alt="Showcase pools" data-en="Showcase pools" data-ru="Пулы-витрины" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+  <div class="cap"><div class="cap-year">2026</div><div class="cap-plat mono"><span data-l="en">PumpSwap · on chain</span><span data-l="ru">PumpSwap · с цепи</span></div>
+    <h3 class="cap-title"><span data-l="en">Showcase pools</span><span data-l="ru">Пулы-витрины</span></h3><p class="cap-line"><span data-l="en">Traced 16 pump.fun coins on chain: <b>one hub</b> funded both the creator and the big buyer.</span><span data-l="ru">Проследил на цепи 16 монет pump.fun: <b>один концентратор</b> пополнял и создателя, и крупного покупателя.</span></p></div>
+</article>
+<article class="card wide" style="--ar:1.7778;--st:0.8" data-i="5" data-year="2026">
+  <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg></span><span class="handle">hrekokovgmmek-lab</span><span class="yr mono">2026</span></div>
+    <div class="frame"><img class="media" src="/assets/story/2026-open-source.webp?v=6a765e6d01" alt="Open source" data-en="Open source" data-ru="Открытый код" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+  <div class="cap"><div class="cap-year">2026</div><div class="cap-plat mono">GitHub</div>
+    <h3 class="cap-title"><span data-l="en">Open source</span><span data-l="ru">Открытый код</span></h3><p class="cap-line"><span data-l="en">Six Solana projects under the MIT license: <b>fund tracing</b>, fee decoding, alerts, backtest honesty.</span><span data-l="ru">Шесть проектов для Solana под MIT: <b>трассировка денег</b>, разбор комиссий, оповещения, честность бэктеста.</span></p></div>
+</article>
+<article class="card wide" style="--ar:1.7778;--st:-0.8" data-i="6" data-year="2026">
+  <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-web"/></svg><svg class="ic" aria-hidden="true"><use href="#i-telegram"/></svg></span><span class="yr mono">2026</span></div>
+    <div class="frame"><img class="media" data-l="en" src="/assets/story/2026-coin-check-en.webp?v=e74aee26f0" alt="Coin check" data-en="Coin check" data-ru="Проверка монеты" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2026-coin-check-ru.webp?v=ece0b755aa" alt="Coin check" data-en="Coin check" data-ru="Проверка монеты" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+  <div class="cap"><div class="cap-year">2026</div><div class="cap-plat mono">artemvartanov.com</div>
+    <h3 class="cap-title"><span data-l="en">Coin check</span><span data-l="ru">Проверка монеты</span></h3><p class="cap-line"><span data-l="en">Paste a pump.fun coin and the chain answers <b>in big letters</b>. Free, nothing to sign.</span><span data-l="ru">Вставьте монету pump.fun — цепь отвечает <b>большими буквами</b>. Бесплатно, ничего подписывать не нужно.</span></p></div>
+</article>
+<article class="card wide" style="--ar:1.7778;--st:0" data-i="7" data-year="2026">
+  <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-web"/></svg></span><span class="yr mono">2026</span></div>
+    <div class="frame" data-art="/assets/story/art-bounty.json?v=663e216a60" data-ov-en="/assets/story/art-bounty-en.webp?v=8746304b54" data-ov-ru="/assets/story/art-bounty-ru.webp?v=9d1d9c48ab"><img class="media" data-l="en" src="/assets/story/2026-bounty-en.webp?v=ab76528ac3" alt="Bug bounty" data-en="Bug bounty" data-ru="Багбаунти" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2026-bounty-ru.webp?v=a5094292ba" alt="Bug bounty" data-en="Bug bounty" data-ru="Багбаунти" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+  <div class="cap"><div class="cap-year">2026</div><div class="cap-plat mono">Cantina · Solana</div>
+    <h3 class="cap-title"><span data-l="en">Bug bounty</span><span data-l="ru">Багбаунти</span></h3><p class="cap-line"><span data-l="en">I read Solana programs for bugs: <b>16 protocols</b> so far, and every finding is reproduced by a test in a sandbox before it is sent.</span><span data-l="ru">Ищу уязвимости в программах Solana: <b>16 протоколов</b> прочитано, и каждую находку воспроизвожу тестом в песочнице до отправки.</span></p></div>
+</article></div>
+    <div class="timeline" id="timeline" style="--n:8"><div class="t-rail"><i class="t-fill"></i></div><ol><li data-i="0"><span class="t-year">2023</span><span class="t-name"><span data-l="en">Clothing store</span><span data-l="ru">Магазин одежды</span></span></li><li data-i="1"><span class="t-year">2025</span><span class="t-name"><span data-l="en">Trading by hand</span><span data-l="ru">Торговля руками</span></span></li><li data-i="2"><span class="t-year">2025</span><span class="t-name"><span data-l="en">memesniper</span><span data-l="ru">memesniper</span></span></li><li data-i="3"><span class="t-year">2026</span><span class="t-name"><span data-l="en">1,263 live trades</span><span data-l="ru">1 263 живых сделки</span></span></li><li data-i="4"><span class="t-year">2026</span><span class="t-name"><span data-l="en">Showcase pools</span><span data-l="ru">Пулы-витрины</span></span></li><li data-i="5"><span class="t-year">2026</span><span class="t-name"><span data-l="en">Open source</span><span data-l="ru">Открытый код</span></span></li><li data-i="6"><span class="t-year">2026</span><span class="t-name"><span data-l="en">Coin check</span><span data-l="ru">Проверка монеты</span></span></li><li data-i="7"><span class="t-year">2026</span><span class="t-name"><span data-l="en">Bug bounty</span><span data-l="ru">Багбаунти</span></span></li></ol></div>
+  </div>
+</section>
+<section class="today" id="today">
+  <h2 class="sec-title rise"><span data-l="en" class="ls"><span class="l1"><span>Where to</span></span><span class="l2"><span>find me.</span></span></span><span data-l="ru" class="ls"><span class="l1"><span>Где меня</span></span><span class="l2"><span>найти.</span></span></span></h2>
+  <ul class="rows"><li class="row">
+    <div class="row-l"><a class="row-name" href="https://t.me/artemvartanov" target="_blank" rel="noopener">Telegram</a>
+      <span class="row-plats"><a class="plat" href="https://t.me/artemvartanov" target="_blank" rel="noopener" aria-label="telegram @artemvartanov"><svg class="ic" aria-hidden="true"><use href="#i-telegram"/></svg></a></span><div class="row-handle mono">@artemvartanov</div></div>
+    <p class="row-line"><span data-l="en">A direct line for your idea or investigation.</span><span data-l="ru">Обсудим вашу идею или расследование.</span></p>
+  </li><li class="row">
+    <div class="row-l"><a class="row-name" href="https://github.com/hrekokovgmmek-lab" target="_blank" rel="noopener">GitHub</a>
+      <span class="row-plats"><a class="plat" href="https://github.com/hrekokovgmmek-lab" target="_blank" rel="noopener" aria-label="github hrekokovgmmek-lab"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg></a></span><div class="row-handle mono">hrekokovgmmek-lab</div></div>
+    <p class="row-line"><span data-l="en">Open-source Solana tools and research.</span><span data-l="ru">Открытые инструменты и исследования Solana.</span></p>
+  </li><li class="row">
+    <div class="row-l"><a class="row-name" href="https://x.com/ArtemPadinggton" target="_blank" rel="noopener">X</a>
+      <span class="row-plats"><a class="plat" href="https://x.com/ArtemPadinggton" target="_blank" rel="noopener" aria-label="x @ArtemPadinggton"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></a></span><div class="row-handle mono">@ArtemPadinggton</div></div>
+    <p class="row-line"><span data-l="en">Notes, findings and project updates.</span><span data-l="ru">Заметки, находки и новости проектов.</span></p>
+  </li><li class="row">
+    <div class="row-l"><a class="row-name" href="https://www.instagram.com/ilowuvery/" target="_blank" rel="noopener">Instagram</a>
+      <span class="row-plats"><a class="plat" href="https://www.instagram.com/ilowuvery/" target="_blank" rel="noopener" aria-label="instagram @ilowuvery"><svg class="ic" aria-hidden="true"><use href="#i-instagram"/></svg></a></span><div class="row-handle mono">@ilowuvery</div></div>
+    <p class="row-line"></p>
+  </li></ul>
+</section>
+<section class="feed" id="feed"><div class="feed-x">
+  <div class="feed-head"><h2 class="sec-title rise"><span data-l="en" class="ls"><span class="l1"><span>Lately</span></span><span class="l2"><span>on X.</span></span></span><span data-l="ru" class="ls"><span class="l1"><span>Свежее</span></span><span class="l2"><span>в X.</span></span></span></h2>
+    <a class="feed-profile mono" href="https://x.com/ArtemPadinggton" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg>@ArtemPadinggton ↗</a></div>
+  <div class="posts"><a class="post" href="https://x.com/ArtemPadinggton/status/2114420777835725270" target="_blank" rel="noopener">
+  <div class="bar"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg><span class="handle">@ArtemPadinggton</span><span class="yr mono"><span data-l="en">25 Oct 2026</span><span data-l="ru">25.10.2026</span></span></div>
+  <span class="pin mono"><span data-l="en">Pinned</span><span data-l="ru">Закреплено</span></span><p class="post-text">pumpfun coin yesterday:<br><br>curve bought out in 3s<br>pool opens with ~100 sol<br>17 min later: 1.27 sol left, holders 291 → 21<br><br>built a free bot that reads the chain:<br>dev rights, real holders, real pool, who funded the dev<br>+ pings you when money leaves the pool</p>
+  <span class="post-open mono"><span data-l="en">Open on X</span><span data-l="ru">Открыть в X</span> ↗</span>
+</a><a class="post" href="https://x.com/ArtemPadinggton/status/2116253282452828230" target="_blank" rel="noopener">
+  <div class="bar"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg><span class="handle">@ArtemPadinggton</span><span class="yr mono"><span data-l="en">30 Oct 2026</span><span data-l="ru">30.10.2026</span></span></div>
+  <p class="post-text">binance&#x27;s own numbers on the oct 29 hack:<br><br>$6.3B taken<br>~$3B frozen, $2.3B+ of it by tether and circle<br>~$3.3B still out<br><br>how: one compromised laptop → a service container → withdrawal requests the system accepted<br><br>no evidence a key leaked. the keys weren&#x27;t the weak spot</p>
+  <span class="post-open mono"><span data-l="en">Open on X</span><span data-l="ru">Открыть в X</span> ↗</span>
+</a><a class="post" href="https://x.com/ArtemPadinggton/status/2115923203570737399" target="_blank" rel="noopener">
+  <div class="bar"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg><span class="handle">@ArtemPadinggton</span><span class="yr mono"><span data-l="en">30 Oct 2026</span><span data-l="ru">30.10.2026</span></span></div>
+  <p class="post-text">binance hot wallets, oct 29, 20:24–21:04 utc<br><br>$2.4–3.5B out (estimates vary)<br>eth, stablecoins, 60+ tokens<br>the sender was funded through tornado<br><br>tether froze ~$971M, circle ~$823M<br><br>stablecoins can be frozen. eth can&#x27;t<br>that&#x27;s where the chase goes now</p>
+  <span class="post-open mono"><span data-l="en">Open on X</span><span data-l="ru">Открыть в X</span> ↗</span>
+</a><a class="post" href="https://x.com/ArtemPadinggton/status/2115857543134355846" target="_blank" rel="noopener">
+  <div class="bar"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg><span class="handle">@ArtemPadinggton</span><span class="yr mono"><span data-l="en">29 Oct 2026</span><span data-l="ru">29.10.2026</span></span></div>
+  <p class="post-text">75% of pumpfun curve transactions fail<br><br>it&#x27;s not bots losing races. i decoded a sample from 120k txs in a row:<br><br>46% conditional orders, resent every ~0.3s until a check passes<br>44% bot programs cancelling themselves<br>10% rejected by pumpfun, price moved<br><br>real lost races: ~7% 👇</p><img class="post-img" src="/assets/feed/x-2026-10-29.webp?v=36f05618b5" alt="" width="1000" height="1000" loading="lazy" decoding="async">
+  <span class="post-open mono"><span data-l="en">Open on X</span><span data-l="ru">Открыть в X</span> ↗</span>
+</a><a class="post" href="https://x.com/ArtemPadinggton/status/2115024593236660275" target="_blank" rel="noopener">
+  <div class="bar"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg><span class="handle">@ArtemPadinggton</span><span class="yr mono"><span data-l="en">27 Oct 2026</span><span data-l="ru">27.10.2026</span></span></div>
+  <p class="post-text">spent the night reading pump.fun&#x27;s books straight from the chain<br><br>1.54M swap pools<br>14.9M bonding curves<br>825k fee-split configs<br><br>one question for each:<br>is the money the program says it holds actually in the vault?<br><br>answer: yes. down to the lamport.<br><br>0 shortfalls 🫡</p>
+  <span class="post-open mono"><span data-l="en">Open on X</span><span data-l="ru">Открыть в X</span> ↗</span>
+</a></div>
+</div><div class="feed-ig ig-is-card">
+  <div class="ig-card solo">
+    <div class="ig-left">
+      <div class="ig-word" aria-hidden="true">Instagram</div>
+      <a class="ig-handle" href="https://www.instagram.com/ilowuvery/" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-instagram"/></svg><span class="tick">@ilowuvery</span></a>
+      
+      <a class="ig-cta mono" href="https://www.instagram.com/ilowuvery/" target="_blank" rel="noopener"><span data-l="en">Open profile</span><span data-l="ru">Открыть профиль</span> ↗</a>
+    </div>
+    
+    <div class="ig-marquee" style="--loop:70s"><div class="ig-track"><ul><li><a href="https://www.instagram.com/p/DYNjzo7CILo/" target="_blank" rel="noopener" aria-label="Instagram 2026-05-11"><img src="/assets/feed/ig-2026-05-11.webp?v=fb77a9d965" alt="" width="480" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DXUVASwiGOb/" target="_blank" rel="noopener" aria-label="Instagram 2026-04-19"><img src="/assets/feed/ig-2026-04-19.webp?v=c1ea9c5df6" alt="" width="482" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DWlEyaACBI7/" target="_blank" rel="noopener" aria-label="Instagram 2026-03-31"><img src="/assets/feed/ig-2026-03-31.webp?v=c5916e7df4" alt="" width="480" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DUwMQ-sCLMw/" target="_blank" rel="noopener" aria-label="Instagram 2026-02-14"><img src="/assets/feed/ig-2026-02-14.webp?v=bf4124fe9b" alt="" width="482" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DUN3avgiOAS/" target="_blank" rel="noopener" aria-label="Instagram 2026-02-01"><img src="/assets/feed/ig-2026-02-01.webp?v=83a66e9823" alt="" width="480" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DTdW2PFDD9z/" target="_blank" rel="noopener" aria-label="Instagram 2026-01-13"><img src="/assets/feed/ig-2026-01-13.webp?v=a5eea1ef1d" alt="" width="482" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DTLUJbVDLGZ/" target="_blank" rel="noopener" aria-label="Instagram 2026-01-06"><img src="/assets/feed/ig-2026-01-06.webp?v=0b997566c9" alt="" width="640" height="360" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DTATryXjATS/" target="_blank" rel="noopener" aria-label="Instagram 2026-01-02"><img src="/assets/feed/ig-2026-01-02.webp?v=0651891965" alt="" width="640" height="480" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DSSiSyDDP4x/" target="_blank" rel="noopener" aria-label="Instagram 2025-12-15"><img src="/assets/feed/ig-2025-12-15.webp?v=c93b0c6fa6" alt="" width="480" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DR2un9TjBN_/" target="_blank" rel="noopener" aria-label="Instagram 2025-12-04"><img src="/assets/feed/ig-2025-12-04.webp?v=ef4095da63" alt="" width="482" height="640" loading="lazy" decoding="async"></a></li></ul><ul aria-hidden="true"><li><a href="https://www.instagram.com/p/DYNjzo7CILo/" target="_blank" rel="noopener" tabindex="-1" aria-label="Instagram 2026-05-11"><img src="/assets/feed/ig-2026-05-11.webp?v=fb77a9d965" alt="" width="480" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DXUVASwiGOb/" target="_blank" rel="noopener" tabindex="-1" aria-label="Instagram 2026-04-19"><img src="/assets/feed/ig-2026-04-19.webp?v=c1ea9c5df6" alt="" width="482" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DWlEyaACBI7/" target="_blank" rel="noopener" tabindex="-1" aria-label="Instagram 2026-03-31"><img src="/assets/feed/ig-2026-03-31.webp?v=c5916e7df4" alt="" width="480" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DUwMQ-sCLMw/" target="_blank" rel="noopener" tabindex="-1" aria-label="Instagram 2026-02-14"><img src="/assets/feed/ig-2026-02-14.webp?v=bf4124fe9b" alt="" width="482" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DUN3avgiOAS/" target="_blank" rel="noopener" tabindex="-1" aria-label="Instagram 2026-02-01"><img src="/assets/feed/ig-2026-02-01.webp?v=83a66e9823" alt="" width="480" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DTdW2PFDD9z/" target="_blank" rel="noopener" tabindex="-1" aria-label="Instagram 2026-01-13"><img src="/assets/feed/ig-2026-01-13.webp?v=a5eea1ef1d" alt="" width="482" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DTLUJbVDLGZ/" target="_blank" rel="noopener" tabindex="-1" aria-label="Instagram 2026-01-06"><img src="/assets/feed/ig-2026-01-06.webp?v=0b997566c9" alt="" width="640" height="360" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DTATryXjATS/" target="_blank" rel="noopener" tabindex="-1" aria-label="Instagram 2026-01-02"><img src="/assets/feed/ig-2026-01-02.webp?v=0651891965" alt="" width="640" height="480" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DSSiSyDDP4x/" target="_blank" rel="noopener" tabindex="-1" aria-label="Instagram 2025-12-15"><img src="/assets/feed/ig-2025-12-15.webp?v=c93b0c6fa6" alt="" width="480" height="640" loading="lazy" decoding="async"></a></li><li><a href="https://www.instagram.com/p/DR2un9TjBN_/" target="_blank" rel="noopener" tabindex="-1" aria-label="Instagram 2025-12-04"><img src="/assets/feed/ig-2025-12-04.webp?v=ef4095da63" alt="" width="482" height="640" loading="lazy" decoding="async"></a></li></ul></div></div>
+  </div>
+</div></section>
+
 </main>
-
-<footer><p data-l="en">Market cap, chart, trades, holders' spread: GeckoTerminal. Chain: public Solana nodes, read in your browser. Nothing is stored. Not advice to buy.</p><p data-l="ru">Капитализация, график, сделки, распределение держателей — GeckoTerminal. Цепь — публичные узлы Solana, читается в вашем браузере. Ничего не сохраняется. Не совет покупать.</p></footer>
-<script type="module">const PAGE_RPC = "https://solana-rpc.publicnode.com", HOLDERS_RPC = "https://public.rpc.solanavibestation.com/", BOT = "artem_coinchek_bot", REFS = {"gmgn": "Ri639FUK", "axiom": "https://axiom.trade/@peni3", "trojan": "https://trojan.com/@ArtemVartanov", "pump": "AjarTestedFibre"}, LABELS = {
-"_about":"Public labels for the pump.fun coin check: terminals (programs and fee wallets) and exchange/bridge wallets. Built by build_labels.py from a white list.",
-"terminals":{
-"2416yFoX5ep69Ae8u4EoWN2b1jRMC8diygQDf4zqNAQG":"Ave.ai",
-"2jwHNxavSoMZMEDbT1eV9PcPt5dDcayCqM6MkgaPpmWQ":"Trojan",
-"3F72P7DKhYUZtTtz7WcgTcqcTe8trr2z8TBRw2mVXtnr":"pump.fun app",
-"3Pu1V4duyLyVpAJue1kLAfr74nGjQ3JDzj3aJjnoEXuL":"Looter",
-"3kxSQybWEeQZsMuNWMRJH4TxrhwoDwfv41TNMLRzFP5A":"MevX",
-"3t9EKmRiAUcQUYzTZpNojzeGP1KBAVEEbDNmy6wECQpK":"GMGN",
-"47hEzz83VFR23rLTEeVm9A7eFzjJwjvdupPPmX3cePqF":"Banana Gun",
-"4DGMLhJqTBAB9xs1FodvXrfbdo5YqPSfDRaK1KZFXd1V":"MevX",
-"4FobGn5ZWYquoJkxMzh2VUAWvV36xMgxQ3M7uG1pGGhd":"Axiom",
-"4Lpvp1q69SHentfYcMBUrkgvppeEx6ovHCSYjg4UYXiq":"MevX",
-"4V65jvcDG9DSQioUVqVPiUcUY9v6sb6HKtMnsxSKEz5S":"Axiom",
-"4kuG6NsAFJNwqEkac8GFDMMheCGKUPEbaRVHHyFHSwWz":"Axiom",
-"4mih95RmBqfHYvEfqq6uGGLp1Fr3gVS3VNSEa3JVRfQK":"RayBot",
-"4vfFG2xGZsjXQgA6ZCTzA1PgUGLppFHY9eGnh3ZVGUuz":"Sol Trading Bot",
-"5BqYhuD4q1YD3DMAYkc1FeTu9vqQVYYdfBAmkZjamyZg":"Axiom",
-"5L2QKqDn5ukJSWGyqR4RPvFvwnBabKWqAqMzH4heaQNB":"Axiom",
-"65gDv7pZQCZELsNpNYSFEBtNFpWZAbxmRFB6BGMqFkHH":"Trojan",
-"6TxjC5wJzuuZgTtnTMipwwULEbMPx5JPW3QwWkdTGnrn":"GMGN",
-"6Vo3245eszAb5wuqEMw8mGdbfRUdKbHhDHP5LcaGuTAB":"pump.fun app",
-"6m2CDdhRgxpH4WjvdzxAYbGxwdGUz5MziiL5jek2kBma":"OKX DEX",
-"76sxKrPtgoJHDJvxwFHqb3cAXWfRHFLe3VpKcLCAHSEf":"Axiom",
-"7HeD6sLLqAnKVRuSfc1Ko3BSPMNKWgGTiWLKXJF31vKM":"Bloom",
-"7LCZckF6XXGQ1hDY6HFXBKWAtiUgL9QY5vj1C4Bn1Qjj":"Axiom",
-"7oi1L8U9MRu5zDz5syFahsiLUric47LzvJBQX6r827ws":"Axiom",
-"7sHXjs1j7sDJGVSMSPjD1b4v3FD6uRSvRWfhRdfv5BiA":"GMGN",
-"846ah7iBSu9ApuCyEhA5xpnjHHX7d4QJKetWLbwzmJZ8":"Axiom",
-"86Vh4XGLW2b6nvWbRyDs4ScgMXbuvRCHT7WbUT3RFxKG":"Axiom",
-"8jgg7moFJkHyTtAv9M6RBSPMp2oXeXhuiUMKW8YbYCWn":"Trojan",
-"8m5GkL7nVy95G4YVUbs79z873oVKqg2afgKRmqxsiiRm":"Axiom",
-"8vFGAKdwpn4hk7kc1cBgfWZzpyW3MEMDATDzVZhddeQb":"Axiom",
-"92Med3qeK7duC5iiYsHX38H2f2twJfRsSx93oNrza2VH":"Trojan",
-"96aFQc9qyqpjMfqdUeurZVYRrrwPJG2uPV6pceu4B1yb":"Sol Trading Bot",
-"9Fox6i7oT8p4qHn76Qj3dks8RRMGsXQyfMSBScA5yVyX":"Padre",
-"9cSuF94JWPb1HQzWMcifJzkoggwAtfjsojcUqny5XuJy":"Shuriken",
-"9kPrgLggBJ69tx1czYAbp7fezuUmL337BsqQTKETUEhP":"Axiom",
-"9yMwSPk9mrXSN7yDHUuZurAh1sjbJsfpUqjZ7SvVtdco":"Trojan",
-"A7XTexV13EPnhtH55qhT7qmFkgYCMAMnfXk89VWu9PCJ":"Sol Trading Bot",
-"AVUCZyuT35YSuj4RH7fwiyPu82Djn2Hfg7y2ND2XcnZH":"Photon",
-"AaG6of1gbj1pbDumvbSiTuJhRCRkkUNaWVxijSbWvTJW":"Axiom",
-"AveaiuA1emN71q9mS2QQ9BEWNAAHmp8sHSvwLFHQjufM":"Ave.ai",
-"AxiomRXZAq1Jgjj9pHmNqVP7Lhu67wLXZJZbaK87TTSk":"Axiom",
-"AxiomRYAid8ZDhS1bJUAzEaNSr69aTWB9ATfdDLfUbnc":"Axiom",
-"BANANAjs7FJiPQqJTGFzkZJndT9o7UmKiYYGaJz6frGu":"Banana Gun",
-"BB5dnY55FXS1e1NXqZDwCzgdYJdMCj3B92PU6Q5Fb6DT":"GMGN",
-"BBRouter1cVunVXvkcqeKkZQcBK7ruan37PPm3xzWaXD":"BONKbot",
-"BBYXdwhqbCxVRVtnuMTTxh8biNisz3ZxsnHfr44jXytR":"Trojan",
-"BNuebGMyAsrLytsS13whc3qUqbnM9mVwUJcumD31m5zA":"Maestro",
-"BS3CyJ9rRC4Tp8G7f86r6hGvuu3XdrVGNVpbNM9U5WRZ":"MevX",
-"BSfD6SHZigAfDWSjzD5Q41jw8LmKwtmjskPH9XW1mrRW":"Photon",
-"BTQyUXhxiLrFPD5JUANCwg4ViibmNY39McmWk4bVNxLA":"Sol Trading Bot",
-"BWgb8wR1FEGiu1jCDSKuHKf752W27b4iN6SvoNCiK4qp":"Trojan",
-"BXhkDUR2MCA6wPrnmUN1q2PHLqf973E5L3aqXzouojQE":"Pepeboost",
-"BwWK17cbHxwWBKZkUYvzxLcNQ1YVyaFezduWbtm2de6s":"pump.fun Mayhem agent",
-"ByRRgnZenY6W2sddo1VJzX9o4sMU4gPDUkcmgrpGBxRy":"GMGN",
-"CeA3sPZfWWToFEBmw5n1Y93tnV66Vmp8LacLzsVprgxZ":"Axiom",
-"CxvksNjwhdHDLr3qbCXNKVdeYACW8cs93vFqLqtgyFE5":"BONKbot",
-"DF1ow4tspfHX9JwWJsAb9epbkA8hmpSEAtxXy1V27QBH":"DFlow",
-"DGMgNKpqygARV2pHZfW4kNQSHT9F3Ly2BKWqvpYrAg5C":"GMGN",
-"DKyUs1xXMDy8Z11zNsLnUg3dy9HZf6hYZidB6WodcaGy":"Axiom",
-"DXfkEGoo6WFsdL7x6gLZ7r6Hw2S6HrtrAQVPWYx2A1s9":"GMGN",
-"DYVeNgXGLAhZdeLMMYnCw1nPnMxkBN7fJnNpHmizTrrF":"Axiom",
-"DZfEurFKFtSbdWZsKSDTqpqsQgvXxmESpvRtXkAdgLwM":"Axiom",
-"DoAsxPQgiyAxyaJNvpAAUb2ups6rbJRdYrCPyWxwRxBb":"pump.fun Terminal (Padre)",
-"DymeoWc5WLNiQBaoLuxrxDnDRvLgGZ1QGsEoCAM7Jsrx":"GMGN",
-"F34kcgMgCF7mYWkwLN3WN7KrFprr2NbwxuLvXx4fbztj":"Sol Trading Bot",
-"F4hJ3Ee3c5UuaorKAMfELBjYCjiiLH75haZTKqTywRP3":"BullX",
-"FBYmU5XbRgX2DV2i2SpPPpHpXmf6mdZS98wQChmUyMba":"Telemetry",
-"FLASHX8DrLbgeR8FcfNV1F5krxYcYMUdBkrP1EPBtxB9":"Axiom",
-"FRMxAnZgkW58zbYcE7Bxqsg99VWpJh6sMP5xLzAWNabN":"Maestro",
-"G9PhF9C9H83mAjjkdJz4MDqkufiTPMJkx7TnKE1kFyCp":"Pepeboost",
-"GMGNreQcJFufBiCTLDBgKhYEfEe9B454UjpDr5CaSLA1":"GMGN",
-"GreGavLfh5sK1BeQ2WYvmk352wbyNNzQdCmqWCV8QSib":"Sol Trading Bot",
-"H2cDR3EkJjtTKDQKk8SJS48du9mhsdzQhy8xJx5UMqQK":"Axiom",
-"HEPL5rTb6n1Ax6jt9z2XMPFJcDe9bSWvWQpsK7AMcbZg":"Sol Trading Bot",
-"Hbj6XdxX6eV4nfbYTseysibp4zZJtVRRPn2J3BhGRuK9":"Axiom",
-"HeZVpHj9jLwTVtMMbzQRf6mLtFPkWNSg11o68qrbUBa3":"GMGN",
-"J5XGHmzrRmnYWbmw45DbYkdZAU2bwERFZ11qCDXPvFB5":"pump.fun Terminal (Padre)",
-"JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4":"Jupiter",
-"K1LRSA1DSoKBtC5DkcvnermRQ62YxogWSCZZPWQrdG5":"Sol Trading Bot",
-"KfHbT5Jrr5SV3CDkQVCLiSNWyVv5DmuVaCzbAHrzMFQ":"pump.fun app",
-"MAyhSmzXzV1pTf7LsNkrNwkWKTo4ougAJ1PPg47MD4e":"pump.fun Mayhem agent",
-"MaestroAAe9ge5HTc64VbBQZ6fP77pwvrhM8i1XWSAx":"Maestro",
-"MaestroUL88UBnZr3wfoN7hqmNWFi3ZYCGqZoJJHE36":"Maestro",
-"MevxQ9iQNGNQSWqa2CtDQs2BwrJA6MifzocykZAgGBr":"MevX",
-"NoVA1TmDUqksaj2hB1nayFkPysjJbFiU76dT4qPw2wm":"Nova",
-"Stbot61LkCD5HE4p1TDtYRt9bzkjX81pKrshZz4Awny":"Sol Trading Bot",
-"T1TANpTeScyeqVzzgNViGDNrkQ6qHz9KrSBS4aNXvGT":"Titan",
-"VAULTkV5rgY9WqZtvaMHvctrKMwQw8bCfSJF4nga2D4":"Axiom",
-"ZG98FUCjb8mJ824Gbs6RsgVmr1FhXb2oNiJHa2dwmPd":"BONKbot",
-"b1oomGGqPKGD6errbyfbVMBuzSC8WtAAYo8MwNafWW1":"Bloom",
-"dBhdrmwBkRa66XxBuAK4WZeZnsZ6bHeHCCLXa3a8bTJ":"GMGN",
-"noVaE91mUL5jTb8e9Vf6dqJdNPzJpEQ3uAdnQ8h4nVz":"Nova",
-"noVakKQGTTjpHARvecAUbVnc85AatCLm3ijDFk8JXZB":"Nova",
-"proVF4pMXVaYqmy4NjniPh4pqKNfMmsihgd4wdkCX3u":"OKX DEX",
-"shrknHaCuVXmahvxLER4Qm9vooBzhbYsMP7HnAAS9Hn":"Shuriken",
-"shuvodtwMMFFB6KmqCDYaiAe1hRokCVwr4LkT1pLAL5":"Shuriken",
-"term9YPb9mzAsABaqN71A4xdbxHmpBNZavpBiQKZzN3":"pump.fun Terminal (Padre)",
-"troyXT7Ty3s2rjJe4bqWaroUrS4Fjd8rbHHNHxcACF4":"Trojan"
-},
-"exchanges":{
-"28nYGHJyUVcVdxZtzKByBXEj127XnrUkrE3VaGuWj1ZU":"Ceffu",
-"2AQdpHJ2JpcEgPiATUXjQxA8QmafFegfQwSLWSprPicm":"Coinbase",
-"2E1UKoiiZPwsp4vn6tUh5k61kG2UqYpT7oBrFaJUJXXd":"Swissborg",
-"2XxP4kS2vfkiMvpLpGNxry3fPUYimsuAmSbqL1KnuwZ8":"Swissborg",
-"2ojv9BAiHUrvsm9gxDe7fJSzbNZSJcxZvf8dqmWGHG8S":"Binance",
-"3Nvb6UeEMVLf9DsehhqT8B5SNHrNLEpHdf42nXi9aLK8":"CoinDCX",
-"3gd3dqgtJ4jWfBfLYTX67DALFetjc5iS72sCgRhCkW2u":"Binance",
-"3yFwqXBfZY4jBVUafQ1YEXw189y2dN3V5KQq9uzBDy1E":"Binance",
-"41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB":"Chainlink CCIP bridge",
-"42brAgAVNzMBP7aaktPvAmBSPEkehnFQejiZc53EpJFd":"Bybit",
-"43DbAvKxhXh1oSxkJSqGosNw3HpBnmsWiak6tB5wpecN":"Backpack",
-"44DwSkZbY2PVo9wfFP21D7HG7xf5rw8QaF6xSLGSfm7P":"OKX",
-"4DgunMfBb19GaMZ1Z48oqcymZ4eBA4v5SUdRnapzj66G":"Coinsquare",
-"4E73T5Zubx3kPtheJ5DB6QMEaadMQowhUcdRV6f9rvVt":"CoinDCX",
-"51AASorYCLPcUHnuQQaau6DfsfFRixzh4HsoQwsc5Ara":"LAToken",
-"57vSaRTqN9iXaemgh4AoDsZ63mcaoshfMK8NP3Z5QNbs":"KuCoin",
-"5SDrsMNTYdhmApjfqYHDvjoW92f2S42vcc7zNDVcQ9Ej":"Ceffu",
-"5URmUviWsAtcciFXqgM7f1jmhvBULdQDT47dqDkrJUi":"OKX",
-"5VCwKtCXgCJ6kit5FybXjvriW3xELsFDhYrPSqtJNmcD":"OKX",
-"5VtQHnhs2pfVEr68qQsbTRwKh4JV5GTu9mBHgHFxpHeQ":"Mayan bridge",
-"5bJcc9eb2XE7mqcET2xDuAdMGuXWybb4YPmAHLjKLhQG":"HTX",
-"5bjZPeHbdGUCduyY8i2dZkkgLWkG3u1P2sbt1Jb5kFxW":"CoinDCX",
-"5kiqH41rz2wPoNH5FuDJ3x8dB3EEe3XGoSWy2485tAp9":"OKX",
-"5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9":"Binance",
-"6Attw9NcFspCAreufvQ3mW8aqXEk6MDceeoC8obw45cJ":"OKX",
-"6FEVkH17P9y8Q9aCkDdPcMDjvj7SVxrTETaYEm8f51Jy":"Crypto.com",
-"6NnzUC7mrM7ZgKdcMq1jPAdqh9TMgdsaVR1DNq6kce3A":"OKX",
-"6QJzieMYfp7yr3EdrePaQoG3Ghxs2wM98xSLRu8Xh56U":"Binance",
-"6XuYJv4PyauP2WKdgd4fZYvjK7uBdVkEySoy89fXV9XT":"CoinDCX",
-"6ZRCB7AAqGre6c72PRz3MHLC73VMYvJ8bi9KHf1HFpNk":"FTX",
-"6b4aypBhH337qSzzkbeoHWzTLt4DjG2aG8GkrrTQJfQA":"FTX",
-"6fuHoq5Tr2j6dFTGWHmLUhVBUj8XvDBgdGGzgfSwe5DN":"CoinDCX",
-"6iVBAsquJRaLsXbojb18kqTW1d5iVLspVjCtsReZBKhY":"AscendEX",
-"6oCa9Tz8VXVp63WiFyruE5PD6yXz3pCsv6oGzUGvg9TP":"Binance",
-"6p8LxMvHUZtdiik28TQy483WaCaDGsAUFm3PKjpUpLB":"CoinDCX",
-"6wEMcwrcF5AP9jpHWQcPxHXciWA2g217Qq81CTWjbgBw":"FTX",
-"76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6":"LayerZero bridge",
-"7CtzEcGeYpMfR1aEi1Gbt8GRHDPH9uDB6GNTsBABqSmo":"OKX",
-"7SRyi7urg28j1XtioKbcJLtkL9Pqu39Y4CTAXwmu2Hts":"CoinList",
-"7fGw3UURsxk1szQ4buxQyEkiF4P6z7vx7sN1MHEguTJg":"OKX",
-"7o9ukGhWvc71yYcjinKnrxMn2kFMyQD1iCG3romrzg7r":"OKX",
-"7uTT8Xi5RWXzy7h9XL244GRgEycDYDhLjr3ZyNdXi8pZ":"Relay bridge",
-"821dTn3JEhhqg11Q24ijxRBYXfKWngGMibTqHS8hWjZb":"Rollbit",
-"88xTWZMeKfiTgbfEmPLdsUCQcZinwUfk25EBQZ21XMAZ":"HTX",
-"8NBEbxLknGv5aRYefFrW2qFXoDZyi9fSHJNiJRvEcMBE":"HTX",
-"8QJmxZcEzwuYmCPy6XqgN2sHcYCcFq6AEfBMJZZuLo5a":"Mayan bridge",
-"8W4u11KJYhmCY9rs2MCVHmMrgpeHLgsbkwAarbNvzr2Y":"CoinDCX",
-"8dUc88Nss8uhqzzFvUQhepkwZaVrfzpoCfKjCXGkdzAG":"OKX",
-"8eqh8wppT9c5rw4ERqNCffvU6cNFJWff9WmkcYtmGiqC":"Chainlink CCIP bridge",
-"8nFGjbJNdarBouEC856Qmhrm8fptuEUnZrpNKgougsLi":"CoinDCX",
-"8zSWFy8wvHEuFJ7CZ81wy2wn4fPaju6jc6tbtbv5x9f8":"CoinDCX",
-"92qQCjprXoJ5GYji5it8PJTneBFxzSJ6mYosQWxYKxx4":"CoinDCX",
-"945SJTwsBSqwEEgtKMnhcLDnJowP6YpJUTEykMVK5k6q":"OKX",
-"99vQwtBwYtrqqD9YSXbdum3KBdxPAVxYTaQ3cfnJSrN2":"Relay bridge",
-"9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM":"Binance",
-"9buzBcTujdQLyf1XkyLaSrGNbkyNxg8qML3bpKWCz9P6":"CoinDCX",
-"9qoUcyhKSWMbk6tqGUYQUpeosPcdUnJszG4eQKwfe4gL":"Swissborg",
-"9un5wqE3q4oCjyrDkwsdD48KteCJitQX5978Vh7KKxHo":"OKX",
-"9uyDy9VDBw4K7xoSkhmCAm8NAFCwu4pkF6JeHUCtVKcX":"FTX",
-"A77HErqtfN1hLLpvZ9pCtu66FEtM8BveoaKbbMoZ4RiR":"Bitget",
-"AC5RDfQFmDS1deWZos921JfqscXdByf8BKHs5ACWjtW2":"Bybit",
-"APJmXrtC9TUAg5gcjbcsVUiVzeDv85xLZRLad1GiQTNE":"OKX",
-"ASTyfSima4LLAdDgoFGkgqoKowG1LZFDr9fAQrg7iaJZ":"MEXC",
-"AjCHG7CYJST379Eh7xLqhRaUyBzurFKjsX7z8DTrfGZp":"CoinDCX",
-"Amf2mf2Ciap5wYAEKDtGoQHfHPWaKbyFYhutMK46hTRF":"Binance",
-"AobVSwdW9BbpMdJvTqeCN4hPAmh4rHm7vwLnQ5ATSyrS":"Crypto.com",
-"BEaiMhcc4Kao7B4hoq6r9m8neUpfimUMwhzugKxtkZw6":"OKX",
-"BLZRi6frs4X4DNLw56V4EXai1b6QVESN1BhHBTYM9VcY":"Mayan bridge",
-"BWZqi67kXsvf5crjd19Fb3gmf3DCipGE8eWWJT2YHDXQ":"OKX",
-"BY4StcU9Y2BpgH8quZzorg31EGE4L1rjomN8FNsCBEcx":"HTX",
-"BZ3kabSsMzbuJUguYxtmkRtzw7ACqw1DUMH8PcbvXiUr":"Ceffu",
-"BbHG9GvPActFGogv3iNrpDAj4qpXr8t3jF16uGxXcKci":"Backpack",
-"BhJrLQEyFyrcf1746pHATzAZQpC1uk3SJf2AHHK7LW3K":"OKX",
-"BmFdpraQhkiDQE6SnfG5omcA1VwzqfXrwtNYBwWTymy6":"KuCoin",
-"Bq6NnW55ToJrAM7NxUYDmSMbKKCQ6f742ZemLiypqjzY":"CoinDCX",
-"BrdgN2RPzEMWF96ZbnnJaUtQDQx7VRXYaHHbYCBvceWB":"Allbridge bridge",
-"CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC":"CCTP bridge",
-"CCTPV2vPZJS2u2BBsUoscuikbYjnpFmbFsvVuJdgUMQe":"CCTP bridge",
-"CCTPiPYPc6AsJuwueEnWgSgucamXDZwBd53dQ11YiKX3":"CCTP bridge",
-"CE8joA143dBjsCFTeBxBs3kNGNU87WH6Q7GMMfxPzSr2":"OKX",
-"CGZAHxBannZzYK3rzVdG1e3uNjMxrmaXDhLEZxQBbueq":"OKX",
-"CLNEVwuSAiGsvPtE74yLhda4beNfd8qfZXVKkUcAJZDL":"Gate.io",
-"Ccip842gzYHhvdDkSyi2YVCoAWPbYJoApMFzSxQroE9C":"Chainlink CCIP bridge",
-"CeGyfZdtbjzC5FeVXCBdYE1v397yxxqYgmMcUwtouJUu":"OKX",
-"Cet3t77x2BBVSmiEFm8ZPoDSngbpso2RuWPL79Ky7SpA":"Swissborg",
-"DEbrdGj3HsRsAzx6uH4MKyREKxVAfBydijLUF3ygsFfh":"deBridge bridge",
-"DLv3NggMiSaef97YCkew5xKUHDh13tVGZ7tydt3ZeAru":"Across bridge",
-"DRpbCBMxVnDK7maPM5tGv6MvB3v1sRMC86PZ8okm21hy":"Binance",
-"DeSetTwWhjZq6Pz9Kfdo1KoS5NqtsM6G8ERbX4SSCSft":"deBridge bridge",
-"DwMLtdtJqJQkHzNcrdTBuWHJByJfgpKBnvFvzyKdy3cU":"Mayan bridge",
-"E1EfU3iKUS16mB2vdgj6mi3ssV32dm2Pxh7W74XxKuYu":"Bitstamp",
-"EBVigEhxvkWUwreG98kTh5FbZEjnXTXC5ANZtLz4YpHQ":"OKX",
-"EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm":"Backpack",
-"EPauhjQjjTBCpeBtszS3xGRASLpEJFM1cspSiFRXZa9Z":"Binance",
-"ETZY5TjMKdV2KdHVmUNTN56pWhMc8TyjrXtQ7YexDCmG":"Bitstamp",
-"EUXVDPCwXe9sJt3VucYfveB1kk5piSWJqhWQEsFtE2CR":"CoinDCX",
-"Edbef6Xi35u6iYEmeGAFmThCZrgj6MxzYAgAmZFYPmFF":"Binance",
-"EhZLSqyWrazhqR5bmyyEfFRa3ycWu9KPgQgQ7G1R9zC9":"CoinDCX",
-"EkUy8BB574iEVAQE9dywEiMhp9f2mFBuFu6TBKAkQxFY":"KuCoin",
-"F7p3dFrjRTbtRp8FRF6qHLomXbKRBzpvBLjtQcfcgmNe":"Relay bridge",
-"FC4eXxkyrMPTjiYUpp4EAnkmwMbQyZ6NDCh1kfLn6vsf":"Mayan bridge",
-"FJS2rTjAQmFFRmVqtnkceGvLJrMwUPgCUfLjciuMYkSC":"OKX",
-"FWznbcNXWQuHTawe9RxvQ2LdCENssh12dsznf4RiouN5":"Kraken",
-"Fe7SEekiKygziaEGKxsDsgLVzrCfNvVBvAYsaJBwFA8s":"Swissborg",
-"FeeQPGkKDeRV1MgoYfMH6L8o3KeuYjwUZrgn4LRKfjHi":"Chainlink CCIP bridge",
-"FefAbVt2EgXMGxeJb6sB1k5pQJhiGPxw4mB1zeUohZLk":"OKX",
-"FxteHmLwG9nk1eL4pjNve3Eub2goGkkz6g6TbvdmW46a":"Bitfinex",
-"FyJBKcfcEBzGN74uNxZ95GxnCxeuJJujQCELpPv14ZfN":"Bitfinex",
-"G9RCBaYb8aBRxoe8QBC2ucGrVqjuZFysRhY8d56cnNT1":"Binance",
-"GBrURzmtWujJRTA3Bkvo7ZgWuZYLMMwPCwre7BejJXnK":"Binance",
-"GFRP4yXUjvcQemf2zRJN8w9sPNaDk5PyBUQdPHD1AzLp":"Mayan bridge",
-"GJRs4FwHtemZ5ZE9x3FNvJ8TMwitKTh21yxdRPqn7npE":"Coinbase",
-"GK35nWN6ZHSGZrRTf8kTQd8RkFCighChPEb41XwSFVAC":"Binance",
-"GcFZHQVJ2icPGLrA9qPLq88b7eqBXSUcdL1utUtUfcSD":"OKX",
-"GnCRxKqUEPouYMvTb5nJMGrDB3VkTXZnDTaDuVZdnWA3":"Bitfinex",
-"Gx9rivpS3YR8pBFwMuP6omYqVxunpLvLkNn7ubNyuZZ5":"Mayan bridge",
-"H8sMJSCQxfKiFTCfDR3DUMLPwcRbM61LGFJ8N4dK3WjS":"Coinbase",
-"HBxZShcE86UMmF93KUM8eWJKqeEXi5cqWCLYLMMhqMYm":"Bitstamp",
-"HVh6wHNBAsG3pq1Bj5oCzRjoWKVogEDHwUHkRz3ekFgt":"KuCoin",
-"HXsKP7wrBWaQ8T2Vtjry3Nj3oUgwYcqq9vrHDM12G664":"Binance",
-"HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3":"Backpack",
-"HiRpdAZifEsZGdzQ5Xo5wcnaH3D2Jj9SoNsUzcYNK78J":"Gate.io",
-"HnLezgQkNVWMp2AV6mcHM1Ljst32kfsoVnYUkvXuQpjg":"OKX",
-"HwgxMWxaq5cDbdVmoH24Gy8F9m9DkU7Mwgdbgh4mh2m7":"CoinDCX",
-"J4rzLDLhLWFpjSgCMCcxTU84bQ8AH5vhgjwq7SjYVk8Q":"Bitfinex",
-"JBpj7yp4Afvb71TmanVwJZXGeX4kqbGFvjCFCRo3EbTM":"FTX US",
-"JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN":"Backpack",
-"RmnXLft1mSEwDgMKu2okYuHkiazxntFFcZFrrcXxYg7":"Chainlink CCIP bridge",
-"WnFt12ZrnzZrFZkt2xsNsaNWoQribnuQ5B5FrDbwDhD":"Wormhole bridge",
-"dkpZqrxHFrhziEMQ931GLtfy11nFkCsfMftH9u6QwBU":"Mayan bridge",
-"dst5MGcFPoBeREFAA5E3tU5ij8m5uVYwkzkSAbsLbNo":"deBridge bridge",
-"hntyVP6YFm1Hg25TN9WGLqM12b8TQmcknKrdu1oxWux":"Backpack",
-"i57ExrKB2i4mSgjSuq2xz617mQXmu33WG2WEYypmdvX":"Bitstamp",
-"jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL":"Backpack",
-"krakeNd6ednDPEXxHAmoBs1qKVM8kLg79PvWF2mhXV1":"Kraken",
-"mayan34VedncxdK2XobtvWFDXQASUTBXhUVzt2kKgny":"Mayan bridge",
-"mb1eu7TzEc71KxDpsmsKoucSSuuoGLv1drys1oP2jh6":"Backpack",
-"rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof":"Backpack",
-"src5qyZHqTqecJV4aY6Cb6zDZLMDzrDKKezs22MPHr4":"deBridge bridge",
-"u6PJ8DtQuPFnfmwHbGFULQ4u4EgjDiyYKjVEsynXq2w":"Gate.io",
-"worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth":"Wormhole bridge",
-"wormDTUJ6AWPNvk59vGQbDvGJmqbDTdgWgAqcLBCgUb":"Wormhole bridge"
-}
-};
-
-import { checkCoin, describe, isAddress, makeRpc, parseMintInput, SAME_BLOCK_WARN } from "./coincheck.mjs";
-import { candles, candlesFromTrades, marketOf, money, poolNow, signedPct, tokenInfo, trades } from "./market.mjs";
-import { buyLinks, pumpCode, signupLinks } from "./links.mjs";
-
-const root = document.documentElement;
-const $ = (s) => document.querySelector(s);
-const all = (s) => Array.from(document.querySelectorAll(s));
-const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-const short = (a) => `${a.slice(0, 4)}…${a.slice(-4)}`;
-const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const lang = () => root.getAttribute("data-lang") || "en";
-const T = (en, ru) => (lang() === "ru" ? ru : en);
-const LOC = () => (lang() === "ru" ? "ru-RU" : "en-US");
-const intl = (x, d = 0) => (x == null || !Number.isFinite(x) ? "?" : x.toLocaleString(LOC(), { maximumFractionDigits: d }));
-const pct = (x, d = 1) => (x == null || !Number.isFinite(x) ? "?" : `${intl(x, x < 10 ? d : 0)}${lang() === "ru" ? " %" : "%"}`);
-
-const app = window.Telegram?.WebApp;
-const inTg = !!(app && app.platform && app.platform !== "unknown");
-if (inTg) {
-  app.ready(); app.expand();
-  try { app.setHeaderColor("#f4f2ec"); app.setBackgroundColor("#f4f2ec"); } catch (e) {}
-}
-const haptic = () => { try { inTg && app.HapticFeedback.impactOccurred("light"); } catch (e) {} };
-function openUrl(url) {
-  haptic();
-  if (!inTg) return window.open(url, "_blank", "noopener");
-  if (url.startsWith("https://t.me/")) app.openTelegramLink(url); else app.openLink(url);
-}
-
-// Timeframes as on Axiom: seconds are built from trades (GeckoTerminal's second candles are paid), minutes and hours
-// come from GeckoTerminal; the newest trades finish the last candle in both.
-const TF = {
-  "1s": { trades: 1 }, "15s": { trades: 15 }, "30s": { trades: 30 },
-  "1m": { gt: ["minute", 1, 1000], step: 60 }, "5m": { gt: ["minute", 5, 1000], step: 300 },
-  "15m": { gt: ["minute", 15, 1000], step: 900 }, "1h": { gt: ["hour", 1, 1000], step: 3600 },
-};
-const S = { autoFit: true, mint: null, pool: null, curvePool: null, createdAt: null, tf: "1m", mode: "mc", supply: 1e9, bars: [], trades: [],
-  market: null, report: null, info: null, seen: new Set(), timer: null, slow: null, price: null, mcap: null, run: 0 };
-const C = { chart: null, candles: null, volume: null };
-// the site's paper palette: moss for up, brick for down, ink and grey for the rest
-const UP = "#4d6b3c", DOWN = "#a84b36", BG = "#f4f2ec", GRID = "#e7e3da", TXT = "#6f6b62", INK = "#1f1f1f", RULE = "#dedad1";
-
-function status(text, isErr) { const s = $("#status"); s.textContent = text || ""; s.classList.toggle("err", !!isErr); }
-
-// ---------- numbers that count ----------
-function countTo(el, to, fmt) {
-  const from = Number(el.dataset.v ?? to);
-  el.dataset.v = to;
-  // with fx/coin.js on (class fx-coin) the number is final at once and the effect rolls its digits over it
-  if (reduce || root.classList.contains("fx-coin") || !Number.isFinite(from) || from === to) { el.textContent = fmt(to); return; }
-  const t0 = performance.now();
-  const step = (t) => {
-    const k = Math.min(1, (t - t0) / 700);
-    const e = 1 - Math.pow(1 - k, 3);
-    el.textContent = fmt(from + (to - from) * e);
-    if (k < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
-}
-
-// ---------- the chart (TradingView Lightweight Charts, the open version of the engine terminals use) ----------
-const defaultTf = (age) => (age < 15 * 60 ? "1s" : age < 3 * 3600 ? "1m" : age < 2 * 86400 ? "5m" : "15m");
-const scaleBy = () => (S.mode === "mc" ? S.supply : 1);
-const fmt = (v) => money(v, lang());
-const axisFmt = (v) => (v < 0 ? "" : fmt(v));      // below zero is only room for the volume bars
-function tickLabel(t, type) {
-  const d = new Date(t * 1000);
-  if (type <= 2) return d.toLocaleDateString(LOC(), { day: "numeric", month: "short" });
-  return d.toLocaleTimeString(LOC(), type === 4 ? { hour: "2-digit", minute: "2-digit", second: "2-digit" } : { hour: "2-digit", minute: "2-digit" });
-}
-function fullTime(t) {
-  return new Date(t * 1000).toLocaleString(LOC(), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", ...(TF[S.tf].trades ? { second: "2-digit" } : {}) });
-}
-function makeChart() {
-  const el = $("#chart");
-  if (C.chart) { C.chart.remove(); C.chart = null; }
-  el.innerHTML = "";
-  const LW = window.LightweightCharts;
-  C.chart = LW.createChart(el, {
-    autoSize: true,
-    layout: { background: { type: "solid", color: BG }, textColor: TXT, fontSize: 11, fontFamily: '"Helvetica Neue",Helvetica,Arial,sans-serif' },
-    grid: { vertLines: { color: GRID }, horzLines: { color: GRID } },
-    rightPriceScale: { borderColor: RULE, scaleMargins: { top: 0.08, bottom: 0.24 } },
-    timeScale: { borderColor: RULE, timeVisible: true, secondsVisible: !!TF[S.tf].trades, rightOffset: 6, barSpacing: 7, minBarSpacing: 0.5, tickMarkFormatter: tickLabel },
-    crosshair: { mode: LW.CrosshairMode.Normal,
-      vertLine: { color: TXT, width: 1, style: LW.LineStyle.Dashed, labelBackgroundColor: INK },
-      horzLine: { color: TXT, width: 1, style: LW.LineStyle.Dashed, labelBackgroundColor: INK } },
-    localization: { priceFormatter: axisFmt, timeFormatter: fullTime },
-    // the wheel and a vertical swipe scroll the page: over a chart that zoomed instead, the candles shrank into a strip
-    handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
-    handleScale: { mouseWheel: false, pinch: true, axisPressedMouseMove: true, axisDoubleClickReset: true },
-  });
-  C.candles = C.chart.addCandlestickSeries({ upColor: UP, downColor: DOWN, wickUpColor: UP, wickDownColor: DOWN, borderVisible: false,
-    priceFormat: { type: "custom", formatter: axisFmt, minMove: 1e-12 } });
-  C.volume = C.chart.addHistogramSeries({ priceScaleId: "", lastValueVisible: false, priceLineVisible: false, priceFormat: { type: "custom", formatter: fmt, minMove: 0.01 } });
-  C.volume.priceScale().applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
-  // the chart sizes itself after layout: fit again then, and stop once the user takes over
-  new ResizeObserver(() => requestAnimationFrame(refit)).observe(el);
-  for (const ev of ["pointerdown", "touchstart"]) el.addEventListener(ev, () => { S.autoFit = false; }, { passive: true });
-  C.chart.subscribeCrosshairMove((p) => legend(p && p.time != null ? p.seriesData.get(C.candles) : null, p && p.time != null ? p.seriesData.get(C.volume) : null));
-}
-/**
- * Up to 160 candles fill the whole width; more show the last 160, until the user drags or zooms. (A window starting
- * before the first candle left the left half of the chart empty.)
- */
-function refit() {
-  if (!C.chart || !S.autoFit) return;
-  const n = S.bars.length;
-  // room for the next candles: six of them on a full chart, one when a young coin has only a dozen
-  const room = Math.max(1, Math.min(6, Math.round(n / 25)));
-  C.chart.timeScale().applyOptions({ rightOffset: room });
-  if (n <= 160) C.chart.timeScale().fitContent();
-  else C.chart.timeScale().setVisibleLogicalRange({ from: n - 160, to: n + room });
-}
-const toBar = (k) => { const m = scaleBy(); return { time: k.t, open: k.o * m, high: k.h * m, low: k.l * m, close: k.c * m }; };
-const toVol = (k) => ({ time: k.t, value: k.v, color: k.c >= k.o ? "rgba(77,107,60,.32)" : "rgba(168,75,54,.32)" });
-function paint(fit) {
-  if (!C.chart) makeChart();
-  $("#chartNote").textContent = S.bars.length ? "" : T("No trades in this window yet.", "В этом окне сделок пока нет.");
-  C.candles.setData(S.bars.map(toBar));
-  C.volume.setData(S.bars.map(toVol));
-  // setData puts the chart back to its default bar width; fit after every repaint until the user drags or zooms
-  if (fit) S.autoFit = true;
-  if (S.autoFit) requestAnimationFrame(refit);
-  legend(null, null);
-}
-function legend(bar, vol) {
-  const last = S.bars[S.bars.length - 1];
-  const b = bar || (last ? toBar(last) : null);
-  const v = vol ? vol.value : last ? last.v : null;
-  if (!b) { $("#legend").innerHTML = ""; return; }
-  const ch = b.open ? (b.close / b.open - 1) * 100 : 0;
-  const cls = ch >= 0 ? "up" : "down";
-  $("#legend").innerHTML = `<span class="lbl">${S.mode === "mc" ? "MC" : T("Price", "Цена")} · ${S.tf}</span> O <b>${esc(fmt(b.open))}</b> H <b>${esc(fmt(b.high))}</b> L <b>${esc(fmt(b.low))}</b> C <b class="${cls}">${esc(fmt(b.close))}</b> <b class="${cls}">${esc(signedPct(ch, lang()))}</b> ${T("Vol", "Об.")} <b>${esc(fmt(v))}</b>`;
-}
-/** GeckoTerminal candles of the pool and of the coin's curve (both requests at once); `failed` if either was refused. */
-function rawMinute(tf) {
-  let failed = false;
-  const one = (pool) => candles(pool, ...tf.gt).catch(() => { failed = true; return []; });
-  return Promise.all([one(S.pool), S.curvePool ? one(S.curvePool) : Promise.resolve([])])
-    .then(([main, curve]) => ({ main, curve, failed }));
-}
-/**
- * The free API refuses bursts. Without this the chart stays at the few candles built from the latest trades, which
- * is what showed up as "not enough trades" and then a straight line: ask again a few times and repaint when it answers.
- */
-async function retryMinute(run, name, attempt = 1) {
-  await new Promise((r) => setTimeout(r, attempt * 5000));
-  if (run !== S.run || S.tf !== name) return;
-  const tf = TF[name];
-  const raw = await rawMinute(tf);
-  if (run !== S.run || S.tf !== name) return;
-  if (raw.main.length || raw.curve.length) { S.bars = finishMinute(raw, tf); paint(S.autoFit); }
-  if (raw.failed && attempt < 4) retryMinute(run, name, attempt + 1);
-}
-/** The curve's candles before the pool's, the last ones finished with the newest trades. */
-function finishMinute({ main, curve }, tf) {
-  const first = main.length ? main[0].t : Infinity;
-  const out = [...curve.filter((k) => k.t < first), ...main].map((k) => ({ ...k }));
-  const lastT = out.length ? out[out.length - 1].t : 0;
-  for (const k of candlesFromTrades(S.trades.filter((x) => x.at / 1000 >= lastT), tf.step)) {
-    const b = out.find((x) => x.t === k.t);
-    if (b) { b.h = Math.max(b.h, k.h); b.l = Math.min(b.l, k.l); b.c = k.c; }
-    else if (k.t > lastT) out.push({ ...k, o: out.length ? out[out.length - 1].c : k.o });
-  }
-  return out;
-}
-async function loadBars(fit) {
-  if (!S.pool) return;
-  const tf = TF[S.tf];
-  if (C.chart) C.chart.applyOptions({ timeScale: { secondsVisible: !!tf.trades } });
-  const raw = tf.trades ? null : await rawMinute(tf);
-  S.bars = tf.trades ? candlesFromTrades(S.trades, tf.trades) : finishMinute(raw, tf);
-  paint(fit);
-  if (raw?.failed) retryMinute(S.run, S.tf);
-}
-let refitQueued = false;
-function scheduleRefit() {
-  if (refitQueued) return;
-  refitQueued = true;
-  requestAnimationFrame(() => { refitQueued = false; refit(); });
-}
-/** One new trade into the last candle, as terminals do between candle refreshes. */
-function applyTrade(x) {
-  if (!(x.priceUsd > 0)) return;
-  const tf = TF[S.tf];
-  const step = tf.trades || tf.step;
-  const t = Math.floor(x.at / 1000 / step) * step;
-  let last = S.bars[S.bars.length - 1];
-  if (last && t < last.t) return;
-  if (!last || t > last.t) {
-    const o = last ? last.c : x.priceUsd;
-    last = { t, o, h: o, l: o, c: o, v: 0 };
-    S.bars.push(last);
-    // a young coin's chart grows from its trades: without a fit the new candles bunch up at the right edge
-    $("#chartNote").textContent = "";
-    if (S.autoFit) scheduleRefit();
-  }
-  last.h = Math.max(last.h, x.priceUsd); last.l = Math.min(last.l, x.priceUsd); last.c = x.priceUsd; last.v += x.usd || 0;
-  C.candles.update(toBar(last)); C.volume.update(toVol(last));
-}
-function addTrades(list) {
-  const known = new Set(S.trades.map((x) => x.tx));
-  const fresh = list.filter((x) => !known.has(x.tx));
-  S.trades = [...S.trades, ...fresh].sort((a, b) => a.at - b.at).slice(-5000);
-  return fresh.sort((a, b) => a.at - b.at);
-}
-function setTf(tf) {
-  S.tf = tf;
-  all(".tfs button[data-tf]").forEach((x) => x.setAttribute("aria-pressed", x.dataset.tf === tf ? "true" : "false"));
-}
-
-// ---------- the verdict, in big letters ----------
-const BIG = {
-  checking: ["Checking the coin…", "Проверяю монету…"],
-  danger: ["Dangerous to buy", "Опасно покупать"],
-  warn: ["Be careful", "Осторожно"],
-  ok: ["No obvious traps", "Явных ловушек нет"],
-  failed: ["Could not check", "Не удалось проверить"],
-};
-function renderVerdict() {
-  const r = S.report;
-  let level = S.checkFailed ? "failed" : r ? r.level : "checking";
-  let why = "";
-  if (r) {
-    const d = describe(r, lang());
-    const top = d.flags.find((f) => f.level === "danger") || d.flags.find((f) => f.level === "warn");
-    why = top ? top.text : T("New tokens cannot be minted, accounts cannot be frozen, no dangerous token extensions.",
-      "Новые токены выпустить нельзя, счета не заморозить, опасных расширений токена нет.");
-  }
-  if (S.info?.honeypot === true) { level = "danger"; why = T("GeckoTerminal marks this token as a honeypot: selling may be blocked.", "GeckoTerminal помечает токен как ловушку: продать могут не дать."); }
-  if (level === "checking") why = T("Reading the coin on the Solana chain.", "Читаю монету в сети Solana.");
-  if (level === "failed") why = T("The chain did not answer; the market data below still works.", "Сеть не ответила; данные рынка ниже работают.");
-  const v = $("#verdict");
-  v.className = `verdict ${level}`;
-  $("#vText").textContent = T(...BIG[level]);
-  $("#vWhy").textContent = why;
-  // the plaque says what it has not seen yet: the holder list comes after the verdict and can raise it, or fail.
-  // Three notes of about one length: the verdict's height must not change with them (docs/coin-link.md)
-  const unread = r && !r.holders && level !== "danger";
-  $("#vNote").textContent = level !== "ok" && level !== "warn" && level !== "danger" ? ""
-    : unread && r.missing.includes("holders") ? T("The biggest wallets could not be read, so this verdict does not take them into account.", "Крупнейшие кошельки прочитать не удалось, поэтому этот вердикт их не учитывает.")
-    : unread ? T("Still reading the biggest wallets, which takes a few seconds: the verdict may get stricter.", "Ещё читаю крупнейшие кошельки, это несколько секунд: вердикт может стать строже.")
-    : T("This is how the coin is built on chain, not a promise it goes up: memecoins fall without traps too.", "Это устройство монеты на цепи, а не обещание роста: мемкоины падают и без ловушек.");
-}
-
-// ---------- market block: the market cap, live ----------
-function renderMarket(m, first) {
-  if (!m) return;
-  const el = $("#price");
-  const mcap = m.marketCapUsd ?? (m.priceUsd != null ? m.priceUsd * S.supply : null);
-  const prev = S.mcap;
-  S.mcap = mcap; S.price = m.priceUsd;
-  countTo(el, mcap ?? 0, (v) => (mcap == null ? "?" : money(v, lang())));
-  if (!first && prev != null && mcap != null && mcap !== prev) {
-    el.classList.remove("up", "down"); void el.offsetWidth;
-    el.classList.add(mcap > prev ? "up" : "down");
-    setTimeout(() => el.classList.remove("up", "down"), 1600);
-  }
-  $("#sub").textContent = `${T("price", "цена")} ${money(m.priceUsd, lang())} · ${T("liquidity", "ликвидность")} ${money(m.liquidityUsd, lang())} · ${T("volume 24h", "объём 24ч")} ${money(m.volume24, lang())}`;
-  $("#chips").innerHTML = [["5m", "5м", m.change.m5], ["1h", "1ч", m.change.h1], ["6h", "6ч", m.change.h6], ["24h", "24ч", m.change.h24]]
-    .filter(([, , v]) => v != null).map(([en, ru, v]) => `<span class="chip ${v > 0 ? "up" : v < 0 ? "down" : ""}">${T(en, ru)} ${esc(signedPct(v, lang()))}</span>`).join("");
-}
-
-// ---------- the key numbers, as terminals show them ----------
-function renderTiles() {
-  const r = S.report, i = S.info, m = S.market;
-  const t = r?.token;
-  const tx24 = m?.tx?.h24;
-  const h = r?.holders;   // read from the chain just now; GeckoTerminal's holder numbers can be a day old
-  const tiles = [
-    [T("top 10 hold", "топ-10 держат"), h ? pct(h.top10WalletsPct) : i?.spread?.top10 != null ? pct(i.spread.top10) : "…", ""],
-    [T("developer holds", "создатель держит"), h && r.creator ? pct(h.creatorPct) : i?.devPct != null ? pct(i.devPct) : "…", ""],
-    [T("holders", "держателей"), h ? intl(h.accounts) : i?.holders != null ? intl(i.holders) : "…", ""],
-    [T("new tokens", "выпуск новых"), t ? (t.mintAuthority ? T("ON", "ВКЛЮЧЁН") : T("off", "отключён")) : "…", t ? (t.mintAuthority ? "danger" : "ok") : ""],
-    [T("freezing", "заморозка"), t ? (t.freezeAuthority ? T("ON", "ВКЛЮЧЕНА") : T("off", "отключена")) : "…", t ? (t.freezeAuthority ? "danger" : "ok") : ""],
-    [T("trades in creation block", "сделок в блоке создания"), r?.launch?.reached ? intl(r.launch.sameBlock) : r ? "?" : "…", r?.launch?.reached && r.launch.sameBlock >= SAME_BLOCK_WARN ? "warn" : ""],
-    [T("liquidity", "ликвидность"), m ? money(m.liquidityUsd, lang()) : "…", ""],
-    [T("volume 24h", "объём 24ч"), m ? money(m.volume24, lang()) : "…", ""],
-    [T("trades 24h", "сделок за 24ч"), tx24 && tx24.buys != null ? intl(tx24.buys + tx24.sells) : "…", ""],
-  ];
-  $("#tiles").innerHTML = tiles.map(([k, v, c]) => `<div class="${c}"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join("");
-}
-
-// ---------- who holds: the supply's spread ----------
-function renderSpread() {
-  const i = S.info;
-  const card = $("#spreadCard");
-  if (!i || i.spread.top10 == null) { card.hidden = !S.infoDone; if (S.infoDone) $("#spread").innerHTML = `<p class="empty">${T("GeckoTerminal has no holder data for this coin yet.", "У GeckoTerminal пока нет данных о держателях этой монеты.")}</p>`; return; }
-  card.hidden = false;
-  const parts = [
-    [T("top 10", "топ-10"), i.spread.top10, "var(--brick)"], [T("11–20", "11–20"), i.spread.next10, "var(--ochre)"],
-    [T("21–40", "21–40"), i.spread.next20, "var(--sand)"], [T("everyone else", "все остальные"), i.spread.rest, "var(--moss)"],
-  ].filter(([, v]) => v != null);
-  const sum = parts.reduce((s, [, v]) => s + v, 0) || 100;
-  $("#spread").innerHTML = `<div class="stack">${parts.map(([, v, c]) => `<i style="width:${(v / sum * 100).toFixed(2)}%;background:${c}"></i>`).join("")}</div>
-    <ul class="keys">${parts.map(([k, v, c]) => `<li><s style="background:${c}"></s>${esc(k)} · ${esc(pct(v))}</li>`).join("")}</ul>
-    <p class="src">${T(`${intl(i.holders)} holders`, `${intl(i.holders)} держателей`)}${i.devPct != null ? T(` · developer holds ${pct(i.devPct)}`, ` · у создателя ${pct(i.devPct)}`) : ""} · GeckoTerminal</p>`;
-}
-
-// ---------- who trades: buys against sells per window ----------
-const WINDOWS = [["m5", "5m", "5 мин"], ["m15", "15m", "15 мин"], ["h1", "1h", "1 ч"], ["h6", "6h", "6 ч"], ["h24", "24h", "24 ч"]];
-function splitRow(label, a, b, right) {
-  const tot = (a || 0) + (b || 0);
-  const pa = tot ? (a / tot) * 100 : 50;
-  return `<div class="row"><span>${esc(label)}</span><div class="split"><i class="b" style="width:${pa.toFixed(1)}%"></i><i class="s" style="width:${(100 - pa).toFixed(1)}%"></i></div><span class="n">${right}</span></div>`;
-}
-function renderPressure() {
-  const tx = S.market?.tx;
-  const card = $("#pressCard");
-  if (!tx || !Object.keys(tx).length) { card.hidden = true; return; }
-  card.hidden = false;
-  const rows = WINDOWS.filter(([k]) => tx[k] && tx[k].buys != null)
-    .map(([k, en, ru]) => splitRow(T(en, ru), tx[k].buys, tx[k].sells, `<span class="up">${intl(tx[k].buys)}</span> / <span class="down">${intl(tx[k].sells)}</span>`));
-  const ppl = ["h1", "h24"].filter((k) => tx[k] && tx[k].buyers != null)
-    .map((k) => { const w = WINDOWS.find((x) => x[0] === k); return splitRow(T(w[1], w[2]), tx[k].buyers, tx[k].sellers, `<span class="up">${intl(tx[k].buyers)}</span> / <span class="down">${intl(tx[k].sellers)}</span>`); });
-  $("#press").innerHTML = `<div class="rows">${rows.join("")}</div>`
-    + (ppl.length ? `<p class="hint" style="margin:12px 0 6px">${T("Different wallets: buyers / sellers", "Разных кошельков: покупатели / продавцы")}</p><div class="rows">${ppl.join("")}</div>` : "");
-}
-
-// ---------- money in and out over the latest trades ----------
-function renderFlow() {
-  const list = S.trades.filter((x) => x.usd > 0);
-  const card = $("#flowCard");
-  if (list.length < 2) { card.hidden = !S.tradesDone; if (S.tradesDone) $("#flow").innerHTML = `<p class="empty">${T("Too few trades in the last day.", "За сутки слишком мало сделок.")}</p>`; return; }
-  card.hidden = false;
-  let cum = 0;
-  const pts = list.map((x) => { cum += x.side === "buy" ? x.usd : -x.usd; return [x.at, cum]; });
-  const t0 = pts[0][0], t1 = pts[pts.length - 1][0] || t0 + 1;
-  const lo = Math.min(0, ...pts.map((p) => p[1])), hi = Math.max(0, ...pts.map((p) => p[1]));
-  const W = 600, H = 150, pad = 8;
-  const X = (t) => ((t - t0) / Math.max(1, t1 - t0)) * W;
-  const Y = (v) => pad + (1 - (v - lo) / Math.max(1e-9, hi - lo)) * (H - 2 * pad);
-  const line = pts.map((p, k) => `${k ? "L" : "M"}${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join(" ");
-  const color = cum >= 0 ? UP : DOWN;
-  const area = `${line} L${X(t1).toFixed(1)} ${Y(0).toFixed(1)} L0 ${Y(0).toFixed(1)} Z`;
-  const mins = Math.max(1, Math.round((t1 - t0) / 60000));
-  const span = mins < 120 ? T(`${mins} min`, `${mins} мин`) : T(`${intl(mins / 60, 1)} h`, `${intl(mins / 60, 1)} ч`);
-  $("#flow").innerHTML = `<p class="flowsum"><b class="${cum >= 0 ? "up" : "down"}">${cum >= 0 ? "+" : "−"}${esc(money(Math.abs(cum), lang()))}</b> ${T(cum >= 0 ? "more came in than went out" : "more went out than came in", cum >= 0 ? "зашло больше, чем вышло" : "вышло больше, чем зашло")} · ${T(`last ${list.length} trades, ${span}`, `последние ${list.length} сделок, ${span}`)}</p>
-    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="net flow"><line x1="0" x2="${W}" y1="${Y(0).toFixed(1)}" y2="${Y(0).toFixed(1)}" stroke="${TXT}" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>
-    <path d="${area}" fill="${color}" fill-opacity=".12"/><path d="${line}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`;
-}
-
-// ---------- trade sizes: small fish or whales ----------
-const SIZES = [[0, 10, "< $10"], [10, 100, "$10–100"], [100, 1000, "$100–1K"], [1000, 10000, "$1K–10K"], [10000, Infinity, "≥ $10K"]];
-function renderSizes() {
-  const list = S.trades.filter((x) => x.usd > 0);
-  const card = $("#sizeCard");
-  if (list.length < 5) { card.hidden = true; return; }
-  card.hidden = false;
-  const rows = SIZES.map(([a, b, label]) => {
-    const inB = list.filter((x) => x.usd >= a && x.usd < b);
-    return { label, buys: inB.filter((x) => x.side === "buy").length, sells: inB.filter((x) => x.side !== "buy").length };
-  });
-  const max = Math.max(1, ...rows.map((r) => Math.max(r.buys, r.sells)));
-  $("#sizes").innerHTML = `<div class="fly mid" style="margin:0 0 4px"><span class="l down">${T("sells", "продажи")}</span><span></span><span class="r up">${T("buys", "покупки")}</span></div>`
-    + `<div class="rows">${rows.map((r) => `<div class="fly"><span class="l">${r.sells ? intl(r.sells) : ""}<i style="width:${(r.sells / max * 100).toFixed(1)}%"></i></span><span class="mid">${esc(r.label)}</span><span class="r"><i style="width:${(r.buys / max * 100).toFixed(1)}%"></i>${r.buys ? intl(r.buys) : ""}</span></div>`).join("")}</div>`;
-}
-
-// ---------- the biggest wallets among the latest trades ----------
-function renderWhales() {
-  const by = new Map();
-  for (const x of S.trades) {
-    if (!x.wallet || !(x.usd > 0)) continue;
-    const w = by.get(x.wallet) || { wallet: x.wallet, buy: 0, sell: 0 };
-    if (x.side === "buy") w.buy += x.usd; else w.sell += x.usd;
-    by.set(x.wallet, w);
-  }
-  const top = [...by.values()].sort((a, b) => b.buy + b.sell - (a.buy + a.sell)).slice(0, 6);
-  const card = $("#whaleCard");
-  if (top.length < 2) { card.hidden = true; return; }
-  card.hidden = false;
-  const max = Math.max(...top.map((w) => w.buy + w.sell));
-  $("#whales").innerHTML = `<div class="rows">${top.map((w) => {
-    const net = w.buy - w.sell;
-    const tot = w.buy + w.sell;
-    return `<div class="whale"><a href="https://solscan.io/account/${esc(w.wallet)}" data-ext>${esc(short(w.wallet))}</a>
-      <div class="split" style="width:${(tot / max * 100).toFixed(1)}%"><i class="b" style="width:${(w.buy / tot * 100).toFixed(1)}%"></i><i class="s" style="width:${(w.sell / tot * 100).toFixed(1)}%"></i></div>
-      <span class="net ${net >= 0 ? "up" : "down"}">${net >= 0 ? "+" : "−"}${esc(money(Math.abs(net), lang()))}</span></div>`;
-  }).join("")}</div>`;
-}
-
-// ---------- the pump.fun curve's progress ----------
-function renderCurve() {
-  const r = S.report, i = S.info;
-  let p = null, text = "";
-  if (r?.curve && !r.curve.complete) { p = r.curve.soldPct; text = T("At 100% the coin moves to a PumpSwap pool.", "При 100 % монета переходит в пул PumpSwap."); }
-  else if (i?.curvePct != null && !i.curveDone) { p = i.curvePct; text = T("At 100% the coin moves to a PumpSwap pool.", "При 100 % монета переходит в пул PumpSwap."); }
-  else if (r?.pool || i?.curveDone) {
-    p = 100;
-    const at = i?.curveDoneAt ? new Date(i.curveDoneAt).toLocaleString(LOC(), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
-    text = at ? T(`Moved to a PumpSwap pool on ${at}.`, `Перешла в пул PumpSwap ${at}.`) : T("Moved to a PumpSwap pool.", "Перешла в пул PumpSwap.");
-  }
-  const card = $("#curveCard");
-  if (p == null) { card.hidden = true; return; }
-  card.hidden = false;
-  $("#curve").innerHTML = `<div class="progress"><i style="width:${Math.max(0, Math.min(100, p)).toFixed(1)}%"></i><span>${esc(pct(p))}</span></div><p class="fine">${esc(text)}</p>`;
-}
-
-function renderAll() { renderVerdict(); renderTiles(); renderSpread(); renderPressure(); renderFlow(); renderSizes(); renderWhales(); renderCurve(); }
-
-// ---------- head: picture, name, links ----------
-function renderHead() {
-  const i = S.info;
-  const img = $("#logo");
-  if (i?.image) { img.src = i.image; img.hidden = false; } else img.hidden = true;
-  if (i && !S.report?.token?.name && (i.name || i.symbol)) $("#title").textContent = [i.name, i.symbol ? "$" + i.symbol : ""].filter(Boolean).join(" ");
-  const links = [];
-  if (i?.twitter) links.push(`<a href="https://x.com/${esc(i.twitter)}" data-ext>X</a>`);
-  if (i?.telegram) links.push(`<a href="https://t.me/${esc(i.telegram)}" data-ext>Telegram</a>`);
-  for (const w of i?.websites ?? []) links.push(`<a href="${esc(w)}" data-ext rel="nofollow">${esc(w.replace(/^https?:\/\//, "").replace(/\/$/, "").slice(0, 28))}</a>`);
-  links.push(`<a href="https://solscan.io/token/${esc(S.mint)}" data-ext>Solscan</a>`);
-  $("#socials").innerHTML = links.join("");
-}
-
-// ---------- trades ----------
-function ago(ms) { const s = Math.max(0, Math.round((Date.now() - ms) / 1000)); return s < 60 ? T(`${s}s`, `${s} с`) : s < 3600 ? T(`${Math.round(s / 60)}m`, `${Math.round(s / 60)} мин`) : T(`${Math.round(s / 3600)}h`, `${Math.round(s / 3600)} ч`); }
-function renderTrades(list, first) {
-  const ul = $("#feed");
-  const fresh = list.slice(0, 15);
-  ul.innerHTML = fresh.map((x) => {
-    const isNew = !first && !S.seen.has(x.tx);
-    const sol = x.sol != null ? x.sol.toLocaleString(LOC(), { maximumFractionDigits: x.sol < 1 ? 3 : 2 }) : "?";
-    return `<li class="${isNew ? "new" : ""}"><span class="side ${x.side === "buy" ? "buy-s" : "sell-s"}">${x.side === "buy" ? T("buy", "покупка") : T("sell", "продажа")}</span>
-      <span class="amt">${sol} SOL <span class="ago">${esc(money(x.usd, lang()))}</span></span>
-      <a class="ago" href="https://solscan.io/tx/${esc(x.tx)}" data-ext>${ago(x.at)}</a></li>`;
-  }).join("") || `<li><span></span><span class="ago">${T("No trades in the last day.", "За сутки сделок нет.")}</span><span></span></li>`;
-  fresh.forEach((x) => S.seen.add(x.tx));
-}
-
-// ---------- the on-chain check ----------
-function renderCheck() {
-  const r = S.report;
-  if (!r) return;
-  const d = describe(r, lang());
-  $("#flags").innerHTML = d.flags.map((f) => `<li class="${f.level}">${esc(f.text)}</li>`).join("");
-  $("#facts").innerHTML = d.facts.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join("");
-  $("#checkNote").textContent = d.note;
-  $("#check").hidden = false;
-}
-
-function renderBuy() {
-  const pair = S.report?.pool?.address ?? S.report?.curve?.address ?? S.pool ?? null;
-  const links = buyLinks(S.mint, pair, REFS);
-  $("#buy").innerHTML = links.map((l) => `<a href="${esc(l.url)}" class="${l.ref ? "ref" : ""}" data-ext>${esc(l.name)}</a>`).join("");
-  const su = signupLinks(REFS);
-  const code = pumpCode(REFS);
-  $("#signup").innerHTML = [
-    ...su.map((s) => `<a href="${esc(s.url)}" data-ext>${T(`No ${esc(s.name)} account? Sign up`, `Нет аккаунта в ${esc(s.name)}? Регистрация`)}</a>`),
-    ...(code ? [T(`New to pump.fun? Invite code in the app: <b>${esc(code)}</b>`, `Впервые на pump.fun? Код приглашения в приложении: <b>${esc(code)}</b>`)] : []),
-  ].join("<br>");
-  $("#botlink").href = `https://t.me/${BOT}?start=${S.mint}`;
-  $("#botlink").parentElement.hidden = inTg;
-}
-
-// ---------- flow ----------
-function remember(mint, name) {
-  try {
-    const list = JSON.parse(localStorage.getItem("recent") || "[]").filter((x) => x.mint !== mint);
-    list.unshift({ mint, name });
-    localStorage.setItem("recent", JSON.stringify(list.slice(0, 6)));
-  } catch (e) {}
-}
-function renderRecent() {
-  let list = [];
-  try { list = JSON.parse(localStorage.getItem("recent") || "[]"); } catch (e) {}
-  $("#recent").innerHTML = list.map((x) => `<button type="button" data-mint="${esc(x.mint)}">${esc(x.name || short(x.mint))}</button>`).join("");
-}
-
-/** Market data again after a pause while this coin is still open: the free API sometimes refuses a burst. */
-async function retrying(fn, run) {
-  for (const wait of [0, 8000, 20000]) {
-    if (wait) {
-      if (!S.bars.length) $("#chartNote").textContent = T("Market data is busy, trying again…", "Данные рынка заняты, пробую ещё раз…");
-      await new Promise((r) => setTimeout(r, wait));
-    }
-    if (run !== S.run) throw new Error("closed");
-    try { return await fn(); } catch (e) { if (wait === 20000) throw e; }
-  }
-}
-
-function readPools(mint) { try { return JSON.parse(localStorage.getItem("pools:" + mint) || "null"); } catch (e) { return null; } }
-function savePools(mint, p) { try { localStorage.setItem("pools:" + mint, JSON.stringify(p)); } catch (e) {} }
-/** The pool to chart and the coin's pump.fun curve, if it migrated (its candles come first, as on Axiom). */
-function poolsOf(m) {
-  if (!m?.main) return null;
-  const curve = m.main.dex === "pumpswap" ? m.pools.filter((p) => p.dex === "pump-fun" && p.createdAt && p.createdAt <= (m.main.createdAt ?? Infinity)).sort((a, b) => a.createdAt - b.createdAt)[0] : null;
-  return { main: m.main.address, curve: curve ? curve.address : null, createdAt: curve?.createdAt ?? m.main.createdAt ?? null };
-}
-
-/** The pool's numbers on the page: market cap, tiles, buys and sells; the pools remembered for the next visit. */
-function showMarket(m, cached, mint) {
-  S.market = m.main;
-  if (m.main.fdvUsd && m.main.priceUsd) S.supply = m.main.fdvUsd / m.main.priceUsd;
-  renderMarket(m.main, true);
-  renderTiles(); renderPressure();
-  if (!cached) { const pp = poolsOf(m); if (pp) savePools(mint, pp); }
-  else if (!cached.createdAt && m.main.createdAt) savePools(mint, { ...cached, createdAt: m.main.createdAt });
-  if (S.bars.length) paint(false);    // the market cap scale needs the supply
-  renderBuy();
-}
-
-/** The chart and the trades of a pool GeckoTerminal knows. */
-async function startChart(run, mint, pp) {
-  Object.assign(S, { pool: pp.main, curvePool: pp.curve, createdAt: pp.createdAt });
-  setTf(pp.createdAt ? defaultTf((Date.now() - pp.createdAt) / 1000) : "1m");
-  const tf = TF[S.tf];
-  const [got, raw] = await Promise.all([trades(S.pool, mint).catch(() => null), tf.trades ? null : rawMinute(tf)]);
-  if (run !== S.run) return;
-  const list = got ?? [];
-  if (!got) retryTrades(run);
-  addTrades(list);
-  S.tradesDone = !!got;
-  renderTrades(list, true);
-  renderFlow(); renderSizes(); renderWhales();
-  S.bars = tf.trades ? candlesFromTrades(S.trades, tf.trades) : finishMinute(raw, tf);
-  paint(true);
-  if (raw?.failed) retryMinute(run, S.tf);
-  if (!pp.createdAt && S.bars.length && defaultTf(Date.now() / 1000 - S.bars[0].t) === "1s") { setTf("1s"); await loadBars(true); }
-}
-
-/**
- * A coin a few minutes old is not on GeckoTerminal yet: look again every 30 s for ten minutes and start the chart
- * as soon as it is listed, instead of leaving the page without one.
- */
-async function waitListing(run, mint, attempt) {
-  $("#chartNote").textContent = T("GeckoTerminal does not list this coin yet (new coins appear within a few minutes). The chart starts by itself.",
-    "GeckoTerminal ещё не знает эту монету (новые появляются через несколько минут). График включится сам.");
-  if (attempt > 20) { $("#chartNote").textContent = T("GeckoTerminal does not list this coin.", "GeckoTerminal не знает эту монету."); S.tradesDone = true; renderFlow(); return; }
-  await new Promise((r) => setTimeout(r, 30000));
-  if (run !== S.run) return;
-  let m = null;
-  try { m = await marketOf(mint); } catch (e) { /* busy: next round */ }
-  if (run !== S.run) return;
-  const pp = poolsOf(m);
-  if (!pp?.main) return waitListing(run, mint, attempt + 1);
-  showMarket(m, null, mint);
-  await startChart(run, mint, pp);
-}
-
-async function open(input) {
-  const mint = parseMintInput(input);
-  if (!mint) { root.classList.remove("coin-link"); status(T("That is not a coin address.", "Это не адрес монеты."), true); return; }
-  if (window.FX) FX.use("coin").catch(() => {});   // fx/coin.js: effects on only, after the first paint; the empty page never loads it
-  const run = ++S.run;
-  clearInterval(S.timer); clearInterval(S.slow);
-  // pools handed over by the bot (it already read the chain); only for the coin they came with
-  const q = new URLSearchParams(location.search);
-  const hinted = q.get("mint") === mint && isAddress(q.get("p") || q.get("c") || "");
-  const given = hinted ? { main: q.get("p") || q.get("c"), curve: q.get("p") && isAddress(q.get("c") || "") ? q.get("c") : null, createdAt: null } : null;
-  Object.assign(S, { mint, pool: null, curvePool: null, createdAt: null, bars: [], trades: [], market: null, report: null, info: null, infoDone: false, tradesDone: false, checkFailed: false, price: null, mcap: null, seen: new Set() });
-  const keep = given ? `${given.main === q.get("p") ? `&p=${given.main}` : ""}${q.get("c") && isAddress(q.get("c")) ? `&c=${q.get("c")}` : ""}` : "";
-  try { history.replaceState(null, "", `?mint=${mint}${keep}&lang=${lang()}`); } catch (e) {}
-  document.body.classList.add("has-coin");
-  $("#coin").hidden = false;
-  $("#coin").querySelectorAll(".reveal").forEach((el, i) => { el.style.animationDelay = `${Math.min(i, 8) * 60}ms`; el.classList.remove("reveal"); void el.offsetWidth; el.classList.add("reveal"); });
-  $("#title").textContent = short(mint);
-  $("#mintBtn").textContent = mint;
-  $("#price").textContent = "…"; delete $("#price").dataset.v;
-  $("#sub").textContent = ""; $("#chips").innerHTML = "";
-  $("#logo").hidden = true; $("#socials").innerHTML = "";
-  $("#check").hidden = true;
-  for (const id of ["#spreadCard", "#pressCard", "#flowCard", "#sizeCard", "#whaleCard", "#curveCard"]) $(id).hidden = true;
-  if (C.chart) { C.chart.remove(); C.chart = null; }
-  $("#chart").innerHTML = "";
-  $("#legend").innerHTML = "";
-  $("#chartNote").textContent = T("Loading the chart…", "Загружаю график…");
-  $("#feed").innerHTML = "";
-  renderAll(); renderHead(); renderBuy();
-  status("");
-
-  // the pools: remembered from the last visit, so the chart starts loading at once; GeckoTerminal confirms them
-  const cached = readPools(mint) || given;
-  // with the pool known, one request for its numbers replaces the search through all of the coin's pools
-  const marketP = cached
-    ? retrying(() => poolNow(cached.main).then((p) => ({ main: p, pools: p ? [p] : [] })), run)
-    : retrying(() => marketOf(mint), run);
-  const poolsP = cached ? Promise.resolve(cached) : marketP.then(poolsOf);
-
-  const chartP = poolsP.then((pp) => {
-    if (run !== S.run) return;
-    if (!pp?.main) { waitListing(run, mint, 1); return; }
-    return startChart(run, mint, pp);
-  });
-
-  marketP.then((m) => {
-    if (run !== S.run || !m?.main) return;
-    showMarket(m, cached, mint);
-  }).catch(() => { if (run === S.run && !S.bars.length) $("#chartNote").textContent = T("Market data did not load.", "Данные рынка не загрузились."); });
-
-  // holders' spread, the developer's share, the curve, picture and links: one more request, after the chart's
-  chartP.catch(() => {}).then(() => retrying(() => tokenInfo(mint), run)).then((info) => {
-    if (run !== S.run) return;
-    S.info = info; S.infoDone = true;
-    renderHead(); renderVerdict(); renderTiles(); renderSpread(); renderCurve();
-  }).catch(() => { if (run === S.run) { S.infoDone = true; renderSpread(); } });
-
-  const showReport = (r) => { S.report = r; renderVerdict(); renderTiles(); renderCurve(); renderCheck(); };
-  const checkP = checkCoin(mint, {
-    rpc: makeRpc(PAGE_RPC, { gapMs: 120, timeoutMs: 12000, retries: [1500, 4000] }),
-    holdersRpc: makeRpc(HOLDERS_RPC),
-    labels: LABELS,
-    sampleTx: 0,
-    // the verdict does not wait for the holder list, which takes seconds on a big coin; the full report may raise it
-    onEarly: (r) => {
-      if (run !== S.run) return;
-      const name = [r.token.name, r.token.symbol ? "$" + r.token.symbol : ""].filter(Boolean).join(" ");
-      if (name) $("#title").textContent = name;
-      remember(mint, r.token.symbol ? "$" + r.token.symbol : r.token.name);
-      showReport(r); renderBuy(); renderRecent();
-    },
-  })
-    .then((r) => { if (run === S.run) showReport(r); })
-    .catch((e) => {
-      if (run !== S.run) return;
-      S.checkFailed = true; renderVerdict();
-      status(e?.code === "not_mint" ? T("This is not a token address.", "Это не адрес токена.") : T("The chain check did not load; the market data still works.", "Проверка по цепи не загрузилась; данные рынка работают."), true);
-    });
-
-  await Promise.allSettled([chartP, marketP]);
-  if (run !== S.run) return;
-  S.timer = setInterval(() => liveTrades(run), 5000);     // new trades move the last candle
-  S.slow = setInterval(() => liveMarket(run), 15000);     // market cap, changes, buys and sells
-  checkP.then(() => {});
-}
-
-/** The first trades were refused (a burst limit): ask again after 3, 6, 9 and 12 s. */
-async function retryTrades(run, attempt = 1) {
-  await new Promise((r) => setTimeout(r, attempt * 3000));
-  if (run !== S.run || !S.pool) return;
-  let list;
-  try { list = await trades(S.pool, S.mint); } catch (e) { if (attempt < 4) retryTrades(run, attempt + 1); return; }
-  if (run !== S.run) return;
-  addTrades(list);
-  S.tradesDone = true;
-  renderTrades(list, true); renderFlow(); renderSizes(); renderWhales();
-  if (TF[S.tf].trades) { S.bars = candlesFromTrades(S.trades, TF[S.tf].trades); paint(S.autoFit); }
-}
-
-async function liveTrades(run) {
-  if (document.hidden || !S.pool || run !== S.run) return;
-  let list;
-  try { list = await trades(S.pool, S.mint); } catch (e) { return; }
-  if (run !== S.run) return;
-  const fresh = addTrades(list);
-  renderTrades(list, false);
-  if (!fresh.length) return;
-  renderFlow(); renderSizes(); renderWhales();
-  if (!C.chart) return;
-  for (const x of fresh) applyTrade(x);
-  legend(null, null);
-  if (root.classList.contains("fx-coin")) tradeMark(fresh[fresh.length - 1]);
-}
-/** For fx/coin.js: where the newest trade landed on the chart — the last candle at its new close. */
-function tradeMark(x) {
-  const last = S.bars[S.bars.length - 1];
-  if (!x || !last) return;
-  const px = C.chart.timeScale().timeToCoordinate(last.t), py = C.candles.priceToCoordinate(toBar(last).close);
-  if (px == null || py == null) return;
-  document.dispatchEvent(new CustomEvent("coin:trade", { detail: { x: px, y: py, side: x.side } }));
-}
-
-async function liveMarket(run) {
-  if (document.hidden || !S.pool || run !== S.run) return;
-  try {
-    const m = await poolNow(S.pool);
-    if (run !== S.run || !m) return;
-    if (m.fdvUsd && m.priceUsd) S.supply = m.fdvUsd / m.priceUsd;
-    S.market = m;
-    renderMarket(m, false); renderTiles(); renderPressure();
-  } catch (e) { /* the next tick tries again */ }
-}
-
-// ---------- language and controls ----------
-let pick = null;
-try { const q = new URLSearchParams(location.search).get("lang"); if (q === "ru" || q === "en") pick = q; } catch (e) {}
-if (!pick && inTg) pick = (app.initDataUnsafe?.user?.language_code || "").startsWith("ru") ? "ru" : "en";
-if (!pick) { try { pick = localStorage.getItem("lang"); } catch (e) {} }
-if (pick !== "ru" && pick !== "en") pick = (navigator.language || "").toLowerCase().startsWith("ru") ? "ru" : "en";
-function setLang(l) {
-  root.setAttribute("data-lang", l); root.lang = l;
-  all("[data-set]").forEach((b) => b.setAttribute("aria-pressed", b.getAttribute("data-set") === l ? "true" : "false"));
-  $("#q").placeholder = l === "ru" ? "адрес монеты pump.fun или ссылка" : "pump.fun coin address or link";
-  if (S.market) renderMarket(S.market, true);
-  if (S.bars.length) paint(false);
-  $("#mode").textContent = S.mode === "mc" ? "MC" : (l === "ru" ? "Цена" : "Price");
-  if (S.mint) { renderAll(); renderHead(); renderCheck(); renderBuy(); renderTrades(S.trades.slice().reverse(), true); }
-}
-setLang(pick);
-all("[data-set]").forEach((b) => b.addEventListener("click", () => { const l = b.getAttribute("data-set"); setLang(l); try { localStorage.setItem("lang", l); } catch (e) {} }));
-$("#form").addEventListener("submit", (e) => { e.preventDefault(); haptic(); open($("#q").value); });
-$("#recent").addEventListener("click", (e) => { const m = e.target.closest("[data-mint]")?.dataset.mint; if (m) { $("#q").value = m; open(m); } });
-all(".tfs button[data-tf]").forEach((b) => b.addEventListener("click", () => { haptic(); setTf(b.dataset.tf); loadBars(true); }));
-$("#fit").addEventListener("click", () => { haptic(); S.autoFit = true; refit(); });
-$("#mode").addEventListener("click", () => {
-  haptic(); S.mode = S.mode === "mc" ? "price" : "mc";
-  $("#mode").textContent = S.mode === "mc" ? "MC" : T("Price", "Цена");
-  if (S.bars.length) paint(false);
-});
-$("#mintBtn").addEventListener("click", async () => {
-  try { await navigator.clipboard.writeText(S.mint); status(T("Address copied.", "Адрес скопирован.")); setTimeout(() => status(""), 1500); } catch (e) {}
-});
-document.addEventListener("click", (e) => {
-  const a = e.target.closest("a[data-ext]");
-  if (a && inTg) { e.preventDefault(); openUrl(a.href); }
-});
-document.addEventListener("visibilitychange", () => { if (!document.hidden && S.mint) { liveTrades(S.run); liveMarket(S.run); } });
-
-renderRecent();
-const start = new URLSearchParams(location.search).get("mint") || (inTg ? app.initDataUnsafe?.start_param : null);
-if (start) { $("#q").value = start; open(start); }
-</script>
+<footer class="foot mono"><span>Artem Vartanov</span><nav><a href="https://t.me/artemvartanov" target="_blank" rel="noopener">Telegram</a><a href="https://github.com/hrekokovgmmek-lab" target="_blank" rel="noopener">GitHub</a><a href="https://x.com/ArtemPadinggton" target="_blank" rel="noopener">X</a><a href="https://www.instagram.com/ilowuvery/" target="_blank" rel="noopener">Instagram</a></nav></footer>
 </body>
 </html>

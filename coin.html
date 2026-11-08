@@ -1,0 +1,1267 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<script>(function(){var r=document.documentElement,l=null;try{l=new URLSearchParams(location.search).get('lang')}catch(e){}if(l!=='ru'&&l!=='en'){try{l=localStorage.getItem('lang')}catch(e){}}if(l!=='ru'&&l!=='en')l=(navigator.language||'').toLowerCase().indexOf('ru')===0?'ru':'en';r.setAttribute('data-lang',l);r.lang=l})();</script>
+<script>(function () {
+  var root = document.documentElement, nav = navigator, net = nav.connection || {}, why = [], q = null, mq = null;
+  try { q = new URLSearchParams(location.search).get('fx'); } catch (e) {}
+  try { mq = matchMedia('(prefers-reduced-motion: reduce)'); } catch (e) {}
+  if (q === '0') why.push('param');
+  if (mq && mq.matches) why.push('motion');
+  if (typeof WebGL2RenderingContext !== 'function') why.push('webgl');
+  if (net.saveData) why.push('save-data');
+  if (/(^|-)2g$/.test(net.effectiveType || '')) why.push('network');
+  if (nav.deviceMemory && nav.deviceMemory < 4) why.push('memory');
+  if (nav.deviceMemory && nav.hardwareConcurrency && nav.hardwareConcurrency < 4) why.push('cores');
+  var FX = window.FX = { on: !why.length, why: why, test: q === 'test' };
+  if (FX.on) root.classList.add('fx-on');
+  FX.off = function (reason) {
+    if (reason && why.indexOf(reason) < 0) why.push(reason);
+    if (!FX.on) return;
+    FX.on = false;
+    root.classList.remove('fx-on');
+    document.dispatchEvent(new CustomEvent('fx:off', { detail: { why: why.slice() } }));
+  };
+  if (mq) {
+    var calm = function (e) { if (e.matches) FX.off('motion'); };
+    if (mq.addEventListener) mq.addEventListener('change', calm); else if (mq.addListener) mq.addListener(calm);
+  }
+  var painted = null, mods = {};
+  function afterPaint() {
+    return painted || (painted = new Promise(function (go) {
+      function next() { requestAnimationFrame(function () { setTimeout(go, 0); }); }
+      if (document.readyState === 'complete') next(); else addEventListener('load', next, { once: true });
+    }));
+  }
+  FX.use = function (name) {
+    if (!FX.on) return Promise.resolve(null);
+    return mods[name] || (mods[name] = afterPaint().then(function () { return FX.on ? import('./fx/' + name + '.js') : null; }));
+  };
+  if (FX.on && FX.test) FX.use('probe');
+})();</script>
+<script>(function(){try{if(/(^|[\s\/?=&#])[1-9A-HJ-NP-Za-km-z]{43,44}([\s\/?=&#]|$)/.test(new URLSearchParams(location.search).get('mint')||''))document.documentElement.classList.add('coin-link')}catch(e){}})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Coin check · Artem Vartanov</title>
+<meta name="description" content="Paste a pump.fun coin: a big verdict from the chain, the live market cap and chart, who holds it and who trades it. Free, nothing to sign, no keys.">
+<meta name="theme-color" content="#f4f2ec">
+<meta property="og:title" content="Is this pump.fun coin a trap? · Coin check">
+<meta property="og:description" content="Paste a pump.fun coin: a big verdict from the chain, the live market cap and chart, who holds it and who trades it. Free, nothing to sign, no keys.">
+<meta property="og:image" content="https://artemvartanov.com/og.png">
+<meta property="og:url" content="https://artemvartanov.com/">
+<link rel="canonical" href="https://artemvartanov.com/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23f4f2ec'/%3E%3Cpath d='M10 44 L24 30 L34 38 L54 18' fill='none' stroke='%23a84b36' stroke-width='6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://api.geckoterminal.com" crossorigin>
+<link rel="preconnect" href="https://solana-rpc.publicnode.com" crossorigin>
+<script defer src="https://telegram.org/js/telegram-web-app.js"></script>
+<script defer src="lwc.js"></script>
+<style>
+:root{--paper:#f4f2ec;--ink:#1f1f1f;--brick:#a84b36;--grey:#6f6b62;--rule:#dedad1;--ochre:#9a6b12;--moss:#4d6b3c;--card:#fbfaf6;--sand:#cdbf9f;
+  --ease:cubic-bezier(.2,.7,.2,1);--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html{background:var(--paper);color:var(--ink);-webkit-text-size-adjust:100%;overflow-x:clip}
+body{margin:0 auto;max-width:1200px;padding:0 16px 40px;font:16px/1.5 "Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--paper)}
+:root[data-lang=en] [data-l=ru],:root[data-lang=ru] [data-l=en]{display:none}
+[hidden]{display:none!important}
+a{color:var(--ink);text-decoration-color:var(--brick);text-underline-offset:3px}
+.top{display:flex;align-items:center;gap:18px;padding:16px 0 4px;flex-wrap:wrap}
+.name{font-weight:500;text-decoration:none;font-size:15px}
+.nav{display:flex;gap:14px;font-size:14px;flex-wrap:wrap}
+.nav a{text-decoration:none;color:var(--grey)}
+.nav a[aria-current=page]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--brick);text-underline-offset:4px}
+.lang{margin-left:auto}
+.lang button{font:inherit;font-size:14px;background:none;border:0;padding:4px 6px;color:var(--grey);cursor:pointer}
+.lang button[aria-pressed=true]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--brick);text-underline-offset:4px}
+.hero h1{font-size:clamp(28px,5vw,44px);font-weight:500;line-height:1.1;letter-spacing:-.015em;margin:26px 0 6px}
+.hero p{color:var(--grey);margin:0;max-width:640px}
+body.has-coin .hero{display:none}
+/* a coin opened from a link (COIN_EARLY): no welcome block from the first paint, the footer below the fold until the
+   coin's place is taken, so that nothing on screen moves when the page script opens the coin; that script waits for
+   telegram.org, seconds at times, so a line says what the page is doing */
+.coin-link .hero{display:none}
+.coin-link body:not(.has-coin) main{min-height:100vh}
+.coin-link body:not(.has-coin) .status::before{content:"Loading the coin…"}
+.coin-link[data-lang=ru] body:not(.has-coin) .status::before{content:"Загружаю монету…"}
+/* and the places of what the answers fill in, each gone as soon as it is taken: the recent coins' row and the verdict's
+   note (the chain's answer brings both), the market's line and changes, the picture (until the answer about the token,
+   when the holders' card shows, with data or without) */
+.coin-link:has(.verdict.checking) .recent:empty{min-height:25px}
+.coin-link .verdict.checking small,.coin-link .sub:empty{min-height:1.5em}
+.coin-link .sub:empty+.chips{min-height:25.5px}
+.coin-link:has(#spreadCard[hidden]) .who:has(.logo[hidden])::before{content:"";flex:none;width:56px;height:56px}
+@media (max-width:560px){.coin-link .verdict.checking small,.coin-link .sub:empty{min-height:3em}}
+.hero .more{margin:10px 0 0;font-size:15px}
+form{display:flex;gap:8px;margin:14px 0 0;max-width:760px}
+input{flex:1;min-width:0;font:15px/1.4 var(--mono);padding:10px 11px;border:1px solid var(--ink);background:var(--card);color:var(--ink);border-radius:0}
+input:focus{outline:2px solid var(--brick);outline-offset:1px}
+button.go{font:inherit;padding:9px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;border-radius:0}
+.recent{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.recent button{font:13px var(--mono);background:none;border:1px solid var(--rule);padding:4px 8px;cursor:pointer;color:var(--ink)}
+.status{color:var(--grey);font-size:14px;min-height:1.5em;margin:10px 0 0}
+.status.err{color:var(--brick)}
+.verdict{margin:14px 0 0;padding:16px 18px;background:var(--grey);color:var(--paper);display:flex;flex-direction:column;gap:4px}
+.verdict b{font-size:clamp(30px,7vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.01em;text-transform:uppercase}
+.verdict span{font-size:15px;opacity:.95}
+.verdict small{font-size:12px;opacity:.8}
+.verdict.danger{background:var(--brick)} .verdict.warn{background:var(--ochre)} .verdict.ok{background:var(--moss)}
+.head{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin:18px 0 0}
+.who{display:flex;gap:12px;align-items:flex-start;flex:1 1 300px;min-width:0}
+.logo{width:56px;height:56px;object-fit:cover;border:1px solid var(--rule);background:var(--card);flex:none}
+.coin h1{font-size:clamp(22px,4.5vw,32px);font-weight:500;line-height:1.15;margin:0;letter-spacing:-.01em;overflow-wrap:anywhere}
+.mint{font:12px var(--mono);color:var(--grey);background:none;border:0;padding:4px 0;cursor:pointer;text-align:left;overflow-wrap:anywhere}
+.socials{display:flex;gap:10px;font-size:13px;flex-wrap:wrap}
+.pricebox{flex:1 1 260px;min-width:0}
+.mc{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.mc b{font-size:clamp(34px,7vw,52px);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.015em;line-height:1;transition:color .6s}
+.mc b.up{color:var(--moss)} .mc b.down{color:var(--brick)}
+.mc em{font-style:normal;color:var(--grey);font-size:13px}
+.live{font-size:12px;color:var(--grey);display:inline-flex;align-items:center;gap:6px}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--moss);display:inline-block;animation:pulse 2s infinite}
+.sub{color:var(--grey);font-size:14px;margin:4px 0 6px;font-variant-numeric:tabular-nums}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:13px;padding:2px 8px;border:1px solid var(--rule);font-variant-numeric:tabular-nums}
+.chip.up{color:var(--moss)} .chip.down{color:var(--brick)}
+.grid{display:flex;flex-direction:column;gap:22px;margin:20px 0 0}
+.col{display:contents}
+@media (min-width:980px){.grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px;align-items:start}
+  .col{display:flex;flex-direction:column;gap:22px}}
+.card{border-top:1px solid var(--ink);padding:10px 0 0;min-width:0}
+.card h2{font-size:17px;font-weight:500;margin:0 0 2px}
+.hint{color:var(--grey);font-size:13px;margin:0 0 10px}
+.src{color:var(--grey);font-size:12px;margin:8px 0 0}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.tiles div{background:var(--paper);padding:8px 10px;min-width:0}
+.tiles span{display:block;color:var(--grey);font-size:12px;text-transform:lowercase;line-height:1.25}
+.tiles b{font-weight:500;font-size:18px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.tiles .danger b{color:var(--brick)} .tiles .warn b{color:var(--ochre)} .tiles .ok b{color:var(--moss)}
+.panel{background:var(--paper);border-bottom:1px solid var(--rule)}
+.tfs{display:flex;gap:2px;align-items:center;border-bottom:1px solid var(--rule);overflow-x:auto;scrollbar-width:none}
+.tfs::-webkit-scrollbar{display:none}
+.tfs button{font:13px var(--mono);background:none;border:0;padding:9px 9px 7px;color:var(--grey);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tfs button[aria-pressed=true]{color:var(--ink);border-color:var(--brick)}
+.tfs button:hover{color:var(--ink)}
+.tfs .sep{flex:1}
+.tfs #mode{color:var(--ink);border:1px solid var(--ink);padding:3px 9px;margin:0 2px 0 6px;border-bottom-width:1px}
+.tfs #fit{color:var(--ink);font-size:15px;padding:3px 8px}
+/* the chart runs edge to edge of the window, past the page column */
+.chartcard{margin:20px calc(50% - 50vw) 0;width:100vw;max-width:100vw;padding:10px 16px 0}
+.chartwrap{position:relative;height:clamp(380px,62vh,620px)}
+.chart{position:absolute;inset:0}
+.legend{position:absolute;left:4px;top:6px;z-index:3;font:11px var(--mono);color:var(--grey);pointer-events:none;white-space:nowrap;overflow:hidden;max-width:calc(100% - 80px)}
+.legend b{font-weight:400;color:var(--ink)}
+.legend .up{color:var(--moss)} .legend .down{color:var(--brick)}
+.legend .lbl{color:var(--ink);margin-right:4px}
+.chartnote{position:absolute;left:0;right:0;top:45%;text-align:center;color:var(--grey);font-size:14px;margin:0;pointer-events:none;z-index:2}
+.stack{display:flex;height:26px;border:1px solid var(--rule);background:var(--card)}
+.stack i{display:block;height:100%;transition:width .9s var(--ease)}
+.keys{list-style:none;padding:0;margin:8px 0 0;display:grid;grid-template-columns:repeat(2,1fr);gap:4px 12px;font-size:13px}
+.keys li{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+.keys s{width:10px;height:10px;display:inline-block;flex:none}
+.rows{display:flex;flex-direction:column;gap:7px}
+.row{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:13px;font-variant-numeric:tabular-nums}
+.row .n{text-align:right;color:var(--grey);white-space:nowrap}
+.split{display:flex;height:16px;background:var(--rule)}
+.split i{display:block;height:100%;transition:width .9s var(--ease)}
+.split .b{background:var(--moss)} .split .s{background:var(--brick)}
+.fly{display:grid;grid-template-columns:1fr 78px 1fr;gap:6px;align-items:center;font-size:12px;font-variant-numeric:tabular-nums}
+.fly .l{display:flex;justify-content:flex-end;align-items:center;gap:5px} .fly .r{display:flex;align-items:center;gap:5px}
+.fly .mid{text-align:center;color:var(--grey)}
+.fly i{display:block;height:14px;transition:width .9s var(--ease)}
+.fly .l i{background:var(--brick)} .fly .r i{background:var(--moss)}
+.whale{display:grid;grid-template-columns:86px 1fr 74px;gap:8px;align-items:center;font-size:13px;font-variant-numeric:tabular-nums}
+.whale a{font:12px var(--mono)}
+.whale .net{text-align:right}
+.up{color:var(--moss)} .down{color:var(--brick)}
+.flow svg{display:block;width:100%;height:150px;background:var(--card);border:1px solid var(--rule)}
+.flowsum{font-size:15px;margin:0 0 8px;font-variant-numeric:tabular-nums}
+.progress{height:18px;border:1px solid var(--ink);background:var(--card);position:relative}
+.progress i{position:absolute;left:0;top:0;bottom:0;background:var(--moss);transition:width 1s var(--ease)}
+.progress span{position:absolute;right:6px;top:-1px;font-size:12px;font-variant-numeric:tabular-nums}
+.empty{color:var(--grey);font-size:14px;padding:18px 0;text-align:center}
+.buy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.buy a{display:block;text-align:center;padding:10px 8px;border:1px solid var(--ink);text-decoration:none;transition:background .2s,color .2s}
+.buy a:hover,.buy a:active{background:var(--ink);color:var(--paper)}
+.buy a.ref::after{content:" ·";color:var(--brick)}
+.fine{color:var(--grey);font-size:13px;margin:8px 0 0}
+.feed{list-style:none;padding:0;margin:0}
+.feed li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--rule);font-size:14px}
+.feed li.new{animation:slide .6s var(--ease)}
+.feed .side{font-size:12px;width:52px}
+.feed .buy-s{color:var(--moss)} .feed .sell-s{color:var(--brick)}
+.feed .amt{font-variant-numeric:tabular-nums}
+.feed .ago{color:var(--grey);font-size:12px;font-variant-numeric:tabular-nums}
+.flags{list-style:none;padding:0;margin:0}
+.flags li{position:relative;padding:5px 0 5px 20px;border-bottom:1px solid var(--rule);font-size:14px}
+.flags li::before{content:"";position:absolute;left:2px;top:12px;width:8px;height:8px;border-radius:50%;background:var(--grey)}
+.flags li.danger::before{background:var(--brick)} .flags li.warn::before{background:var(--ochre)} .flags li.info::before{background:var(--rule);border:1px solid var(--grey)}
+/* only the facts table: the chart library draws inside a table of its own, and a 46% first column there left the
+   left half of the chart empty */
+.facts{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0 0}
+.facts td{padding:6px 8px 6px 0;border-bottom:1px solid var(--rule);vertical-align:top;overflow-wrap:anywhere}
+.facts td:first-child{color:var(--grey);width:46%}
+.reveal{opacity:0;transform:translateY(10px);animation:rise .7s var(--ease) forwards}
+footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:var(--grey);font-size:13px}
+@keyframes rise{to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes slide{from{opacity:0;transform:translateY(-8px);background:#ebe7dc}to{opacity:1;transform:none;background:transparent}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}}
+@media (max-width:560px){.chartwrap{height:360px} .legend{font-size:10px} .tiles b{font-size:16px} .row{grid-template-columns:44px minmax(0,1fr) auto;font-size:12px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="name" href="./">Artem Vartanov</a>
+  <nav class="nav" aria-label="site"><a href="./" aria-current="page"><span data-l="en">Check a coin</span><span data-l="ru">Проверить монету</span></a><a href="about.html#market"><span data-l="en">Launchpad numbers</span><span data-l="ru">Замеры площадок</span></a><a href="stories.html"><span data-l="en">Stories</span><span data-l="ru">Истории</span></a><a href="about.html"><span data-l="en">About</span><span data-l="ru">Обо мне</span></a></nav>
+  <nav class="lang" aria-label="language"><button data-set="en">en</button><button data-set="ru">ru</button></nav>
+</header>
+
+<main>
+<section class="hero">
+  <h1><span data-l="en">Is this coin a trap?</span><span data-l="ru">Монета — ловушка или нет?</span></h1>
+  <p data-l="en">Paste a pump.fun coin address or link. The chain answers in big letters, then the live market cap, the chart, who holds it and who trades it. Free, nothing to sign.</p><p data-l="ru">Вставьте адрес монеты pump.fun или ссылку. Ответ по цепи — большими буквами, а ниже капитализация вживую, график, у кого монеты и кто торгует. Бесплатно, ничего подписывать не нужно.</p>
+  <p class="more"><a href="about.html#market"><span data-l="en">All my launchpad numbers on one page: PumpSwap, pump.fun, Meteora, LaunchLab, Moonit →</span><span data-l="ru">Все мои замеры по лаунчпадам на одной странице: PumpSwap, pump.fun, Meteora, LaunchLab, Moonit →</span></a></p>
+</section>
+<form id="form" autocomplete="off">
+  <label for="q" hidden><span data-l="en">coin address</span><span data-l="ru">адрес монеты</span></label>
+  <input id="q" spellcheck="false" autocapitalize="off" placeholder="pump.fun coin address or link">
+  <button class="go" type="submit"><span data-l="en">Check</span><span data-l="ru">Проверить</span></button>
+</form>
+<div class="recent" id="recent"></div>
+<noscript><p class="status err"><span data-l="en">The page needs JavaScript.</span><span data-l="ru">Странице нужен JavaScript.</span></p></noscript>
+<p class="status" id="status" role="status" aria-live="polite"></p>
+
+<div id="coin" hidden>
+  <section class="verdict reveal" id="verdict" aria-live="polite"><b id="vText"></b><span id="vWhy"></span><small id="vNote"></small></section>
+  <section class="head reveal">
+    <div class="who"><img class="logo" id="logo" alt="" hidden referrerpolicy="no-referrer">
+      <div class="coin"><h1 id="title"></h1><button class="mint" id="mintBtn" type="button" title="copy"></button><div class="socials" id="socials"></div></div></div>
+    <div class="pricebox">
+      <div class="mc"><b id="price">…</b><em><span data-l="en">market cap</span><span data-l="ru">капитализация</span></em><span class="live"><i></i><span data-l="en">live</span><span data-l="ru">вживую</span></span></div>
+      <div class="sub" id="sub"></div>
+      <div class="chips" id="chips"></div>
+    </div>
+  </section>
+  <section class="card reveal chartcard">
+    <div class="panel">
+      <div class="tfs" role="group" aria-label="timeframe"><button type="button" data-tf="1s" aria-pressed="false">1s</button><button type="button" data-tf="15s" aria-pressed="false">15s</button><button type="button" data-tf="30s" aria-pressed="false">30s</button><button type="button" data-tf="1m" aria-pressed="true">1m</button><button type="button" data-tf="5m" aria-pressed="false">5m</button><button type="button" data-tf="15m" aria-pressed="false">15m</button><button type="button" data-tf="1h" aria-pressed="false">1h</button><span class="sep"></span><button type="button" id="fit" title="fit the whole width">⤢</button><button type="button" id="mode" title="market cap / price">MC</button></div>
+      <div class="chartwrap"><div class="chart" id="chart"></div><div class="legend" id="legend"></div><p class="chartnote" id="chartNote"></p></div>
+    </div>
+  </section>
+  <div class="grid">
+    <div class="col">
+<section class="card reveal" id="flowCard" style="order:6" hidden>
+      <h2><span data-l="en">Money in and out</span><span data-l="ru">Деньги: заходят или выходят</span></h2><p class="hint" data-l="en">Every buy adds its dollars, every sell takes them away. The line goes up while more money comes in than leaves.</p><p class="hint" data-l="ru">Каждая покупка прибавляет свои доллары, каждая продажа вычитает. Линия растёт, пока денег заходит больше, чем выходит.</p>
+      <div class="flow" id="flow"></div>
+    </section>
+<section class="card reveal" id="sizeCard" style="order:8" hidden>
+      <h2><span data-l="en">Trade sizes</span><span data-l="ru">Размеры сделок</span></h2><p class="hint" data-l="en">Who is trading now: small buyers or whales. Big red bars at the bottom mean large sells.</p><p class="hint" data-l="ru">Кто торгует сейчас: мелкие покупатели или киты. Длинные красные полосы внизу — крупные продажи.</p>
+      <div id="sizes"></div>
+    </section>
+<section class="card reveal" id="whaleCard" style="order:9" hidden>
+      <h2><span data-l="en">Biggest wallets right now</span><span data-l="ru">Крупнейшие кошельки сейчас</span></h2><p class="hint" data-l="en">Wallets with the most money in the latest trades: green bought, red sold, the number is what they put in or took out.</p><p class="hint" data-l="ru">Кошельки с наибольшими суммами в последних сделках: зелёное — купили, красное — продали, справа — сколько вложили или вывели.</p>
+      <div id="whales"></div>
+    </section>
+<section class="card reveal" style="order:10">
+      <h2><span data-l="en">Latest trades</span><span data-l="ru">Последние сделки</span></h2>
+      <ul class="feed" id="feed"></ul>
+    </section>
+    </div>
+    <div class="col">
+<section class="card reveal" style="order:2">
+      <h2><span data-l="en">Key numbers</span><span data-l="ru">Главные цифры</span></h2>
+      <div class="tiles" id="tiles"></div>
+    </section>
+<section class="card reveal" style="order:3">
+      <h2><span data-l="en">Buy</span><span data-l="ru">Купить</span></h2>
+      <div class="buy" id="buy"></div>
+      <p class="fine" id="signup"></p>
+      <p class="fine" data-l="en">Opens a trading terminal with this coin. Nothing is bought here and no keys are asked for.</p><p class="fine" data-l="ru">Откроется торговый терминал с этой монетой. Здесь ничего не покупается и ключи не нужны.</p>
+    </section>
+<section class="card reveal" id="spreadCard" style="order:4" hidden>
+      <h2><span data-l="en">Who holds the coin</span><span data-l="ru">У кого монеты</span></h2><p class="hint" data-l="en">How the supply is spread. The bigger the red part, the fewer wallets can crash the price by selling.</p><p class="hint" data-l="ru">Как распределены монеты. Чем больше красная часть, тем меньше кошельков нужно, чтобы обрушить цену продажей.</p>
+      <div id="spread"></div>
+    </section>
+<section class="card reveal" id="pressCard" style="order:5" hidden>
+      <h2><span data-l="en">Buys against sells</span><span data-l="ru">Покупки против продаж</span></h2><p class="hint" data-l="en">Number of trades in each window: green buys, red sells. More green means buyers are in charge.</p><p class="hint" data-l="ru">Число сделок за каждый период: зелёное — покупки, красное — продажи. Больше зелёного — покупатели сильнее.</p>
+      <div id="press"></div>
+    </section>
+<section class="card reveal" id="curveCard" style="order:7" hidden>
+      <h2><span data-l="en">pump.fun curve</span><span data-l="ru">Кривая pump.fun</span></h2><p class="hint" data-l="en">How much of the coin is sold on its launch curve.</p><p class="hint" data-l="ru">Сколько монет продано на стартовой кривой.</p>
+      <div id="curve"></div>
+    </section>
+<section class="card reveal" id="check" style="order:11" hidden>
+      <h2><span data-l="en">On-chain check</span><span data-l="ru">Проверка по цепи</span></h2>
+      <ul class="flags" id="flags"></ul>
+      <table class="facts"><tbody id="facts"></tbody></table>
+      <p class="fine" id="checkNote"></p>
+      <p class="fine"><a id="botlink" href="#" data-ext><span data-l="en">Holders by wallet and alerts are in the Telegram bot</span><span data-l="ru">Держатели по кошелькам и уведомления — в Telegram-боте</span></a></p>
+    </section>
+    </div>
+  </div>
+</div>
+</main>
+
+<footer><p data-l="en">Market cap, chart, trades, holders' spread: GeckoTerminal. Chain: public Solana nodes, read in your browser. Nothing is stored. Not advice to buy.</p><p data-l="ru">Капитализация, график, сделки, распределение держателей — GeckoTerminal. Цепь — публичные узлы Solana, читается в вашем браузере. Ничего не сохраняется. Не совет покупать.</p></footer>
+<script type="module">const PAGE_RPC = "https://solana-rpc.publicnode.com", HOLDERS_RPC = "https://public.rpc.solanavibestation.com/", BOT = "artem_coinchek_bot", REFS = {"gmgn": "Ri639FUK", "axiom": "https://axiom.trade/@peni3", "trojan": "https://trojan.com/@ArtemVartanov", "pump": "AjarTestedFibre"}, LABELS = {
+"_about":"Public labels for the pump.fun coin check: terminals (programs and fee wallets) and exchange/bridge wallets. Built by build_labels.py from a white list.",
+"terminals":{
+"2416yFoX5ep69Ae8u4EoWN2b1jRMC8diygQDf4zqNAQG":"Ave.ai",
+"2jwHNxavSoMZMEDbT1eV9PcPt5dDcayCqM6MkgaPpmWQ":"Trojan",
+"3F72P7DKhYUZtTtz7WcgTcqcTe8trr2z8TBRw2mVXtnr":"pump.fun app",
+"3Pu1V4duyLyVpAJue1kLAfr74nGjQ3JDzj3aJjnoEXuL":"Looter",
+"3kxSQybWEeQZsMuNWMRJH4TxrhwoDwfv41TNMLRzFP5A":"MevX",
+"3t9EKmRiAUcQUYzTZpNojzeGP1KBAVEEbDNmy6wECQpK":"GMGN",
+"47hEzz83VFR23rLTEeVm9A7eFzjJwjvdupPPmX3cePqF":"Banana Gun",
+"4DGMLhJqTBAB9xs1FodvXrfbdo5YqPSfDRaK1KZFXd1V":"MevX",
+"4FobGn5ZWYquoJkxMzh2VUAWvV36xMgxQ3M7uG1pGGhd":"Axiom",
+"4Lpvp1q69SHentfYcMBUrkgvppeEx6ovHCSYjg4UYXiq":"MevX",
+"4V65jvcDG9DSQioUVqVPiUcUY9v6sb6HKtMnsxSKEz5S":"Axiom",
+"4kuG6NsAFJNwqEkac8GFDMMheCGKUPEbaRVHHyFHSwWz":"Axiom",
+"4mih95RmBqfHYvEfqq6uGGLp1Fr3gVS3VNSEa3JVRfQK":"RayBot",
+"4vfFG2xGZsjXQgA6ZCTzA1PgUGLppFHY9eGnh3ZVGUuz":"Sol Trading Bot",
+"5BqYhuD4q1YD3DMAYkc1FeTu9vqQVYYdfBAmkZjamyZg":"Axiom",
+"5L2QKqDn5ukJSWGyqR4RPvFvwnBabKWqAqMzH4heaQNB":"Axiom",
+"65gDv7pZQCZELsNpNYSFEBtNFpWZAbxmRFB6BGMqFkHH":"Trojan",
+"6TxjC5wJzuuZgTtnTMipwwULEbMPx5JPW3QwWkdTGnrn":"GMGN",
+"6Vo3245eszAb5wuqEMw8mGdbfRUdKbHhDHP5LcaGuTAB":"pump.fun app",
+"6m2CDdhRgxpH4WjvdzxAYbGxwdGUz5MziiL5jek2kBma":"OKX DEX",
+"76sxKrPtgoJHDJvxwFHqb3cAXWfRHFLe3VpKcLCAHSEf":"Axiom",
+"7HeD6sLLqAnKVRuSfc1Ko3BSPMNKWgGTiWLKXJF31vKM":"Bloom",
+"7LCZckF6XXGQ1hDY6HFXBKWAtiUgL9QY5vj1C4Bn1Qjj":"Axiom",
+"7oi1L8U9MRu5zDz5syFahsiLUric47LzvJBQX6r827ws":"Axiom",
+"7sHXjs1j7sDJGVSMSPjD1b4v3FD6uRSvRWfhRdfv5BiA":"GMGN",
+"846ah7iBSu9ApuCyEhA5xpnjHHX7d4QJKetWLbwzmJZ8":"Axiom",
+"86Vh4XGLW2b6nvWbRyDs4ScgMXbuvRCHT7WbUT3RFxKG":"Axiom",
+"8jgg7moFJkHyTtAv9M6RBSPMp2oXeXhuiUMKW8YbYCWn":"Trojan",
+"8m5GkL7nVy95G4YVUbs79z873oVKqg2afgKRmqxsiiRm":"Axiom",
+"8vFGAKdwpn4hk7kc1cBgfWZzpyW3MEMDATDzVZhddeQb":"Axiom",
+"92Med3qeK7duC5iiYsHX38H2f2twJfRsSx93oNrza2VH":"Trojan",
+"96aFQc9qyqpjMfqdUeurZVYRrrwPJG2uPV6pceu4B1yb":"Sol Trading Bot",
+"9Fox6i7oT8p4qHn76Qj3dks8RRMGsXQyfMSBScA5yVyX":"Padre",
+"9cSuF94JWPb1HQzWMcifJzkoggwAtfjsojcUqny5XuJy":"Shuriken",
+"9kPrgLggBJ69tx1czYAbp7fezuUmL337BsqQTKETUEhP":"Axiom",
+"9yMwSPk9mrXSN7yDHUuZurAh1sjbJsfpUqjZ7SvVtdco":"Trojan",
+"A7XTexV13EPnhtH55qhT7qmFkgYCMAMnfXk89VWu9PCJ":"Sol Trading Bot",
+"AVUCZyuT35YSuj4RH7fwiyPu82Djn2Hfg7y2ND2XcnZH":"Photon",
+"AaG6of1gbj1pbDumvbSiTuJhRCRkkUNaWVxijSbWvTJW":"Axiom",
+"AveaiuA1emN71q9mS2QQ9BEWNAAHmp8sHSvwLFHQjufM":"Ave.ai",
+"AxiomRXZAq1Jgjj9pHmNqVP7Lhu67wLXZJZbaK87TTSk":"Axiom",
+"AxiomRYAid8ZDhS1bJUAzEaNSr69aTWB9ATfdDLfUbnc":"Axiom",
+"BANANAjs7FJiPQqJTGFzkZJndT9o7UmKiYYGaJz6frGu":"Banana Gun",
+"BB5dnY55FXS1e1NXqZDwCzgdYJdMCj3B92PU6Q5Fb6DT":"GMGN",
+"BBRouter1cVunVXvkcqeKkZQcBK7ruan37PPm3xzWaXD":"BONKbot",
+"BBYXdwhqbCxVRVtnuMTTxh8biNisz3ZxsnHfr44jXytR":"Trojan",
+"BNuebGMyAsrLytsS13whc3qUqbnM9mVwUJcumD31m5zA":"Maestro",
+"BS3CyJ9rRC4Tp8G7f86r6hGvuu3XdrVGNVpbNM9U5WRZ":"MevX",
+"BSfD6SHZigAfDWSjzD5Q41jw8LmKwtmjskPH9XW1mrRW":"Photon",
+"BTQyUXhxiLrFPD5JUANCwg4ViibmNY39McmWk4bVNxLA":"Sol Trading Bot",
+"BWgb8wR1FEGiu1jCDSKuHKf752W27b4iN6SvoNCiK4qp":"Trojan",
+"BXhkDUR2MCA6wPrnmUN1q2PHLqf973E5L3aqXzouojQE":"Pepeboost",
+"BwWK17cbHxwWBKZkUYvzxLcNQ1YVyaFezduWbtm2de6s":"pump.fun Mayhem agent",
+"ByRRgnZenY6W2sddo1VJzX9o4sMU4gPDUkcmgrpGBxRy":"GMGN",
+"CeA3sPZfWWToFEBmw5n1Y93tnV66Vmp8LacLzsVprgxZ":"Axiom",
+"CxvksNjwhdHDLr3qbCXNKVdeYACW8cs93vFqLqtgyFE5":"BONKbot",
+"DF1ow4tspfHX9JwWJsAb9epbkA8hmpSEAtxXy1V27QBH":"DFlow",
+"DGMgNKpqygARV2pHZfW4kNQSHT9F3Ly2BKWqvpYrAg5C":"GMGN",
+"DKyUs1xXMDy8Z11zNsLnUg3dy9HZf6hYZidB6WodcaGy":"Axiom",
+"DXfkEGoo6WFsdL7x6gLZ7r6Hw2S6HrtrAQVPWYx2A1s9":"GMGN",
+"DYVeNgXGLAhZdeLMMYnCw1nPnMxkBN7fJnNpHmizTrrF":"Axiom",
+"DZfEurFKFtSbdWZsKSDTqpqsQgvXxmESpvRtXkAdgLwM":"Axiom",
+"DoAsxPQgiyAxyaJNvpAAUb2ups6rbJRdYrCPyWxwRxBb":"pump.fun Terminal (Padre)",
+"DymeoWc5WLNiQBaoLuxrxDnDRvLgGZ1QGsEoCAM7Jsrx":"GMGN",
+"F34kcgMgCF7mYWkwLN3WN7KrFprr2NbwxuLvXx4fbztj":"Sol Trading Bot",
+"F4hJ3Ee3c5UuaorKAMfELBjYCjiiLH75haZTKqTywRP3":"BullX",
+"FBYmU5XbRgX2DV2i2SpPPpHpXmf6mdZS98wQChmUyMba":"Telemetry",
+"FLASHX8DrLbgeR8FcfNV1F5krxYcYMUdBkrP1EPBtxB9":"Axiom",
+"FRMxAnZgkW58zbYcE7Bxqsg99VWpJh6sMP5xLzAWNabN":"Maestro",
+"G9PhF9C9H83mAjjkdJz4MDqkufiTPMJkx7TnKE1kFyCp":"Pepeboost",
+"GMGNreQcJFufBiCTLDBgKhYEfEe9B454UjpDr5CaSLA1":"GMGN",
+"GreGavLfh5sK1BeQ2WYvmk352wbyNNzQdCmqWCV8QSib":"Sol Trading Bot",
+"H2cDR3EkJjtTKDQKk8SJS48du9mhsdzQhy8xJx5UMqQK":"Axiom",
+"HEPL5rTb6n1Ax6jt9z2XMPFJcDe9bSWvWQpsK7AMcbZg":"Sol Trading Bot",
+"Hbj6XdxX6eV4nfbYTseysibp4zZJtVRRPn2J3BhGRuK9":"Axiom",
+"HeZVpHj9jLwTVtMMbzQRf6mLtFPkWNSg11o68qrbUBa3":"GMGN",
+"J5XGHmzrRmnYWbmw45DbYkdZAU2bwERFZ11qCDXPvFB5":"pump.fun Terminal (Padre)",
+"JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4":"Jupiter",
+"K1LRSA1DSoKBtC5DkcvnermRQ62YxogWSCZZPWQrdG5":"Sol Trading Bot",
+"KfHbT5Jrr5SV3CDkQVCLiSNWyVv5DmuVaCzbAHrzMFQ":"pump.fun app",
+"MAyhSmzXzV1pTf7LsNkrNwkWKTo4ougAJ1PPg47MD4e":"pump.fun Mayhem agent",
+"MaestroAAe9ge5HTc64VbBQZ6fP77pwvrhM8i1XWSAx":"Maestro",
+"MaestroUL88UBnZr3wfoN7hqmNWFi3ZYCGqZoJJHE36":"Maestro",
+"MevxQ9iQNGNQSWqa2CtDQs2BwrJA6MifzocykZAgGBr":"MevX",
+"NoVA1TmDUqksaj2hB1nayFkPysjJbFiU76dT4qPw2wm":"Nova",
+"Stbot61LkCD5HE4p1TDtYRt9bzkjX81pKrshZz4Awny":"Sol Trading Bot",
+"T1TANpTeScyeqVzzgNViGDNrkQ6qHz9KrSBS4aNXvGT":"Titan",
+"VAULTkV5rgY9WqZtvaMHvctrKMwQw8bCfSJF4nga2D4":"Axiom",
+"ZG98FUCjb8mJ824Gbs6RsgVmr1FhXb2oNiJHa2dwmPd":"BONKbot",
+"b1oomGGqPKGD6errbyfbVMBuzSC8WtAAYo8MwNafWW1":"Bloom",
+"dBhdrmwBkRa66XxBuAK4WZeZnsZ6bHeHCCLXa3a8bTJ":"GMGN",
+"noVaE91mUL5jTb8e9Vf6dqJdNPzJpEQ3uAdnQ8h4nVz":"Nova",
+"noVakKQGTTjpHARvecAUbVnc85AatCLm3ijDFk8JXZB":"Nova",
+"proVF4pMXVaYqmy4NjniPh4pqKNfMmsihgd4wdkCX3u":"OKX DEX",
+"shrknHaCuVXmahvxLER4Qm9vooBzhbYsMP7HnAAS9Hn":"Shuriken",
+"shuvodtwMMFFB6KmqCDYaiAe1hRokCVwr4LkT1pLAL5":"Shuriken",
+"term9YPb9mzAsABaqN71A4xdbxHmpBNZavpBiQKZzN3":"pump.fun Terminal (Padre)",
+"troyXT7Ty3s2rjJe4bqWaroUrS4Fjd8rbHHNHxcACF4":"Trojan"
+},
+"exchanges":{
+"28nYGHJyUVcVdxZtzKByBXEj127XnrUkrE3VaGuWj1ZU":"Ceffu",
+"2AQdpHJ2JpcEgPiATUXjQxA8QmafFegfQwSLWSprPicm":"Coinbase",
+"2E1UKoiiZPwsp4vn6tUh5k61kG2UqYpT7oBrFaJUJXXd":"Swissborg",
+"2XxP4kS2vfkiMvpLpGNxry3fPUYimsuAmSbqL1KnuwZ8":"Swissborg",
+"2ojv9BAiHUrvsm9gxDe7fJSzbNZSJcxZvf8dqmWGHG8S":"Binance",
+"3Nvb6UeEMVLf9DsehhqT8B5SNHrNLEpHdf42nXi9aLK8":"CoinDCX",
+"3gd3dqgtJ4jWfBfLYTX67DALFetjc5iS72sCgRhCkW2u":"Binance",
+"3yFwqXBfZY4jBVUafQ1YEXw189y2dN3V5KQq9uzBDy1E":"Binance",
+"41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB":"Chainlink CCIP bridge",
+"42brAgAVNzMBP7aaktPvAmBSPEkehnFQejiZc53EpJFd":"Bybit",
+"43DbAvKxhXh1oSxkJSqGosNw3HpBnmsWiak6tB5wpecN":"Backpack",
+"44DwSkZbY2PVo9wfFP21D7HG7xf5rw8QaF6xSLGSfm7P":"OKX",
+"4DgunMfBb19GaMZ1Z48oqcymZ4eBA4v5SUdRnapzj66G":"Coinsquare",
+"4E73T5Zubx3kPtheJ5DB6QMEaadMQowhUcdRV6f9rvVt":"CoinDCX",
+"51AASorYCLPcUHnuQQaau6DfsfFRixzh4HsoQwsc5Ara":"LAToken",
+"57vSaRTqN9iXaemgh4AoDsZ63mcaoshfMK8NP3Z5QNbs":"KuCoin",
+"5SDrsMNTYdhmApjfqYHDvjoW92f2S42vcc7zNDVcQ9Ej":"Ceffu",
+"5URmUviWsAtcciFXqgM7f1jmhvBULdQDT47dqDkrJUi":"OKX",
+"5VCwKtCXgCJ6kit5FybXjvriW3xELsFDhYrPSqtJNmcD":"OKX",
+"5VtQHnhs2pfVEr68qQsbTRwKh4JV5GTu9mBHgHFxpHeQ":"Mayan bridge",
+"5bJcc9eb2XE7mqcET2xDuAdMGuXWybb4YPmAHLjKLhQG":"HTX",
+"5bjZPeHbdGUCduyY8i2dZkkgLWkG3u1P2sbt1Jb5kFxW":"CoinDCX",
+"5kiqH41rz2wPoNH5FuDJ3x8dB3EEe3XGoSWy2485tAp9":"OKX",
+"5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9":"Binance",
+"6Attw9NcFspCAreufvQ3mW8aqXEk6MDceeoC8obw45cJ":"OKX",
+"6FEVkH17P9y8Q9aCkDdPcMDjvj7SVxrTETaYEm8f51Jy":"Crypto.com",
+"6NnzUC7mrM7ZgKdcMq1jPAdqh9TMgdsaVR1DNq6kce3A":"OKX",
+"6QJzieMYfp7yr3EdrePaQoG3Ghxs2wM98xSLRu8Xh56U":"Binance",
+"6XuYJv4PyauP2WKdgd4fZYvjK7uBdVkEySoy89fXV9XT":"CoinDCX",
+"6ZRCB7AAqGre6c72PRz3MHLC73VMYvJ8bi9KHf1HFpNk":"FTX",
+"6b4aypBhH337qSzzkbeoHWzTLt4DjG2aG8GkrrTQJfQA":"FTX",
+"6fuHoq5Tr2j6dFTGWHmLUhVBUj8XvDBgdGGzgfSwe5DN":"CoinDCX",
+"6iVBAsquJRaLsXbojb18kqTW1d5iVLspVjCtsReZBKhY":"AscendEX",
+"6oCa9Tz8VXVp63WiFyruE5PD6yXz3pCsv6oGzUGvg9TP":"Binance",
+"6p8LxMvHUZtdiik28TQy483WaCaDGsAUFm3PKjpUpLB":"CoinDCX",
+"6wEMcwrcF5AP9jpHWQcPxHXciWA2g217Qq81CTWjbgBw":"FTX",
+"76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6":"LayerZero bridge",
+"7CtzEcGeYpMfR1aEi1Gbt8GRHDPH9uDB6GNTsBABqSmo":"OKX",
+"7SRyi7urg28j1XtioKbcJLtkL9Pqu39Y4CTAXwmu2Hts":"CoinList",
+"7fGw3UURsxk1szQ4buxQyEkiF4P6z7vx7sN1MHEguTJg":"OKX",
+"7o9ukGhWvc71yYcjinKnrxMn2kFMyQD1iCG3romrzg7r":"OKX",
+"7uTT8Xi5RWXzy7h9XL244GRgEycDYDhLjr3ZyNdXi8pZ":"Relay bridge",
+"821dTn3JEhhqg11Q24ijxRBYXfKWngGMibTqHS8hWjZb":"Rollbit",
+"88xTWZMeKfiTgbfEmPLdsUCQcZinwUfk25EBQZ21XMAZ":"HTX",
+"8NBEbxLknGv5aRYefFrW2qFXoDZyi9fSHJNiJRvEcMBE":"HTX",
+"8QJmxZcEzwuYmCPy6XqgN2sHcYCcFq6AEfBMJZZuLo5a":"Mayan bridge",
+"8W4u11KJYhmCY9rs2MCVHmMrgpeHLgsbkwAarbNvzr2Y":"CoinDCX",
+"8dUc88Nss8uhqzzFvUQhepkwZaVrfzpoCfKjCXGkdzAG":"OKX",
+"8eqh8wppT9c5rw4ERqNCffvU6cNFJWff9WmkcYtmGiqC":"Chainlink CCIP bridge",
+"8nFGjbJNdarBouEC856Qmhrm8fptuEUnZrpNKgougsLi":"CoinDCX",
+"8zSWFy8wvHEuFJ7CZ81wy2wn4fPaju6jc6tbtbv5x9f8":"CoinDCX",
+"92qQCjprXoJ5GYji5it8PJTneBFxzSJ6mYosQWxYKxx4":"CoinDCX",
+"945SJTwsBSqwEEgtKMnhcLDnJowP6YpJUTEykMVK5k6q":"OKX",
+"99vQwtBwYtrqqD9YSXbdum3KBdxPAVxYTaQ3cfnJSrN2":"Relay bridge",
+"9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM":"Binance",
+"9buzBcTujdQLyf1XkyLaSrGNbkyNxg8qML3bpKWCz9P6":"CoinDCX",
+"9qoUcyhKSWMbk6tqGUYQUpeosPcdUnJszG4eQKwfe4gL":"Swissborg",
+"9un5wqE3q4oCjyrDkwsdD48KteCJitQX5978Vh7KKxHo":"OKX",
+"9uyDy9VDBw4K7xoSkhmCAm8NAFCwu4pkF6JeHUCtVKcX":"FTX",
+"A77HErqtfN1hLLpvZ9pCtu66FEtM8BveoaKbbMoZ4RiR":"Bitget",
+"AC5RDfQFmDS1deWZos921JfqscXdByf8BKHs5ACWjtW2":"Bybit",
+"APJmXrtC9TUAg5gcjbcsVUiVzeDv85xLZRLad1GiQTNE":"OKX",
+"ASTyfSima4LLAdDgoFGkgqoKowG1LZFDr9fAQrg7iaJZ":"MEXC",
+"AjCHG7CYJST379Eh7xLqhRaUyBzurFKjsX7z8DTrfGZp":"CoinDCX",
+"Amf2mf2Ciap5wYAEKDtGoQHfHPWaKbyFYhutMK46hTRF":"Binance",
+"AobVSwdW9BbpMdJvTqeCN4hPAmh4rHm7vwLnQ5ATSyrS":"Crypto.com",
+"BEaiMhcc4Kao7B4hoq6r9m8neUpfimUMwhzugKxtkZw6":"OKX",
+"BLZRi6frs4X4DNLw56V4EXai1b6QVESN1BhHBTYM9VcY":"Mayan bridge",
+"BWZqi67kXsvf5crjd19Fb3gmf3DCipGE8eWWJT2YHDXQ":"OKX",
+"BY4StcU9Y2BpgH8quZzorg31EGE4L1rjomN8FNsCBEcx":"HTX",
+"BZ3kabSsMzbuJUguYxtmkRtzw7ACqw1DUMH8PcbvXiUr":"Ceffu",
+"BbHG9GvPActFGogv3iNrpDAj4qpXr8t3jF16uGxXcKci":"Backpack",
+"BhJrLQEyFyrcf1746pHATzAZQpC1uk3SJf2AHHK7LW3K":"OKX",
+"BmFdpraQhkiDQE6SnfG5omcA1VwzqfXrwtNYBwWTymy6":"KuCoin",
+"Bq6NnW55ToJrAM7NxUYDmSMbKKCQ6f742ZemLiypqjzY":"CoinDCX",
+"BrdgN2RPzEMWF96ZbnnJaUtQDQx7VRXYaHHbYCBvceWB":"Allbridge bridge",
+"CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC":"CCTP bridge",
+"CCTPV2vPZJS2u2BBsUoscuikbYjnpFmbFsvVuJdgUMQe":"CCTP bridge",
+"CCTPiPYPc6AsJuwueEnWgSgucamXDZwBd53dQ11YiKX3":"CCTP bridge",
+"CE8joA143dBjsCFTeBxBs3kNGNU87WH6Q7GMMfxPzSr2":"OKX",
+"CGZAHxBannZzYK3rzVdG1e3uNjMxrmaXDhLEZxQBbueq":"OKX",
+"CLNEVwuSAiGsvPtE74yLhda4beNfd8qfZXVKkUcAJZDL":"Gate.io",
+"Ccip842gzYHhvdDkSyi2YVCoAWPbYJoApMFzSxQroE9C":"Chainlink CCIP bridge",
+"CeGyfZdtbjzC5FeVXCBdYE1v397yxxqYgmMcUwtouJUu":"OKX",
+"Cet3t77x2BBVSmiEFm8ZPoDSngbpso2RuWPL79Ky7SpA":"Swissborg",
+"DEbrdGj3HsRsAzx6uH4MKyREKxVAfBydijLUF3ygsFfh":"deBridge bridge",
+"DLv3NggMiSaef97YCkew5xKUHDh13tVGZ7tydt3ZeAru":"Across bridge",
+"DRpbCBMxVnDK7maPM5tGv6MvB3v1sRMC86PZ8okm21hy":"Binance",
+"DeSetTwWhjZq6Pz9Kfdo1KoS5NqtsM6G8ERbX4SSCSft":"deBridge bridge",
+"DwMLtdtJqJQkHzNcrdTBuWHJByJfgpKBnvFvzyKdy3cU":"Mayan bridge",
+"E1EfU3iKUS16mB2vdgj6mi3ssV32dm2Pxh7W74XxKuYu":"Bitstamp",
+"EBVigEhxvkWUwreG98kTh5FbZEjnXTXC5ANZtLz4YpHQ":"OKX",
+"EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm":"Backpack",
+"EPauhjQjjTBCpeBtszS3xGRASLpEJFM1cspSiFRXZa9Z":"Binance",
+"ETZY5TjMKdV2KdHVmUNTN56pWhMc8TyjrXtQ7YexDCmG":"Bitstamp",
+"EUXVDPCwXe9sJt3VucYfveB1kk5piSWJqhWQEsFtE2CR":"CoinDCX",
+"Edbef6Xi35u6iYEmeGAFmThCZrgj6MxzYAgAmZFYPmFF":"Binance",
+"EhZLSqyWrazhqR5bmyyEfFRa3ycWu9KPgQgQ7G1R9zC9":"CoinDCX",
+"EkUy8BB574iEVAQE9dywEiMhp9f2mFBuFu6TBKAkQxFY":"KuCoin",
+"F7p3dFrjRTbtRp8FRF6qHLomXbKRBzpvBLjtQcfcgmNe":"Relay bridge",
+"FC4eXxkyrMPTjiYUpp4EAnkmwMbQyZ6NDCh1kfLn6vsf":"Mayan bridge",
+"FJS2rTjAQmFFRmVqtnkceGvLJrMwUPgCUfLjciuMYkSC":"OKX",
+"FWznbcNXWQuHTawe9RxvQ2LdCENssh12dsznf4RiouN5":"Kraken",
+"Fe7SEekiKygziaEGKxsDsgLVzrCfNvVBvAYsaJBwFA8s":"Swissborg",
+"FeeQPGkKDeRV1MgoYfMH6L8o3KeuYjwUZrgn4LRKfjHi":"Chainlink CCIP bridge",
+"FefAbVt2EgXMGxeJb6sB1k5pQJhiGPxw4mB1zeUohZLk":"OKX",
+"FxteHmLwG9nk1eL4pjNve3Eub2goGkkz6g6TbvdmW46a":"Bitfinex",
+"FyJBKcfcEBzGN74uNxZ95GxnCxeuJJujQCELpPv14ZfN":"Bitfinex",
+"G9RCBaYb8aBRxoe8QBC2ucGrVqjuZFysRhY8d56cnNT1":"Binance",
+"GBrURzmtWujJRTA3Bkvo7ZgWuZYLMMwPCwre7BejJXnK":"Binance",
+"GFRP4yXUjvcQemf2zRJN8w9sPNaDk5PyBUQdPHD1AzLp":"Mayan bridge",
+"GJRs4FwHtemZ5ZE9x3FNvJ8TMwitKTh21yxdRPqn7npE":"Coinbase",
+"GK35nWN6ZHSGZrRTf8kTQd8RkFCighChPEb41XwSFVAC":"Binance",
+"GcFZHQVJ2icPGLrA9qPLq88b7eqBXSUcdL1utUtUfcSD":"OKX",
+"GnCRxKqUEPouYMvTb5nJMGrDB3VkTXZnDTaDuVZdnWA3":"Bitfinex",
+"Gx9rivpS3YR8pBFwMuP6omYqVxunpLvLkNn7ubNyuZZ5":"Mayan bridge",
+"H8sMJSCQxfKiFTCfDR3DUMLPwcRbM61LGFJ8N4dK3WjS":"Coinbase",
+"HBxZShcE86UMmF93KUM8eWJKqeEXi5cqWCLYLMMhqMYm":"Bitstamp",
+"HVh6wHNBAsG3pq1Bj5oCzRjoWKVogEDHwUHkRz3ekFgt":"KuCoin",
+"HXsKP7wrBWaQ8T2Vtjry3Nj3oUgwYcqq9vrHDM12G664":"Binance",
+"HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3":"Backpack",
+"HiRpdAZifEsZGdzQ5Xo5wcnaH3D2Jj9SoNsUzcYNK78J":"Gate.io",
+"HnLezgQkNVWMp2AV6mcHM1Ljst32kfsoVnYUkvXuQpjg":"OKX",
+"HwgxMWxaq5cDbdVmoH24Gy8F9m9DkU7Mwgdbgh4mh2m7":"CoinDCX",
+"J4rzLDLhLWFpjSgCMCcxTU84bQ8AH5vhgjwq7SjYVk8Q":"Bitfinex",
+"JBpj7yp4Afvb71TmanVwJZXGeX4kqbGFvjCFCRo3EbTM":"FTX US",
+"JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN":"Backpack",
+"RmnXLft1mSEwDgMKu2okYuHkiazxntFFcZFrrcXxYg7":"Chainlink CCIP bridge",
+"WnFt12ZrnzZrFZkt2xsNsaNWoQribnuQ5B5FrDbwDhD":"Wormhole bridge",
+"dkpZqrxHFrhziEMQ931GLtfy11nFkCsfMftH9u6QwBU":"Mayan bridge",
+"dst5MGcFPoBeREFAA5E3tU5ij8m5uVYwkzkSAbsLbNo":"deBridge bridge",
+"hntyVP6YFm1Hg25TN9WGLqM12b8TQmcknKrdu1oxWux":"Backpack",
+"i57ExrKB2i4mSgjSuq2xz617mQXmu33WG2WEYypmdvX":"Bitstamp",
+"jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL":"Backpack",
+"krakeNd6ednDPEXxHAmoBs1qKVM8kLg79PvWF2mhXV1":"Kraken",
+"mayan34VedncxdK2XobtvWFDXQASUTBXhUVzt2kKgny":"Mayan bridge",
+"mb1eu7TzEc71KxDpsmsKoucSSuuoGLv1drys1oP2jh6":"Backpack",
+"rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof":"Backpack",
+"src5qyZHqTqecJV4aY6Cb6zDZLMDzrDKKezs22MPHr4":"deBridge bridge",
+"u6PJ8DtQuPFnfmwHbGFULQ4u4EgjDiyYKjVEsynXq2w":"Gate.io",
+"worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth":"Wormhole bridge",
+"wormDTUJ6AWPNvk59vGQbDvGJmqbDTdgWgAqcLBCgUb":"Wormhole bridge"
+}
+};
+
+import { checkCoin, describe, isAddress, makeRpc, parseMintInput, SAME_BLOCK_WARN } from "./coincheck.mjs";
+import { candles, candlesFromTrades, marketOf, money, poolNow, signedPct, tokenInfo, trades } from "./market.mjs";
+import { buyLinks, pumpCode, signupLinks } from "./links.mjs";
+
+const root = document.documentElement;
+const $ = (s) => document.querySelector(s);
+const all = (s) => Array.from(document.querySelectorAll(s));
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const short = (a) => `${a.slice(0, 4)}…${a.slice(-4)}`;
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const lang = () => root.getAttribute("data-lang") || "en";
+const T = (en, ru) => (lang() === "ru" ? ru : en);
+const LOC = () => (lang() === "ru" ? "ru-RU" : "en-US");
+const intl = (x, d = 0) => (x == null || !Number.isFinite(x) ? "?" : x.toLocaleString(LOC(), { maximumFractionDigits: d }));
+const pct = (x, d = 1) => (x == null || !Number.isFinite(x) ? "?" : `${intl(x, x < 10 ? d : 0)}${lang() === "ru" ? " %" : "%"}`);
+
+const app = window.Telegram?.WebApp;
+const inTg = !!(app && app.platform && app.platform !== "unknown");
+if (inTg) {
+  app.ready(); app.expand();
+  try { app.setHeaderColor("#f4f2ec"); app.setBackgroundColor("#f4f2ec"); } catch (e) {}
+}
+const haptic = () => { try { inTg && app.HapticFeedback.impactOccurred("light"); } catch (e) {} };
+function openUrl(url) {
+  haptic();
+  if (!inTg) return window.open(url, "_blank", "noopener");
+  if (url.startsWith("https://t.me/")) app.openTelegramLink(url); else app.openLink(url);
+}
+
+// Timeframes as on Axiom: seconds are built from trades (GeckoTerminal's second candles are paid), minutes and hours
+// come from GeckoTerminal; the newest trades finish the last candle in both.
+const TF = {
+  "1s": { trades: 1 }, "15s": { trades: 15 }, "30s": { trades: 30 },
+  "1m": { gt: ["minute", 1, 1000], step: 60 }, "5m": { gt: ["minute", 5, 1000], step: 300 },
+  "15m": { gt: ["minute", 15, 1000], step: 900 }, "1h": { gt: ["hour", 1, 1000], step: 3600 },
+};
+const S = { autoFit: true, mint: null, pool: null, curvePool: null, createdAt: null, tf: "1m", mode: "mc", supply: 1e9, bars: [], trades: [],
+  market: null, report: null, info: null, seen: new Set(), timer: null, slow: null, price: null, mcap: null, run: 0 };
+const C = { chart: null, candles: null, volume: null };
+// the site's paper palette: moss for up, brick for down, ink and grey for the rest
+const UP = "#4d6b3c", DOWN = "#a84b36", BG = "#f4f2ec", GRID = "#e7e3da", TXT = "#6f6b62", INK = "#1f1f1f", RULE = "#dedad1";
+
+function status(text, isErr) { const s = $("#status"); s.textContent = text || ""; s.classList.toggle("err", !!isErr); }
+
+// ---------- numbers that count ----------
+function countTo(el, to, fmt) {
+  const from = Number(el.dataset.v ?? to);
+  el.dataset.v = to;
+  // with fx/coin.js on (class fx-coin) the number is final at once and the effect rolls its digits over it
+  if (reduce || root.classList.contains("fx-coin") || !Number.isFinite(from) || from === to) { el.textContent = fmt(to); return; }
+  const t0 = performance.now();
+  const step = (t) => {
+    const k = Math.min(1, (t - t0) / 700);
+    const e = 1 - Math.pow(1 - k, 3);
+    el.textContent = fmt(from + (to - from) * e);
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+// ---------- the chart (TradingView Lightweight Charts, the open version of the engine terminals use) ----------
+const defaultTf = (age) => (age < 15 * 60 ? "1s" : age < 3 * 3600 ? "1m" : age < 2 * 86400 ? "5m" : "15m");
+const scaleBy = () => (S.mode === "mc" ? S.supply : 1);
+const fmt = (v) => money(v, lang());
+const axisFmt = (v) => (v < 0 ? "" : fmt(v));      // below zero is only room for the volume bars
+function tickLabel(t, type) {
+  const d = new Date(t * 1000);
+  if (type <= 2) return d.toLocaleDateString(LOC(), { day: "numeric", month: "short" });
+  return d.toLocaleTimeString(LOC(), type === 4 ? { hour: "2-digit", minute: "2-digit", second: "2-digit" } : { hour: "2-digit", minute: "2-digit" });
+}
+function fullTime(t) {
+  return new Date(t * 1000).toLocaleString(LOC(), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", ...(TF[S.tf].trades ? { second: "2-digit" } : {}) });
+}
+function makeChart() {
+  const el = $("#chart");
+  if (C.chart) { C.chart.remove(); C.chart = null; }
+  el.innerHTML = "";
+  const LW = window.LightweightCharts;
+  C.chart = LW.createChart(el, {
+    autoSize: true,
+    layout: { background: { type: "solid", color: BG }, textColor: TXT, fontSize: 11, fontFamily: '"Helvetica Neue",Helvetica,Arial,sans-serif' },
+    grid: { vertLines: { color: GRID }, horzLines: { color: GRID } },
+    rightPriceScale: { borderColor: RULE, scaleMargins: { top: 0.08, bottom: 0.24 } },
+    timeScale: { borderColor: RULE, timeVisible: true, secondsVisible: !!TF[S.tf].trades, rightOffset: 6, barSpacing: 7, minBarSpacing: 0.5, tickMarkFormatter: tickLabel },
+    crosshair: { mode: LW.CrosshairMode.Normal,
+      vertLine: { color: TXT, width: 1, style: LW.LineStyle.Dashed, labelBackgroundColor: INK },
+      horzLine: { color: TXT, width: 1, style: LW.LineStyle.Dashed, labelBackgroundColor: INK } },
+    localization: { priceFormatter: axisFmt, timeFormatter: fullTime },
+    // the wheel and a vertical swipe scroll the page: over a chart that zoomed instead, the candles shrank into a strip
+    handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
+    handleScale: { mouseWheel: false, pinch: true, axisPressedMouseMove: true, axisDoubleClickReset: true },
+  });
+  C.candles = C.chart.addCandlestickSeries({ upColor: UP, downColor: DOWN, wickUpColor: UP, wickDownColor: DOWN, borderVisible: false,
+    priceFormat: { type: "custom", formatter: axisFmt, minMove: 1e-12 } });
+  C.volume = C.chart.addHistogramSeries({ priceScaleId: "", lastValueVisible: false, priceLineVisible: false, priceFormat: { type: "custom", formatter: fmt, minMove: 0.01 } });
+  C.volume.priceScale().applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+  // the chart sizes itself after layout: fit again then, and stop once the user takes over
+  new ResizeObserver(() => requestAnimationFrame(refit)).observe(el);
+  for (const ev of ["pointerdown", "touchstart"]) el.addEventListener(ev, () => { S.autoFit = false; }, { passive: true });
+  C.chart.subscribeCrosshairMove((p) => legend(p && p.time != null ? p.seriesData.get(C.candles) : null, p && p.time != null ? p.seriesData.get(C.volume) : null));
+}
+/**
+ * Up to 160 candles fill the whole width; more show the last 160, until the user drags or zooms. (A window starting
+ * before the first candle left the left half of the chart empty.)
+ */
+function refit() {
+  if (!C.chart || !S.autoFit) return;
+  const n = S.bars.length;
+  // room for the next candles: six of them on a full chart, one when a young coin has only a dozen
+  const room = Math.max(1, Math.min(6, Math.round(n / 25)));
+  C.chart.timeScale().applyOptions({ rightOffset: room });
+  if (n <= 160) C.chart.timeScale().fitContent();
+  else C.chart.timeScale().setVisibleLogicalRange({ from: n - 160, to: n + room });
+}
+const toBar = (k) => { const m = scaleBy(); return { time: k.t, open: k.o * m, high: k.h * m, low: k.l * m, close: k.c * m }; };
+const toVol = (k) => ({ time: k.t, value: k.v, color: k.c >= k.o ? "rgba(77,107,60,.32)" : "rgba(168,75,54,.32)" });
+function paint(fit) {
+  if (!C.chart) makeChart();
+  $("#chartNote").textContent = S.bars.length ? "" : T("No trades in this window yet.", "В этом окне сделок пока нет.");
+  C.candles.setData(S.bars.map(toBar));
+  C.volume.setData(S.bars.map(toVol));
+  // setData puts the chart back to its default bar width; fit after every repaint until the user drags or zooms
+  if (fit) S.autoFit = true;
+  if (S.autoFit) requestAnimationFrame(refit);
+  legend(null, null);
+}
+function legend(bar, vol) {
+  const last = S.bars[S.bars.length - 1];
+  const b = bar || (last ? toBar(last) : null);
+  const v = vol ? vol.value : last ? last.v : null;
+  if (!b) { $("#legend").innerHTML = ""; return; }
+  const ch = b.open ? (b.close / b.open - 1) * 100 : 0;
+  const cls = ch >= 0 ? "up" : "down";
+  $("#legend").innerHTML = `<span class="lbl">${S.mode === "mc" ? "MC" : T("Price", "Цена")} · ${S.tf}</span> O <b>${esc(fmt(b.open))}</b> H <b>${esc(fmt(b.high))}</b> L <b>${esc(fmt(b.low))}</b> C <b class="${cls}">${esc(fmt(b.close))}</b> <b class="${cls}">${esc(signedPct(ch, lang()))}</b> ${T("Vol", "Об.")} <b>${esc(fmt(v))}</b>`;
+}
+/** GeckoTerminal candles of the pool and of the coin's curve (both requests at once); `failed` if either was refused. */
+function rawMinute(tf) {
+  let failed = false;
+  const one = (pool) => candles(pool, ...tf.gt).catch(() => { failed = true; return []; });
+  return Promise.all([one(S.pool), S.curvePool ? one(S.curvePool) : Promise.resolve([])])
+    .then(([main, curve]) => ({ main, curve, failed }));
+}
+/**
+ * The free API refuses bursts. Without this the chart stays at the few candles built from the latest trades, which
+ * is what showed up as "not enough trades" and then a straight line: ask again a few times and repaint when it answers.
+ */
+async function retryMinute(run, name, attempt = 1) {
+  await new Promise((r) => setTimeout(r, attempt * 5000));
+  if (run !== S.run || S.tf !== name) return;
+  const tf = TF[name];
+  const raw = await rawMinute(tf);
+  if (run !== S.run || S.tf !== name) return;
+  if (raw.main.length || raw.curve.length) { S.bars = finishMinute(raw, tf); paint(S.autoFit); }
+  if (raw.failed && attempt < 4) retryMinute(run, name, attempt + 1);
+}
+/** The curve's candles before the pool's, the last ones finished with the newest trades. */
+function finishMinute({ main, curve }, tf) {
+  const first = main.length ? main[0].t : Infinity;
+  const out = [...curve.filter((k) => k.t < first), ...main].map((k) => ({ ...k }));
+  const lastT = out.length ? out[out.length - 1].t : 0;
+  for (const k of candlesFromTrades(S.trades.filter((x) => x.at / 1000 >= lastT), tf.step)) {
+    const b = out.find((x) => x.t === k.t);
+    if (b) { b.h = Math.max(b.h, k.h); b.l = Math.min(b.l, k.l); b.c = k.c; }
+    else if (k.t > lastT) out.push({ ...k, o: out.length ? out[out.length - 1].c : k.o });
+  }
+  return out;
+}
+async function loadBars(fit) {
+  if (!S.pool) return;
+  const tf = TF[S.tf];
+  if (C.chart) C.chart.applyOptions({ timeScale: { secondsVisible: !!tf.trades } });
+  const raw = tf.trades ? null : await rawMinute(tf);
+  S.bars = tf.trades ? candlesFromTrades(S.trades, tf.trades) : finishMinute(raw, tf);
+  paint(fit);
+  if (raw?.failed) retryMinute(S.run, S.tf);
+}
+let refitQueued = false;
+function scheduleRefit() {
+  if (refitQueued) return;
+  refitQueued = true;
+  requestAnimationFrame(() => { refitQueued = false; refit(); });
+}
+/** One new trade into the last candle, as terminals do between candle refreshes. */
+function applyTrade(x) {
+  if (!(x.priceUsd > 0)) return;
+  const tf = TF[S.tf];
+  const step = tf.trades || tf.step;
+  const t = Math.floor(x.at / 1000 / step) * step;
+  let last = S.bars[S.bars.length - 1];
+  if (last && t < last.t) return;
+  if (!last || t > last.t) {
+    const o = last ? last.c : x.priceUsd;
+    last = { t, o, h: o, l: o, c: o, v: 0 };
+    S.bars.push(last);
+    // a young coin's chart grows from its trades: without a fit the new candles bunch up at the right edge
+    $("#chartNote").textContent = "";
+    if (S.autoFit) scheduleRefit();
+  }
+  last.h = Math.max(last.h, x.priceUsd); last.l = Math.min(last.l, x.priceUsd); last.c = x.priceUsd; last.v += x.usd || 0;
+  C.candles.update(toBar(last)); C.volume.update(toVol(last));
+}
+function addTrades(list) {
+  const known = new Set(S.trades.map((x) => x.tx));
+  const fresh = list.filter((x) => !known.has(x.tx));
+  S.trades = [...S.trades, ...fresh].sort((a, b) => a.at - b.at).slice(-5000);
+  return fresh.sort((a, b) => a.at - b.at);
+}
+function setTf(tf) {
+  S.tf = tf;
+  all(".tfs button[data-tf]").forEach((x) => x.setAttribute("aria-pressed", x.dataset.tf === tf ? "true" : "false"));
+}
+
+// ---------- the verdict, in big letters ----------
+const BIG = {
+  checking: ["Checking the coin…", "Проверяю монету…"],
+  danger: ["Dangerous to buy", "Опасно покупать"],
+  warn: ["Be careful", "Осторожно"],
+  ok: ["No obvious traps", "Явных ловушек нет"],
+  failed: ["Could not check", "Не удалось проверить"],
+};
+function renderVerdict() {
+  const r = S.report;
+  let level = S.checkFailed ? "failed" : r ? r.level : "checking";
+  let why = "";
+  if (r) {
+    const d = describe(r, lang());
+    const top = d.flags.find((f) => f.level === "danger") || d.flags.find((f) => f.level === "warn");
+    why = top ? top.text : T("New tokens cannot be minted, accounts cannot be frozen, no dangerous token extensions.",
+      "Новые токены выпустить нельзя, счета не заморозить, опасных расширений токена нет.");
+  }
+  if (S.info?.honeypot === true) { level = "danger"; why = T("GeckoTerminal marks this token as a honeypot: selling may be blocked.", "GeckoTerminal помечает токен как ловушку: продать могут не дать."); }
+  if (level === "checking") why = T("Reading the coin on the Solana chain.", "Читаю монету в сети Solana.");
+  if (level === "failed") why = T("The chain did not answer; the market data below still works.", "Сеть не ответила; данные рынка ниже работают.");
+  const v = $("#verdict");
+  v.className = `verdict ${level}`;
+  $("#vText").textContent = T(...BIG[level]);
+  $("#vWhy").textContent = why;
+  // the plaque says what it has not seen yet: the holder list comes after the verdict and can raise it, or fail.
+  // Three notes of about one length: the verdict's height must not change with them (docs/coin-link.md)
+  const unread = r && !r.holders && level !== "danger";
+  $("#vNote").textContent = level !== "ok" && level !== "warn" && level !== "danger" ? ""
+    : unread && r.missing.includes("holders") ? T("The biggest wallets could not be read, so this verdict does not take them into account.", "Крупнейшие кошельки прочитать не удалось, поэтому этот вердикт их не учитывает.")
+    : unread ? T("Still reading the biggest wallets, which takes a few seconds: the verdict may get stricter.", "Ещё читаю крупнейшие кошельки, это несколько секунд: вердикт может стать строже.")
+    : T("This is how the coin is built on chain, not a promise it goes up: memecoins fall without traps too.", "Это устройство монеты на цепи, а не обещание роста: мемкоины падают и без ловушек.");
+}
+
+// ---------- market block: the market cap, live ----------
+function renderMarket(m, first) {
+  if (!m) return;
+  const el = $("#price");
+  const mcap = m.marketCapUsd ?? (m.priceUsd != null ? m.priceUsd * S.supply : null);
+  const prev = S.mcap;
+  S.mcap = mcap; S.price = m.priceUsd;
+  countTo(el, mcap ?? 0, (v) => (mcap == null ? "?" : money(v, lang())));
+  if (!first && prev != null && mcap != null && mcap !== prev) {
+    el.classList.remove("up", "down"); void el.offsetWidth;
+    el.classList.add(mcap > prev ? "up" : "down");
+    setTimeout(() => el.classList.remove("up", "down"), 1600);
+  }
+  $("#sub").textContent = `${T("price", "цена")} ${money(m.priceUsd, lang())} · ${T("liquidity", "ликвидность")} ${money(m.liquidityUsd, lang())} · ${T("volume 24h", "объём 24ч")} ${money(m.volume24, lang())}`;
+  $("#chips").innerHTML = [["5m", "5м", m.change.m5], ["1h", "1ч", m.change.h1], ["6h", "6ч", m.change.h6], ["24h", "24ч", m.change.h24]]
+    .filter(([, , v]) => v != null).map(([en, ru, v]) => `<span class="chip ${v > 0 ? "up" : v < 0 ? "down" : ""}">${T(en, ru)} ${esc(signedPct(v, lang()))}</span>`).join("");
+}
+
+// ---------- the key numbers, as terminals show them ----------
+function renderTiles() {
+  const r = S.report, i = S.info, m = S.market;
+  const t = r?.token;
+  const tx24 = m?.tx?.h24;
+  const h = r?.holders;   // read from the chain just now; GeckoTerminal's holder numbers can be a day old
+  const tiles = [
+    [T("top 10 hold", "топ-10 держат"), h ? pct(h.top10WalletsPct) : i?.spread?.top10 != null ? pct(i.spread.top10) : "…", ""],
+    [T("developer holds", "создатель держит"), h && r.creator ? pct(h.creatorPct) : i?.devPct != null ? pct(i.devPct) : "…", ""],
+    [T("holders", "держателей"), h ? intl(h.accounts) : i?.holders != null ? intl(i.holders) : "…", ""],
+    [T("new tokens", "выпуск новых"), t ? (t.mintAuthority ? T("ON", "ВКЛЮЧЁН") : T("off", "отключён")) : "…", t ? (t.mintAuthority ? "danger" : "ok") : ""],
+    [T("freezing", "заморозка"), t ? (t.freezeAuthority ? T("ON", "ВКЛЮЧЕНА") : T("off", "отключена")) : "…", t ? (t.freezeAuthority ? "danger" : "ok") : ""],
+    [T("trades in creation block", "сделок в блоке создания"), r?.launch?.reached ? intl(r.launch.sameBlock) : r ? "?" : "…", r?.launch?.reached && r.launch.sameBlock >= SAME_BLOCK_WARN ? "warn" : ""],
+    [T("liquidity", "ликвидность"), m ? money(m.liquidityUsd, lang()) : "…", ""],
+    [T("volume 24h", "объём 24ч"), m ? money(m.volume24, lang()) : "…", ""],
+    [T("trades 24h", "сделок за 24ч"), tx24 && tx24.buys != null ? intl(tx24.buys + tx24.sells) : "…", ""],
+  ];
+  $("#tiles").innerHTML = tiles.map(([k, v, c]) => `<div class="${c}"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join("");
+}
+
+// ---------- who holds: the supply's spread ----------
+function renderSpread() {
+  const i = S.info;
+  const card = $("#spreadCard");
+  if (!i || i.spread.top10 == null) { card.hidden = !S.infoDone; if (S.infoDone) $("#spread").innerHTML = `<p class="empty">${T("GeckoTerminal has no holder data for this coin yet.", "У GeckoTerminal пока нет данных о держателях этой монеты.")}</p>`; return; }
+  card.hidden = false;
+  const parts = [
+    [T("top 10", "топ-10"), i.spread.top10, "var(--brick)"], [T("11–20", "11–20"), i.spread.next10, "var(--ochre)"],
+    [T("21–40", "21–40"), i.spread.next20, "var(--sand)"], [T("everyone else", "все остальные"), i.spread.rest, "var(--moss)"],
+  ].filter(([, v]) => v != null);
+  const sum = parts.reduce((s, [, v]) => s + v, 0) || 100;
+  $("#spread").innerHTML = `<div class="stack">${parts.map(([, v, c]) => `<i style="width:${(v / sum * 100).toFixed(2)}%;background:${c}"></i>`).join("")}</div>
+    <ul class="keys">${parts.map(([k, v, c]) => `<li><s style="background:${c}"></s>${esc(k)} · ${esc(pct(v))}</li>`).join("")}</ul>
+    <p class="src">${T(`${intl(i.holders)} holders`, `${intl(i.holders)} держателей`)}${i.devPct != null ? T(` · developer holds ${pct(i.devPct)}`, ` · у создателя ${pct(i.devPct)}`) : ""} · GeckoTerminal</p>`;
+}
+
+// ---------- who trades: buys against sells per window ----------
+const WINDOWS = [["m5", "5m", "5 мин"], ["m15", "15m", "15 мин"], ["h1", "1h", "1 ч"], ["h6", "6h", "6 ч"], ["h24", "24h", "24 ч"]];
+function splitRow(label, a, b, right) {
+  const tot = (a || 0) + (b || 0);
+  const pa = tot ? (a / tot) * 100 : 50;
+  return `<div class="row"><span>${esc(label)}</span><div class="split"><i class="b" style="width:${pa.toFixed(1)}%"></i><i class="s" style="width:${(100 - pa).toFixed(1)}%"></i></div><span class="n">${right}</span></div>`;
+}
+function renderPressure() {
+  const tx = S.market?.tx;
+  const card = $("#pressCard");
+  if (!tx || !Object.keys(tx).length) { card.hidden = true; return; }
+  card.hidden = false;
+  const rows = WINDOWS.filter(([k]) => tx[k] && tx[k].buys != null)
+    .map(([k, en, ru]) => splitRow(T(en, ru), tx[k].buys, tx[k].sells, `<span class="up">${intl(tx[k].buys)}</span> / <span class="down">${intl(tx[k].sells)}</span>`));
+  const ppl = ["h1", "h24"].filter((k) => tx[k] && tx[k].buyers != null)
+    .map((k) => { const w = WINDOWS.find((x) => x[0] === k); return splitRow(T(w[1], w[2]), tx[k].buyers, tx[k].sellers, `<span class="up">${intl(tx[k].buyers)}</span> / <span class="down">${intl(tx[k].sellers)}</span>`); });
+  $("#press").innerHTML = `<div class="rows">${rows.join("")}</div>`
+    + (ppl.length ? `<p class="hint" style="margin:12px 0 6px">${T("Different wallets: buyers / sellers", "Разных кошельков: покупатели / продавцы")}</p><div class="rows">${ppl.join("")}</div>` : "");
+}
+
+// ---------- money in and out over the latest trades ----------
+function renderFlow() {
+  const list = S.trades.filter((x) => x.usd > 0);
+  const card = $("#flowCard");
+  if (list.length < 2) { card.hidden = !S.tradesDone; if (S.tradesDone) $("#flow").innerHTML = `<p class="empty">${T("Too few trades in the last day.", "За сутки слишком мало сделок.")}</p>`; return; }
+  card.hidden = false;
+  let cum = 0;
+  const pts = list.map((x) => { cum += x.side === "buy" ? x.usd : -x.usd; return [x.at, cum]; });
+  const t0 = pts[0][0], t1 = pts[pts.length - 1][0] || t0 + 1;
+  const lo = Math.min(0, ...pts.map((p) => p[1])), hi = Math.max(0, ...pts.map((p) => p[1]));
+  const W = 600, H = 150, pad = 8;
+  const X = (t) => ((t - t0) / Math.max(1, t1 - t0)) * W;
+  const Y = (v) => pad + (1 - (v - lo) / Math.max(1e-9, hi - lo)) * (H - 2 * pad);
+  const line = pts.map((p, k) => `${k ? "L" : "M"}${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join(" ");
+  const color = cum >= 0 ? UP : DOWN;
+  const area = `${line} L${X(t1).toFixed(1)} ${Y(0).toFixed(1)} L0 ${Y(0).toFixed(1)} Z`;
+  const mins = Math.max(1, Math.round((t1 - t0) / 60000));
+  const span = mins < 120 ? T(`${mins} min`, `${mins} мин`) : T(`${intl(mins / 60, 1)} h`, `${intl(mins / 60, 1)} ч`);
+  $("#flow").innerHTML = `<p class="flowsum"><b class="${cum >= 0 ? "up" : "down"}">${cum >= 0 ? "+" : "−"}${esc(money(Math.abs(cum), lang()))}</b> ${T(cum >= 0 ? "more came in than went out" : "more went out than came in", cum >= 0 ? "зашло больше, чем вышло" : "вышло больше, чем зашло")} · ${T(`last ${list.length} trades, ${span}`, `последние ${list.length} сделок, ${span}`)}</p>
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="net flow"><line x1="0" x2="${W}" y1="${Y(0).toFixed(1)}" y2="${Y(0).toFixed(1)}" stroke="${TXT}" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>
+    <path d="${area}" fill="${color}" fill-opacity=".12"/><path d="${line}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`;
+}
+
+// ---------- trade sizes: small fish or whales ----------
+const SIZES = [[0, 10, "< $10"], [10, 100, "$10–100"], [100, 1000, "$100–1K"], [1000, 10000, "$1K–10K"], [10000, Infinity, "≥ $10K"]];
+function renderSizes() {
+  const list = S.trades.filter((x) => x.usd > 0);
+  const card = $("#sizeCard");
+  if (list.length < 5) { card.hidden = true; return; }
+  card.hidden = false;
+  const rows = SIZES.map(([a, b, label]) => {
+    const inB = list.filter((x) => x.usd >= a && x.usd < b);
+    return { label, buys: inB.filter((x) => x.side === "buy").length, sells: inB.filter((x) => x.side !== "buy").length };
+  });
+  const max = Math.max(1, ...rows.map((r) => Math.max(r.buys, r.sells)));
+  $("#sizes").innerHTML = `<div class="fly mid" style="margin:0 0 4px"><span class="l down">${T("sells", "продажи")}</span><span></span><span class="r up">${T("buys", "покупки")}</span></div>`
+    + `<div class="rows">${rows.map((r) => `<div class="fly"><span class="l">${r.sells ? intl(r.sells) : ""}<i style="width:${(r.sells / max * 100).toFixed(1)}%"></i></span><span class="mid">${esc(r.label)}</span><span class="r"><i style="width:${(r.buys / max * 100).toFixed(1)}%"></i>${r.buys ? intl(r.buys) : ""}</span></div>`).join("")}</div>`;
+}
+
+// ---------- the biggest wallets among the latest trades ----------
+function renderWhales() {
+  const by = new Map();
+  for (const x of S.trades) {
+    if (!x.wallet || !(x.usd > 0)) continue;
+    const w = by.get(x.wallet) || { wallet: x.wallet, buy: 0, sell: 0 };
+    if (x.side === "buy") w.buy += x.usd; else w.sell += x.usd;
+    by.set(x.wallet, w);
+  }
+  const top = [...by.values()].sort((a, b) => b.buy + b.sell - (a.buy + a.sell)).slice(0, 6);
+  const card = $("#whaleCard");
+  if (top.length < 2) { card.hidden = true; return; }
+  card.hidden = false;
+  const max = Math.max(...top.map((w) => w.buy + w.sell));
+  $("#whales").innerHTML = `<div class="rows">${top.map((w) => {
+    const net = w.buy - w.sell;
+    const tot = w.buy + w.sell;
+    return `<div class="whale"><a href="https://solscan.io/account/${esc(w.wallet)}" data-ext>${esc(short(w.wallet))}</a>
+      <div class="split" style="width:${(tot / max * 100).toFixed(1)}%"><i class="b" style="width:${(w.buy / tot * 100).toFixed(1)}%"></i><i class="s" style="width:${(w.sell / tot * 100).toFixed(1)}%"></i></div>
+      <span class="net ${net >= 0 ? "up" : "down"}">${net >= 0 ? "+" : "−"}${esc(money(Math.abs(net), lang()))}</span></div>`;
+  }).join("")}</div>`;
+}
+
+// ---------- the pump.fun curve's progress ----------
+function renderCurve() {
+  const r = S.report, i = S.info;
+  let p = null, text = "";
+  if (r?.curve && !r.curve.complete) { p = r.curve.soldPct; text = T("At 100% the coin moves to a PumpSwap pool.", "При 100 % монета переходит в пул PumpSwap."); }
+  else if (i?.curvePct != null && !i.curveDone) { p = i.curvePct; text = T("At 100% the coin moves to a PumpSwap pool.", "При 100 % монета переходит в пул PumpSwap."); }
+  else if (r?.pool || i?.curveDone) {
+    p = 100;
+    const at = i?.curveDoneAt ? new Date(i.curveDoneAt).toLocaleString(LOC(), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
+    text = at ? T(`Moved to a PumpSwap pool on ${at}.`, `Перешла в пул PumpSwap ${at}.`) : T("Moved to a PumpSwap pool.", "Перешла в пул PumpSwap.");
+  }
+  const card = $("#curveCard");
+  if (p == null) { card.hidden = true; return; }
+  card.hidden = false;
+  $("#curve").innerHTML = `<div class="progress"><i style="width:${Math.max(0, Math.min(100, p)).toFixed(1)}%"></i><span>${esc(pct(p))}</span></div><p class="fine">${esc(text)}</p>`;
+}
+
+function renderAll() { renderVerdict(); renderTiles(); renderSpread(); renderPressure(); renderFlow(); renderSizes(); renderWhales(); renderCurve(); }
+
+// ---------- head: picture, name, links ----------
+function renderHead() {
+  const i = S.info;
+  const img = $("#logo");
+  if (i?.image) { img.src = i.image; img.hidden = false; } else img.hidden = true;
+  if (i && !S.report?.token?.name && (i.name || i.symbol)) $("#title").textContent = [i.name, i.symbol ? "$" + i.symbol : ""].filter(Boolean).join(" ");
+  const links = [];
+  if (i?.twitter) links.push(`<a href="https://x.com/${esc(i.twitter)}" data-ext>X</a>`);
+  if (i?.telegram) links.push(`<a href="https://t.me/${esc(i.telegram)}" data-ext>Telegram</a>`);
+  for (const w of i?.websites ?? []) links.push(`<a href="${esc(w)}" data-ext rel="nofollow">${esc(w.replace(/^https?:\/\//, "").replace(/\/$/, "").slice(0, 28))}</a>`);
+  links.push(`<a href="https://solscan.io/token/${esc(S.mint)}" data-ext>Solscan</a>`);
+  $("#socials").innerHTML = links.join("");
+}
+
+// ---------- trades ----------
+function ago(ms) { const s = Math.max(0, Math.round((Date.now() - ms) / 1000)); return s < 60 ? T(`${s}s`, `${s} с`) : s < 3600 ? T(`${Math.round(s / 60)}m`, `${Math.round(s / 60)} мин`) : T(`${Math.round(s / 3600)}h`, `${Math.round(s / 3600)} ч`); }
+function renderTrades(list, first) {
+  const ul = $("#feed");
+  const fresh = list.slice(0, 15);
+  ul.innerHTML = fresh.map((x) => {
+    const isNew = !first && !S.seen.has(x.tx);
+    const sol = x.sol != null ? x.sol.toLocaleString(LOC(), { maximumFractionDigits: x.sol < 1 ? 3 : 2 }) : "?";
+    return `<li class="${isNew ? "new" : ""}"><span class="side ${x.side === "buy" ? "buy-s" : "sell-s"}">${x.side === "buy" ? T("buy", "покупка") : T("sell", "продажа")}</span>
+      <span class="amt">${sol} SOL <span class="ago">${esc(money(x.usd, lang()))}</span></span>
+      <a class="ago" href="https://solscan.io/tx/${esc(x.tx)}" data-ext>${ago(x.at)}</a></li>`;
+  }).join("") || `<li><span></span><span class="ago">${T("No trades in the last day.", "За сутки сделок нет.")}</span><span></span></li>`;
+  fresh.forEach((x) => S.seen.add(x.tx));
+}
+
+// ---------- the on-chain check ----------
+function renderCheck() {
+  const r = S.report;
+  if (!r) return;
+  const d = describe(r, lang());
+  $("#flags").innerHTML = d.flags.map((f) => `<li class="${f.level}">${esc(f.text)}</li>`).join("");
+  $("#facts").innerHTML = d.facts.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join("");
+  $("#checkNote").textContent = d.note;
+  $("#check").hidden = false;
+}
+
+function renderBuy() {
+  const pair = S.report?.pool?.address ?? S.report?.curve?.address ?? S.pool ?? null;
+  const links = buyLinks(S.mint, pair, REFS);
+  $("#buy").innerHTML = links.map((l) => `<a href="${esc(l.url)}" class="${l.ref ? "ref" : ""}" data-ext>${esc(l.name)}</a>`).join("");
+  const su = signupLinks(REFS);
+  const code = pumpCode(REFS);
+  $("#signup").innerHTML = [
+    ...su.map((s) => `<a href="${esc(s.url)}" data-ext>${T(`No ${esc(s.name)} account? Sign up`, `Нет аккаунта в ${esc(s.name)}? Регистрация`)}</a>`),
+    ...(code ? [T(`New to pump.fun? Invite code in the app: <b>${esc(code)}</b>`, `Впервые на pump.fun? Код приглашения в приложении: <b>${esc(code)}</b>`)] : []),
+  ].join("<br>");
+  $("#botlink").href = `https://t.me/${BOT}?start=${S.mint}`;
+  $("#botlink").parentElement.hidden = inTg;
+}
+
+// ---------- flow ----------
+function remember(mint, name) {
+  try {
+    const list = JSON.parse(localStorage.getItem("recent") || "[]").filter((x) => x.mint !== mint);
+    list.unshift({ mint, name });
+    localStorage.setItem("recent", JSON.stringify(list.slice(0, 6)));
+  } catch (e) {}
+}
+function renderRecent() {
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem("recent") || "[]"); } catch (e) {}
+  $("#recent").innerHTML = list.map((x) => `<button type="button" data-mint="${esc(x.mint)}">${esc(x.name || short(x.mint))}</button>`).join("");
+}
+
+/** Market data again after a pause while this coin is still open: the free API sometimes refuses a burst. */
+async function retrying(fn, run) {
+  for (const wait of [0, 8000, 20000]) {
+    if (wait) {
+      if (!S.bars.length) $("#chartNote").textContent = T("Market data is busy, trying again…", "Данные рынка заняты, пробую ещё раз…");
+      await new Promise((r) => setTimeout(r, wait));
+    }
+    if (run !== S.run) throw new Error("closed");
+    try { return await fn(); } catch (e) { if (wait === 20000) throw e; }
+  }
+}
+
+function readPools(mint) { try { return JSON.parse(localStorage.getItem("pools:" + mint) || "null"); } catch (e) { return null; } }
+function savePools(mint, p) { try { localStorage.setItem("pools:" + mint, JSON.stringify(p)); } catch (e) {} }
+/** The pool to chart and the coin's pump.fun curve, if it migrated (its candles come first, as on Axiom). */
+function poolsOf(m) {
+  if (!m?.main) return null;
+  const curve = m.main.dex === "pumpswap" ? m.pools.filter((p) => p.dex === "pump-fun" && p.createdAt && p.createdAt <= (m.main.createdAt ?? Infinity)).sort((a, b) => a.createdAt - b.createdAt)[0] : null;
+  return { main: m.main.address, curve: curve ? curve.address : null, createdAt: curve?.createdAt ?? m.main.createdAt ?? null };
+}
+
+/** The pool's numbers on the page: market cap, tiles, buys and sells; the pools remembered for the next visit. */
+function showMarket(m, cached, mint) {
+  S.market = m.main;
+  if (m.main.fdvUsd && m.main.priceUsd) S.supply = m.main.fdvUsd / m.main.priceUsd;
+  renderMarket(m.main, true);
+  renderTiles(); renderPressure();
+  if (!cached) { const pp = poolsOf(m); if (pp) savePools(mint, pp); }
+  else if (!cached.createdAt && m.main.createdAt) savePools(mint, { ...cached, createdAt: m.main.createdAt });
+  if (S.bars.length) paint(false);    // the market cap scale needs the supply
+  renderBuy();
+}
+
+/** The chart and the trades of a pool GeckoTerminal knows. */
+async function startChart(run, mint, pp) {
+  Object.assign(S, { pool: pp.main, curvePool: pp.curve, createdAt: pp.createdAt });
+  setTf(pp.createdAt ? defaultTf((Date.now() - pp.createdAt) / 1000) : "1m");
+  const tf = TF[S.tf];
+  const [got, raw] = await Promise.all([trades(S.pool, mint).catch(() => null), tf.trades ? null : rawMinute(tf)]);
+  if (run !== S.run) return;
+  const list = got ?? [];
+  if (!got) retryTrades(run);
+  addTrades(list);
+  S.tradesDone = !!got;
+  renderTrades(list, true);
+  renderFlow(); renderSizes(); renderWhales();
+  S.bars = tf.trades ? candlesFromTrades(S.trades, tf.trades) : finishMinute(raw, tf);
+  paint(true);
+  if (raw?.failed) retryMinute(run, S.tf);
+  if (!pp.createdAt && S.bars.length && defaultTf(Date.now() / 1000 - S.bars[0].t) === "1s") { setTf("1s"); await loadBars(true); }
+}
+
+/**
+ * A coin a few minutes old is not on GeckoTerminal yet: look again every 30 s for ten minutes and start the chart
+ * as soon as it is listed, instead of leaving the page without one.
+ */
+async function waitListing(run, mint, attempt) {
+  $("#chartNote").textContent = T("GeckoTerminal does not list this coin yet (new coins appear within a few minutes). The chart starts by itself.",
+    "GeckoTerminal ещё не знает эту монету (новые появляются через несколько минут). График включится сам.");
+  if (attempt > 20) { $("#chartNote").textContent = T("GeckoTerminal does not list this coin.", "GeckoTerminal не знает эту монету."); S.tradesDone = true; renderFlow(); return; }
+  await new Promise((r) => setTimeout(r, 30000));
+  if (run !== S.run) return;
+  let m = null;
+  try { m = await marketOf(mint); } catch (e) { /* busy: next round */ }
+  if (run !== S.run) return;
+  const pp = poolsOf(m);
+  if (!pp?.main) return waitListing(run, mint, attempt + 1);
+  showMarket(m, null, mint);
+  await startChart(run, mint, pp);
+}
+
+async function open(input) {
+  const mint = parseMintInput(input);
+  if (!mint) { root.classList.remove("coin-link"); status(T("That is not a coin address.", "Это не адрес монеты."), true); return; }
+  if (window.FX) FX.use("coin").catch(() => {});   // fx/coin.js: effects on only, after the first paint; the empty page never loads it
+  const run = ++S.run;
+  clearInterval(S.timer); clearInterval(S.slow);
+  // pools handed over by the bot (it already read the chain); only for the coin they came with
+  const q = new URLSearchParams(location.search);
+  const hinted = q.get("mint") === mint && isAddress(q.get("p") || q.get("c") || "");
+  const given = hinted ? { main: q.get("p") || q.get("c"), curve: q.get("p") && isAddress(q.get("c") || "") ? q.get("c") : null, createdAt: null } : null;
+  Object.assign(S, { mint, pool: null, curvePool: null, createdAt: null, bars: [], trades: [], market: null, report: null, info: null, infoDone: false, tradesDone: false, checkFailed: false, price: null, mcap: null, seen: new Set() });
+  const keep = given ? `${given.main === q.get("p") ? `&p=${given.main}` : ""}${q.get("c") && isAddress(q.get("c")) ? `&c=${q.get("c")}` : ""}` : "";
+  try { history.replaceState(null, "", `?mint=${mint}${keep}&lang=${lang()}`); } catch (e) {}
+  document.body.classList.add("has-coin");
+  $("#coin").hidden = false;
+  $("#coin").querySelectorAll(".reveal").forEach((el, i) => { el.style.animationDelay = `${Math.min(i, 8) * 60}ms`; el.classList.remove("reveal"); void el.offsetWidth; el.classList.add("reveal"); });
+  $("#title").textContent = short(mint);
+  $("#mintBtn").textContent = mint;
+  $("#price").textContent = "…"; delete $("#price").dataset.v;
+  $("#sub").textContent = ""; $("#chips").innerHTML = "";
+  $("#logo").hidden = true; $("#socials").innerHTML = "";
+  $("#check").hidden = true;
+  for (const id of ["#spreadCard", "#pressCard", "#flowCard", "#sizeCard", "#whaleCard", "#curveCard"]) $(id).hidden = true;
+  if (C.chart) { C.chart.remove(); C.chart = null; }
+  $("#chart").innerHTML = "";
+  $("#legend").innerHTML = "";
+  $("#chartNote").textContent = T("Loading the chart…", "Загружаю график…");
+  $("#feed").innerHTML = "";
+  renderAll(); renderHead(); renderBuy();
+  status("");
+
+  // the pools: remembered from the last visit, so the chart starts loading at once; GeckoTerminal confirms them
+  const cached = readPools(mint) || given;
+  // with the pool known, one request for its numbers replaces the search through all of the coin's pools
+  const marketP = cached
+    ? retrying(() => poolNow(cached.main).then((p) => ({ main: p, pools: p ? [p] : [] })), run)
+    : retrying(() => marketOf(mint), run);
+  const poolsP = cached ? Promise.resolve(cached) : marketP.then(poolsOf);
+
+  const chartP = poolsP.then((pp) => {
+    if (run !== S.run) return;
+    if (!pp?.main) { waitListing(run, mint, 1); return; }
+    return startChart(run, mint, pp);
+  });
+
+  marketP.then((m) => {
+    if (run !== S.run || !m?.main) return;
+    showMarket(m, cached, mint);
+  }).catch(() => { if (run === S.run && !S.bars.length) $("#chartNote").textContent = T("Market data did not load.", "Данные рынка не загрузились."); });
+
+  // holders' spread, the developer's share, the curve, picture and links: one more request, after the chart's
+  chartP.catch(() => {}).then(() => retrying(() => tokenInfo(mint), run)).then((info) => {
+    if (run !== S.run) return;
+    S.info = info; S.infoDone = true;
+    renderHead(); renderVerdict(); renderTiles(); renderSpread(); renderCurve();
+  }).catch(() => { if (run === S.run) { S.infoDone = true; renderSpread(); } });
+
+  const showReport = (r) => { S.report = r; renderVerdict(); renderTiles(); renderCurve(); renderCheck(); };
+  const checkP = checkCoin(mint, {
+    rpc: makeRpc(PAGE_RPC, { gapMs: 120, timeoutMs: 12000, retries: [1500, 4000] }),
+    holdersRpc: makeRpc(HOLDERS_RPC),
+    labels: LABELS,
+    sampleTx: 0,
+    // the verdict does not wait for the holder list, which takes seconds on a big coin; the full report may raise it
+    onEarly: (r) => {
+      if (run !== S.run) return;
+      const name = [r.token.name, r.token.symbol ? "$" + r.token.symbol : ""].filter(Boolean).join(" ");
+      if (name) $("#title").textContent = name;
+      remember(mint, r.token.symbol ? "$" + r.token.symbol : r.token.name);
+      showReport(r); renderBuy(); renderRecent();
+    },
+  })
+    .then((r) => { if (run === S.run) showReport(r); })
+    .catch((e) => {
+      if (run !== S.run) return;
+      S.checkFailed = true; renderVerdict();
+      status(e?.code === "not_mint" ? T("This is not a token address.", "Это не адрес токена.") : T("The chain check did not load; the market data still works.", "Проверка по цепи не загрузилась; данные рынка работают."), true);
+    });
+
+  await Promise.allSettled([chartP, marketP]);
+  if (run !== S.run) return;
+  S.timer = setInterval(() => liveTrades(run), 5000);     // new trades move the last candle
+  S.slow = setInterval(() => liveMarket(run), 15000);     // market cap, changes, buys and sells
+  checkP.then(() => {});
+}
+
+/** The first trades were refused (a burst limit): ask again after 3, 6, 9 and 12 s. */
+async function retryTrades(run, attempt = 1) {
+  await new Promise((r) => setTimeout(r, attempt * 3000));
+  if (run !== S.run || !S.pool) return;
+  let list;
+  try { list = await trades(S.pool, S.mint); } catch (e) { if (attempt < 4) retryTrades(run, attempt + 1); return; }
+  if (run !== S.run) return;
+  addTrades(list);
+  S.tradesDone = true;
+  renderTrades(list, true); renderFlow(); renderSizes(); renderWhales();
+  if (TF[S.tf].trades) { S.bars = candlesFromTrades(S.trades, TF[S.tf].trades); paint(S.autoFit); }
+}
+
+async function liveTrades(run) {
+  if (document.hidden || !S.pool || run !== S.run) return;
+  let list;
+  try { list = await trades(S.pool, S.mint); } catch (e) { return; }
+  if (run !== S.run) return;
+  const fresh = addTrades(list);
+  renderTrades(list, false);
+  if (!fresh.length) return;
+  renderFlow(); renderSizes(); renderWhales();
+  if (!C.chart) return;
+  for (const x of fresh) applyTrade(x);
+  legend(null, null);
+  if (root.classList.contains("fx-coin")) tradeMark(fresh[fresh.length - 1]);
+}
+/** For fx/coin.js: where the newest trade landed on the chart — the last candle at its new close. */
+function tradeMark(x) {
+  const last = S.bars[S.bars.length - 1];
+  if (!x || !last) return;
+  const px = C.chart.timeScale().timeToCoordinate(last.t), py = C.candles.priceToCoordinate(toBar(last).close);
+  if (px == null || py == null) return;
+  document.dispatchEvent(new CustomEvent("coin:trade", { detail: { x: px, y: py, side: x.side } }));
+}
+
+async function liveMarket(run) {
+  if (document.hidden || !S.pool || run !== S.run) return;
+  try {
+    const m = await poolNow(S.pool);
+    if (run !== S.run || !m) return;
+    if (m.fdvUsd && m.priceUsd) S.supply = m.fdvUsd / m.priceUsd;
+    S.market = m;
+    renderMarket(m, false); renderTiles(); renderPressure();
+  } catch (e) { /* the next tick tries again */ }
+}
+
+// ---------- language and controls ----------
+let pick = null;
+try { const q = new URLSearchParams(location.search).get("lang"); if (q === "ru" || q === "en") pick = q; } catch (e) {}
+if (!pick && inTg) pick = (app.initDataUnsafe?.user?.language_code || "").startsWith("ru") ? "ru" : "en";
+if (!pick) { try { pick = localStorage.getItem("lang"); } catch (e) {} }
+if (pick !== "ru" && pick !== "en") pick = (navigator.language || "").toLowerCase().startsWith("ru") ? "ru" : "en";
+function setLang(l) {
+  root.setAttribute("data-lang", l); root.lang = l;
+  all("[data-set]").forEach((b) => b.setAttribute("aria-pressed", b.getAttribute("data-set") === l ? "true" : "false"));
+  $("#q").placeholder = l === "ru" ? "адрес монеты pump.fun или ссылка" : "pump.fun coin address or link";
+  if (S.market) renderMarket(S.market, true);
+  if (S.bars.length) paint(false);
+  $("#mode").textContent = S.mode === "mc" ? "MC" : (l === "ru" ? "Цена" : "Price");
+  if (S.mint) { renderAll(); renderHead(); renderCheck(); renderBuy(); renderTrades(S.trades.slice().reverse(), true); }
+}
+setLang(pick);
+all("[data-set]").forEach((b) => b.addEventListener("click", () => { const l = b.getAttribute("data-set"); setLang(l); try { localStorage.setItem("lang", l); } catch (e) {} }));
+$("#form").addEventListener("submit", (e) => { e.preventDefault(); haptic(); open($("#q").value); });
+$("#recent").addEventListener("click", (e) => { const m = e.target.closest("[data-mint]")?.dataset.mint; if (m) { $("#q").value = m; open(m); } });
+all(".tfs button[data-tf]").forEach((b) => b.addEventListener("click", () => { haptic(); setTf(b.dataset.tf); loadBars(true); }));
+$("#fit").addEventListener("click", () => { haptic(); S.autoFit = true; refit(); });
+$("#mode").addEventListener("click", () => {
+  haptic(); S.mode = S.mode === "mc" ? "price" : "mc";
+  $("#mode").textContent = S.mode === "mc" ? "MC" : T("Price", "Цена");
+  if (S.bars.length) paint(false);
+});
+$("#mintBtn").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(S.mint); status(T("Address copied.", "Адрес скопирован.")); setTimeout(() => status(""), 1500); } catch (e) {}
+});
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("a[data-ext]");
+  if (a && inTg) { e.preventDefault(); openUrl(a.href); }
+});
+document.addEventListener("visibilitychange", () => { if (!document.hidden && S.mint) { liveTrades(S.run); liveMarket(S.run); } });
+
+renderRecent();
+const start = new URLSearchParams(location.search).get("mint") || (inTg ? app.initDataUnsafe?.start_param : null);
+if (start) { $("#q").value = start; open(start); }
+</script>
+</body>
+</html>
