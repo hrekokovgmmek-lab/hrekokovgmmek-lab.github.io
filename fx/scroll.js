@@ -1,6 +1,6 @@
 // artemvartanov.com — scroll-linked effects (demo/site/fx/scroll.js; plan demo/site/docs/fx-plan.md, stage 1).
 // GSAP and ScrollTrigger are the npm builds in fx/gsap-3.15.0/, loaded once, the first time this module is imported.
-// The page scrolls natively: no Lenis (the plan has it as optional; it would fight the sticky tab bar, and on touch
+// The page scrolls natively: no Lenis (the plan has it as optional; it would fight tab navigation, and on touch
 // screens it would be off anyway).
 // About shows one tab at a time and the closed ones are hidden (no box), so a trigger inside a closed tab has no
 // position until its tab opens. The page's tab code sends 'tabchange' on document; then, and again when the tab's

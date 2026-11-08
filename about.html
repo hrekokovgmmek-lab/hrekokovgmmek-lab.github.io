@@ -56,7 +56,7 @@
 :root{--paper:#f4f2ec;--ink:#1f1f1f;--brick:#a84b36;--grey:#6f6b62;--rule:#dedad1;--ease:cubic-bezier(.2,.7,.2,1)}
 *{box-sizing:border-box}
 html{background:var(--paper);color:var(--ink);-webkit-text-size-adjust:100%}
-body{margin:0 auto;max-width:880px;padding:0 24px 48px;font:17px/1.6 "Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--paper)}
+body{margin:0 auto;max-width:1080px;padding:0 24px 48px;font:17px/1.6 "Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--paper)}
 :root[data-lang=en] [data-l=ru],:root[data-lang=ru] [data-l=en]{display:none}
 [hidden]{display:none!important}
 a{color:var(--ink);text-decoration-color:var(--brick);text-underline-offset:3px;transition:color .2s}
@@ -75,18 +75,56 @@ h2{font-size:clamp(24px,3.6vw,32px);line-height:1.2;font-weight:500;margin:0 0 1
 .btn{display:inline-block;padding:9px 16px;border:1px solid var(--ink);text-decoration:none;transition:background .2s,color .2s}
 .btn:hover{background:var(--ink);color:var(--paper)}
 
-.tabs{position:sticky;top:0;z-index:5;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;background:var(--paper);
-  border-bottom:1px solid var(--rule);border-top:1px solid var(--rule);margin:0 -24px;padding:0 24px}
-.tabs::-webkit-scrollbar{display:none}
-.tab{font:inherit;font-size:15px;background:none;border:0;padding:14px 12px 13px;color:var(--grey);cursor:pointer;white-space:nowrap;transition:color .2s}
-.tab:hover{color:var(--ink)}
-.tab[aria-selected=true]{color:var(--ink)}
-.tab:focus-visible{outline:2px solid var(--brick);outline-offset:-4px}
-.tab-ink{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:var(--brick);pointer-events:none}
-.tabs.ready .tab-ink{transition:transform .35s var(--ease),width .35s var(--ease)}
+.portal-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px;margin:32px 0 24px}
+.portal-card{grid-column:span 2}
+.portal-card:nth-child(n+4){grid-column:span 3}
+.model-card{--mx:50%;--my:40%;position:relative;display:flex;flex-direction:column;align-items:stretch;min-width:0;overflow:hidden;
+  padding:17px 18px 15px;border:1px solid var(--rule);border-radius:2px;background:var(--paper);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--paper) 48%,transparent),color-mix(in srgb,var(--rule) 16%,transparent));
+  color:var(--ink);font:inherit;text-align:left;white-space:normal;text-decoration:none;cursor:pointer;transform:translateY(0);
+  box-shadow:0 1px 0 var(--rule);transition:transform .55s var(--ease),border-color .35s,box-shadow .55s var(--ease)}
+.model-card::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transform:translateX(-35%);
+  background:linear-gradient(112deg,transparent 22%,var(--paper) 49%,transparent 73%);transition:transform .9s var(--ease),opacity .5s}
+.model-card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.12;transition:opacity .5s;
+  background:radial-gradient(circle at var(--mx) var(--my),var(--paper),transparent 62%)}
+.model-card>*{position:relative;z-index:1}
+.model-card:hover,.model-card:focus-visible{color:var(--ink);border-color:var(--brick);transform:translateY(-7px);
+  box-shadow:0 22px 42px -28px var(--ink),0 0 0 1px var(--brick);outline:none}
+.model-card:hover::before,.model-card:focus-visible::before{opacity:.12;transform:translateX(35%)}
+.model-card:hover::after,.model-card:focus-visible::after{opacity:.3}
+.model-card:active{transform:translateY(-2px) scale(.99);transition-duration:.12s}
+.model-kicker{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font:10px/1.3 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.07em;text-transform:uppercase;color:var(--brick)}
+.model-kicker>span{color:var(--grey);text-align:right;letter-spacing:.025em}
+.model-view{display:block;height:205px;margin:3px -5px 0;pointer-events:none}
+.model-view::before{content:"";position:absolute;inset:14px 5px 10px;opacity:.15;transform:scale(.94);transition:opacity .55s,transform .7s var(--ease);
+  background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,var(--rule) 1px,transparent 1px);background-size:28px 28px;
+  -webkit-mask-image:radial-gradient(ellipse,#000,transparent 72%);mask-image:radial-gradient(ellipse,#000,transparent 72%)}
+.model-view::after{content:"";position:absolute;left:14%;right:14%;top:18%;height:1px;background:var(--brick);opacity:0}
+.model-card:hover .model-view::before,.model-card:focus-visible .model-view::before{opacity:.34;transform:scale(1)}
+.fx-on .model-view::after{opacity:.15;animation:model-scan 5.5s var(--ease) infinite alternate}
+.model-fallback{display:block;width:100%;height:100%;opacity:.88;transform:scale(.96);transition:opacity .5s,transform .8s var(--ease),filter .5s}
+.model-card:hover .model-fallback,.model-card:focus-visible .model-fallback{transform:scale(1.05) rotate(-2deg);opacity:1}
+.model-view.fx-object-ready .model-fallback{opacity:0;transform:scale(.92)}
+.model-caption{display:block;border-top:1px solid var(--rule);padding-top:12px}
+.model-title{display:block;font-size:22px;line-height:1.15;font-weight:500;letter-spacing:-.025em;transition:color .3s}
+.model-description{display:block;min-height:2.9em;margin-top:7px;font-size:13.5px;line-height:1.45;color:var(--grey)}
+.model-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:auto;padding-top:15px;
+  font:10px ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+.model-arrow{display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--rule);border-radius:50%;
+  color:var(--brick);font:18px/1 "Helvetica Neue",Helvetica,Arial,sans-serif;transition:transform .45s var(--ease),background .35s,color .35s,border-color .35s}
+.model-card:hover .model-title,.model-card:focus-visible .model-title{color:var(--brick)}
+.model-card:hover .model-arrow,.model-card:focus-visible .model-arrow{transform:translate(2px,-2px);background:var(--brick);border-color:var(--brick);color:var(--paper)}
+.model-tabs{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:6px 0 0}
+.model-tabs .model-view{height:178px}
+.model-tabs .model-title{font-size:21px}
+.tab[aria-selected=true]{border-color:var(--brick);box-shadow:inset 0 -3px 0 var(--brick),0 14px 34px -27px var(--ink)}
+.tab[aria-selected=true] .model-arrow{background:var(--brick);border-color:var(--brick);color:var(--paper)}
+.tab-ink{display:none}
 html:not(.js) .tabs{display:none}
+@keyframes model-scan{from{transform:translateY(0)}to{transform:translateY(132px)}}
 
 section{padding:44px 0;border-bottom:1px solid var(--rule)}
+.hero{padding:52px 0 32px;border-bottom:0}
 .js main section{border-bottom:0}
 .js main{min-height:calc(100vh - 50px)}
 .js body{overflow-anchor:none}
@@ -220,8 +258,8 @@ table.market{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:16p
 
 /* motion: only with JS, never with "reduce motion" */
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.js .hero>*{animation:rise .7s var(--ease) both}
-.js .hero>:nth-child(2),.js .hero>:nth-child(3){animation-delay:.08s}
+.js .hero>*,.js .hero-copy>*{animation:rise .7s var(--ease) both}
+.js .hero>:nth-child(2),.js .hero>:nth-child(3),.js .hero-copy>:nth-child(2),.js .hero-copy>:nth-child(3){animation-delay:.08s}
 .js .hero>:nth-child(4),.js .hero>:nth-child(5){animation-delay:.16s}
 .js .hero>:nth-child(6){animation-delay:.24s}
 .js .hero>:nth-child(n+7){animation-delay:.32s}
@@ -249,14 +287,35 @@ table.market{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:16p
   .js .chart .cell,.js .impact[data-anim] div{opacity:1;transform:none}
   .js .tape-copy{display:none}
   .js .tape-win{overflow-x:auto;-webkit-mask-image:none;mask-image:none}
+  .model-card:hover,.model-card:focus-visible,.model-card:active{transform:none}
+  .model-card:hover .model-fallback,.model-card:focus-visible .model-fallback{transform:none}
+  .model-card:hover .model-arrow,.model-card:focus-visible .model-arrow{transform:none}
+  .model-card::before{display:none}
   *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+@media (max-width:900px){
+  .portal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .portal-card,.portal-card:nth-child(n+4){grid-column:auto}
+  .model-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .model-kicker{font-size:9px}
 }
 
 @media (max-width:640px){
   body{padding:0 16px 40px;font-size:16px}
-  .hero{padding:44px 0 32px}
-  .tabs{margin:0 -16px;padding:0 16px}
-  .tab{padding:13px 10px 12px}
+  .hero{padding:40px 0 28px}
+  .portal-grid,.model-tabs{gap:10px}
+  .portal-grid{margin:24px 0 18px}
+  .model-card{padding:13px 12px 12px}
+  .model-kicker>span{display:none}
+  .model-view{height:160px;margin:5px -4px 0}
+  .model-tabs .model-view{height:145px}
+  .model-caption{padding-top:9px}
+  .model-title,.model-tabs .model-title{font-size:18px}
+  .model-description{font-size:12px;min-height:4.4em}
+  .model-foot{font-size:9px;letter-spacing:.03em;padding-top:10px}
+  .model-arrow{width:28px;height:28px;font-size:16px}
+  .model-index{font-size:8px}
   .chart svg.wide{display:none}
   .chart svg.narrow{display:block}
   .stats{grid-template-columns:repeat(2,1fr);gap:22px 16px}
@@ -285,15 +344,17 @@ table.market{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:16p
   <nav class="lang" aria-label="language"><button data-set="en">en</button><button data-set="ru">ru</button></nav>
 </header>
 
-<section class="hero" data-scene="ledger">
-  <h1><span data-l="en">On-chain analyst <em>and Solana developer.</em></span><span data-l="ru">Ончейн-аналитик <em>и разработчик на Solana.</em></span></h1>
-  <p class="lead" data-l="en">I trace money on Solana through hubs, bridges and exchange deposit addresses, and build the tools that do it fast.</p><p class="lead" data-l="ru">Прослеживаю деньги на Solana — через концентраторы, мосты и депозитные адреса бирж — и пишу для этого быстрые инструменты.</p>
-  <p class="note" data-l="en">Every number here is measured, not estimated.</p><p class="note" data-l="ru">Каждая цифра здесь измерена, а не прикинута.</p>
-  <p class="links"><a class="btn" href="https://t.me/artemvartanov"><span data-l="en">Write in Telegram</span><span data-l="ru">Написать в Telegram</span></a><a href="stories.html"><span data-l="en">Stories</span><span data-l="ru">Истории</span></a><a href="./"><span data-l="en">Check a coin</span><span data-l="ru">Проверить монету</span></a><a href="https://github.com/hrekokovgmmek-lab">GitHub</a><a href="https://x.com/ArtemPadinggton">X</a></p>
+<section class="hero">
+  <div class="hero-copy" data-scene="ledger">
+    <h1><span data-l="en">On-chain analyst <em>and Solana developer.</em></span><span data-l="ru">Ончейн-аналитик <em>и разработчик на Solana.</em></span></h1>
+    <p class="lead" data-l="en">I trace money on Solana through hubs, bridges and exchange deposit addresses, and build the tools that do it fast.</p><p class="lead" data-l="ru">Прослеживаю деньги на Solana — через концентраторы, мосты и депозитные адреса бирж — и пишу для этого быстрые инструменты.</p>
+    <p class="note" data-l="en">Every number here is measured, not estimated.</p><p class="note" data-l="ru">Каждая цифра здесь измерена, а не прикинута.</p>
+  </div>
+  <nav class="portal-grid" aria-label="contact and projects"><a class="model-card portal-card portal-telegram" href="https://t.me/artemvartanov" style="--i:0"><span class="model-kicker" aria-hidden="true">01<span><span data-l="en">direct message</span><span data-l="ru">личное сообщение</span></span></span><span class="model-view" data-scene="object" data-object="telegram" aria-hidden="true"><svg class="model-fallback" viewBox="0 0 320 190" focusable="false"><circle cx="160" cy="94" r="64" fill="none" stroke="var(--rule)" stroke-dasharray="3 6"/><ellipse cx="160" cy="94" rx="94" ry="36" fill="none" stroke="var(--brick)" stroke-opacity=".3" transform="rotate(-18 160 94)"/><circle cx="238" cy="66" r="4" fill="var(--brick)"/><path d="M48 28h14m-7-7v14M266 151h14m-7-7v14" stroke="var(--grey)" stroke-width="1"/><path d="M76 126L244 47l-59 94-35-34-25 29 3-32z" fill="var(--paper)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/><path d="M128 104l116-57-94 60-25 29 3-32z" fill="var(--brick)"/></svg></span><span class="model-caption"><span class="model-title"><span data-l="en">Write in Telegram</span><span data-l="ru">Написать в Telegram</span></span><span class="model-description"><span data-l="en">A direct line for your idea or investigation.</span><span data-l="ru">Обсудим вашу идею или расследование.</span></span></span><span class="model-foot" aria-hidden="true"><span data-l="en">Open</span><span data-l="ru">Открыть</span><span class="model-arrow">↗</span></span></a><a class="model-card portal-card portal-stories" href="stories.html" style="--i:1"><span class="model-kicker" aria-hidden="true">02<span><span data-l="en">watch the evidence</span><span data-l="ru">смотреть доказательства</span></span></span><span class="model-view" data-scene="object" data-object="stories" aria-hidden="true"><svg class="model-fallback" viewBox="0 0 320 190" focusable="false"><circle cx="160" cy="94" r="64" fill="none" stroke="var(--rule)" stroke-dasharray="3 6"/><ellipse cx="160" cy="94" rx="94" ry="36" fill="none" stroke="var(--brick)" stroke-opacity=".3" transform="rotate(-18 160 94)"/><circle cx="238" cy="66" r="4" fill="var(--brick)"/><path d="M48 28h14m-7-7v14M266 151h14m-7-7v14" stroke="var(--grey)" stroke-width="1"/><g stroke="var(--ink)" stroke-width="2"><rect x="89" y="45" width="86" height="116" rx="3" fill="var(--paper)" transform="rotate(-13 132 103)"/><rect x="137" y="35" width="86" height="116" rx="3" fill="var(--brick)" transform="rotate(11 180 93)"/></g><circle cx="183" cy="119" r="14" fill="var(--paper)"/><path d="M157 60h48m-48 12h32" stroke="var(--paper)" stroke-width="3"/></svg></span><span class="model-caption"><span class="model-title"><span data-l="en">Stories</span><span data-l="ru">Истории</span></span><span class="model-description"><span data-l="en">Short visual stories from on-chain data.</span><span data-l="ru">Короткие визуальные истории по данным цепи.</span></span></span><span class="model-foot" aria-hidden="true"><span data-l="en">Open</span><span data-l="ru">Открыть</span><span class="model-arrow">→</span></span></a><a class="model-card portal-card portal-coin" href="./" style="--i:2"><span class="model-kicker" aria-hidden="true">03<span><span data-l="en">open the tool</span><span data-l="ru">открыть инструмент</span></span></span><span class="model-view" data-scene="object" data-object="coin" aria-hidden="true"><svg class="model-fallback" viewBox="0 0 320 190" focusable="false"><circle cx="160" cy="94" r="64" fill="none" stroke="var(--rule)" stroke-dasharray="3 6"/><ellipse cx="160" cy="94" rx="94" ry="36" fill="none" stroke="var(--brick)" stroke-opacity=".3" transform="rotate(-18 160 94)"/><circle cx="238" cy="66" r="4" fill="var(--brick)"/><path d="M48 28h14m-7-7v14M266 151h14m-7-7v14" stroke="var(--grey)" stroke-width="1"/><ellipse cx="160" cy="98" rx="61" ry="67" fill="var(--paper)" stroke="var(--brick)" stroke-width="7"/><ellipse cx="160" cy="98" rx="48" ry="54" fill="none" stroke="var(--ink)" stroke-width="2"/><path d="M160 62l31 36-31 36-31-36z" fill="var(--ink)"/><path d="M160 62v72l31-36z" fill="var(--brick)"/></svg></span><span class="model-caption"><span class="model-title"><span data-l="en">Check a coin</span><span data-l="ru">Проверить монету</span></span><span class="model-description"><span data-l="en">Read the chain before judging a token.</span><span data-l="ru">Проверка токена по данным блокчейна.</span></span></span><span class="model-foot" aria-hidden="true"><span data-l="en">Open</span><span data-l="ru">Открыть</span><span class="model-arrow">→</span></span></a><a class="model-card portal-card portal-github" href="https://github.com/hrekokovgmmek-lab" style="--i:3"><span class="model-kicker" aria-hidden="true">04<span><span data-l="en">explore the code</span><span data-l="ru">смотреть код</span></span></span><span class="model-view" data-scene="object" data-object="github" aria-hidden="true"><svg class="model-fallback" viewBox="0 0 320 190" focusable="false"><circle cx="160" cy="94" r="64" fill="none" stroke="var(--rule)" stroke-dasharray="3 6"/><ellipse cx="160" cy="94" rx="94" ry="36" fill="none" stroke="var(--brick)" stroke-opacity=".3" transform="rotate(-18 160 94)"/><circle cx="238" cy="66" r="4" fill="var(--brick)"/><path d="M48 28h14m-7-7v14M266 151h14m-7-7v14" stroke="var(--grey)" stroke-width="1"/><g fill="none" stroke="var(--grey)" stroke-width="4"><path d="M102 55l57 45 57 49m-57-49l57-46"/></g><g stroke="var(--brick)" stroke-width="3"><circle cx="102" cy="55" r="17" fill="var(--paper)"/><circle cx="159" cy="100" r="20" fill="var(--ink)"/><circle cx="216" cy="54" r="17" fill="var(--paper)"/><circle cx="216" cy="149" r="17" fill="var(--brick)"/></g></svg></span><span class="model-caption"><span class="model-title"><span data-l="en">GitHub</span><span data-l="ru">GitHub</span></span><span class="model-description"><span data-l="en">Open-source Solana tools and research.</span><span data-l="ru">Открытые инструменты и исследования Solana.</span></span></span><span class="model-foot" aria-hidden="true"><span data-l="en">Open</span><span data-l="ru">Открыть</span><span class="model-arrow">↗</span></span></a><a class="model-card portal-card portal-x" href="https://x.com/ArtemPadinggton" style="--i:4"><span class="model-kicker" aria-hidden="true">05<span><span data-l="en">follow the work</span><span data-l="ru">следить за работой</span></span></span><span class="model-view" data-scene="object" data-object="x" aria-hidden="true"><svg class="model-fallback" viewBox="0 0 320 190" focusable="false"><circle cx="160" cy="94" r="64" fill="none" stroke="var(--rule)" stroke-dasharray="3 6"/><ellipse cx="160" cy="94" rx="94" ry="36" fill="none" stroke="var(--brick)" stroke-opacity=".3" transform="rotate(-18 160 94)"/><circle cx="238" cy="66" r="4" fill="var(--brick)"/><path d="M48 28h14m-7-7v14M266 151h14m-7-7v14" stroke="var(--grey)" stroke-width="1"/><g transform="rotate(2 160 95)"><rect x="140" y="27" width="40" height="139" rx="3" fill="var(--ink)" transform="rotate(-42 160 95)"/><rect x="140" y="27" width="40" height="139" rx="3" fill="var(--brick)" transform="rotate(42 160 95)"/></g></svg></span><span class="model-caption"><span class="model-title"><span data-l="en">X</span><span data-l="ru">X</span></span><span class="model-description"><span data-l="en">Notes, findings and project updates.</span><span data-l="ru">Заметки, находки и новости проектов.</span></span></span><span class="model-foot" aria-hidden="true"><span data-l="en">Open</span><span data-l="ru">Открыть</span><span class="model-arrow">↗</span></span></a></nav>
   <p class="small" data-l="en">Open to roles in AML and fraud analytics and to project work.</p><p class="small" data-l="ru">Открыт к работе AML- и фрод-аналитиком и к проектам.</p>
 </section>
 
-<div class="tabs" role="tablist" aria-label="sections"><button role="tab" class="tab" id="tab-case" aria-controls="case" aria-selected="true"><span data-l="en">Investigation</span><span data-l="ru">Расследование</span></button><button role="tab" class="tab" id="tab-market" aria-controls="market" aria-selected="false" tabindex="-1"><span data-l="en">Market</span><span data-l="ru">Рынок</span></button><button role="tab" class="tab" id="tab-bot" aria-controls="bot" aria-selected="false" tabindex="-1"><span data-l="en">Trading system</span><span data-l="ru">Торговая система</span></button><button role="tab" class="tab" id="tab-method" aria-controls="method" aria-selected="false" tabindex="-1"><span data-l="en">Method</span><span data-l="ru">Метод</span></button><button role="tab" class="tab" id="tab-code" aria-controls="code" aria-selected="false" tabindex="-1"><span data-l="en">Tools</span><span data-l="ru">Инструменты</span></button><button role="tab" class="tab" id="tab-work" aria-controls="work" aria-selected="false" tabindex="-1"><span data-l="en">Contact</span><span data-l="ru">Связаться</span></button><span class="tab-ink" aria-hidden="true"></span></div>
+<div class="tabs model-tabs" role="tablist" aria-label="sections"><button type="button" role="tab" class="tab model-card" id="tab-case" aria-controls="case" aria-selected="true" style="--i:5"><span class="model-kicker">06<span><span data-l="en">16 coins · wallet flows</span><span data-l="ru">16 монет · движение средств</span></span></span><span class="model-view" data-scene="object" data-object="case" aria-hidden="true"><svg class="model-fallback" viewBox="0 0 320 190" focusable="false"><circle cx="160" cy="94" r="64" fill="none" stroke="var(--rule)" stroke-dasharray="3 6"/><ellipse cx="160" cy="94" rx="94" ry="36" fill="none" stroke="var(--brick)" stroke-opacity=".3" transform="rotate(-18 160 94)"/><circle cx="238" cy="66" r="4" fill="var(--brick)"/><path d="M48 28h14m-7-7v14M266 151h14m-7-7v14" stroke="var(--grey)" stroke-width="1"/><circle cx="145" cy="78" r="49" fill="var(--brick)" fill-opacity=".12" stroke="var(--ink)" stroke-width="9"/><path d="M180 115l53 48" stroke="var(--brick)" stroke-width="14" stroke-linecap="round"/><path d="M113 92l27-29 34 12" fill="none" stroke="var(--brick)" stroke-width="3"/><g fill="var(--paper)" stroke="var(--brick)" stroke-width="2"><circle cx="113" cy="92" r="5"/><circle cx="140" cy="63" r="5"/><circle cx="174" cy="75" r="5"/></g></svg></span><span class="model-caption"><span class="model-title"><span data-l="en">Investigation</span><span data-l="ru">Расследование</span></span><span class="model-description"><span data-l="en">16 coins · wallet flows</span><span data-l="ru">16 монет · движение средств</span></span></span><span class="model-foot"><span data-l="en">Explore</span><span data-l="ru">Смотреть</span><span class="model-arrow">→</span></span></button><button type="button" role="tab" class="tab model-card" id="tab-market" aria-controls="market" aria-selected="false" tabindex="-1" style="--i:6"><span class="model-kicker">07<span><span data-l="en">six launchpads · on chain</span><span data-l="ru">шесть площадок · данные цепи</span></span></span><span class="model-view" data-scene="object" data-object="market" aria-hidden="true"><svg class="model-fallback" viewBox="0 0 320 190" focusable="false"><circle cx="160" cy="94" r="64" fill="none" stroke="var(--rule)" stroke-dasharray="3 6"/><ellipse cx="160" cy="94" rx="94" ry="36" fill="none" stroke="var(--brick)" stroke-opacity=".3" transform="rotate(-18 160 94)"/><circle cx="238" cy="66" r="4" fill="var(--brick)"/><path d="M48 28h14m-7-7v14M266 151h14m-7-7v14" stroke="var(--grey)" stroke-width="1"/><path d="M90 147h145" stroke="var(--grey)" stroke-width="3"/><g stroke="var(--ink)" stroke-width="2"><rect x="99" y="100" width="20" height="47" fill="var(--paper)"/><rect x="130" y="77" width="20" height="70" fill="var(--ink)"/><rect x="161" y="53" width="20" height="94" fill="var(--paper)"/><rect x="192" y="86" width="20" height="61" fill="var(--ink)"/></g><path d="M107 90l34-23 34-22 34 30 28-38" fill="none" stroke="var(--brick)" stroke-width="3"/></svg></span><span class="model-caption"><span class="model-title"><span data-l="en">Market</span><span data-l="ru">Рынок</span></span><span class="model-description"><span data-l="en">six launchpads · on chain</span><span data-l="ru">шесть площадок · данные цепи</span></span></span><span class="model-foot"><span data-l="en">Explore</span><span data-l="ru">Смотреть</span><span class="model-arrow">→</span></span></button><button type="button" role="tab" class="tab model-card" id="tab-bot" aria-controls="bot" aria-selected="false" tabindex="-1" style="--i:7"><span class="model-kicker">08<span><span data-l="en">Solana · TypeScript</span><span data-l="ru">Solana · TypeScript</span></span></span><span class="model-view" data-scene="object" data-object="bot" aria-hidden="true"><svg class="model-fallback" viewBox="0 0 320 190" focusable="false"><circle cx="160" cy="94" r="64" fill="none" stroke="var(--rule)" stroke-dasharray="3 6"/><ellipse cx="160" cy="94" rx="94" ry="36" fill="none" stroke="var(--brick)" stroke-opacity=".3" transform="rotate(-18 160 94)"/><circle cx="238" cy="66" r="4" fill="var(--brick)"/><path d="M48 28h14m-7-7v14M266 151h14m-7-7v14" stroke="var(--grey)" stroke-width="1"/><path d="M160 37l62 35v70l-62 36-62-36V72z" fill="var(--ink)" stroke="var(--grey)" stroke-width="2"/><path d="M98 72l62 36 62-36m-62 36v70" fill="none" stroke="var(--paper)" stroke-opacity=".45" stroke-width="2"/><path d="M160 66l31 34-31 34-31-34z" fill="var(--brick)"/><ellipse cx="160" cy="105" rx="91" ry="42" fill="none" stroke="var(--brick)" stroke-width="2" transform="rotate(26 160 105)"/></svg></span><span class="model-caption"><span class="model-title"><span data-l="en">Trading system</span><span data-l="ru">Торговая система</span></span><span class="model-description"><span data-l="en">Solana · TypeScript</span><span data-l="ru">Solana · TypeScript</span></span></span><span class="model-foot"><span data-l="en">Explore</span><span data-l="ru">Смотреть</span><span class="model-arrow">→</span></span></button><button type="button" role="tab" class="tab model-card" id="tab-method" aria-controls="method" aria-selected="false" tabindex="-1" style="--i:8"><span class="model-kicker">09<span><span data-l="en">evidence before conclusions</span><span data-l="ru">сначала доказательства</span></span></span><span class="model-view" data-scene="object" data-object="method" aria-hidden="true"><svg class="model-fallback" viewBox="0 0 320 190" focusable="false"><circle cx="160" cy="94" r="64" fill="none" stroke="var(--rule)" stroke-dasharray="3 6"/><ellipse cx="160" cy="94" rx="94" ry="36" fill="none" stroke="var(--brick)" stroke-opacity=".3" transform="rotate(-18 160 94)"/><circle cx="238" cy="66" r="4" fill="var(--brick)"/><path d="M48 28h14m-7-7v14M266 151h14m-7-7v14" stroke="var(--grey)" stroke-width="1"/><g stroke="var(--ink)" stroke-width="2"><path d="M99 119l109 11 32-23-109-11z" fill="var(--ink)"/><path d="M99 119v17l109 11v-17" fill="var(--paper)"/><path d="M109 91l99 9 27-22-99-9z" fill="var(--brick)"/><path d="M109 91v18l99 9v-18" fill="var(--paper)"/><path d="M120 63l88 7 22-19-88-7z" fill="var(--paper)"/><path d="M120 63v17l88 7V70" fill="var(--paper)"/></g></svg></span><span class="model-caption"><span class="model-title"><span data-l="en">Method</span><span data-l="ru">Метод</span></span><span class="model-description"><span data-l="en">evidence before conclusions</span><span data-l="ru">сначала доказательства</span></span></span><span class="model-foot"><span data-l="en">Explore</span><span data-l="ru">Смотреть</span><span class="model-arrow">→</span></span></button><button type="button" role="tab" class="tab model-card" id="tab-code" aria-controls="code" aria-selected="false" tabindex="-1" style="--i:9"><span class="model-kicker">10<span><span data-l="en">six projects · MIT</span><span data-l="ru">шесть проектов · MIT</span></span></span><span class="model-view" data-scene="object" data-object="code" aria-hidden="true"><svg class="model-fallback" viewBox="0 0 320 190" focusable="false"><circle cx="160" cy="94" r="64" fill="none" stroke="var(--rule)" stroke-dasharray="3 6"/><ellipse cx="160" cy="94" rx="94" ry="36" fill="none" stroke="var(--brick)" stroke-opacity=".3" transform="rotate(-18 160 94)"/><circle cx="238" cy="66" r="4" fill="var(--brick)"/><path d="M48 28h14m-7-7v14M266 151h14m-7-7v14" stroke="var(--grey)" stroke-width="1"/><rect x="87" y="49" width="146" height="94" rx="4" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><rect x="99" y="61" width="122" height="66" fill="var(--ink)"/><path d="M112 77h57m-57 14h82m-82 14h43" stroke="var(--paper)" stroke-width="4"/><circle cx="202" cy="105" r="5" fill="var(--brick)"/><path d="M144 143h32l9 21h-50z" fill="var(--grey)"/></svg></span><span class="model-caption"><span class="model-title"><span data-l="en">Tools</span><span data-l="ru">Инструменты</span></span><span class="model-description"><span data-l="en">six projects · MIT</span><span data-l="ru">шесть проектов · MIT</span></span></span><span class="model-foot"><span data-l="en">Explore</span><span data-l="ru">Смотреть</span><span class="model-arrow">→</span></span></button><button type="button" role="tab" class="tab model-card" id="tab-work" aria-controls="work" aria-selected="false" tabindex="-1" style="--i:10"><span class="model-kicker">11<span><span data-l="en">AML · fraud · development</span><span data-l="ru">AML · фрод · разработка</span></span></span><span class="model-view" data-scene="object" data-object="work" aria-hidden="true"><svg class="model-fallback" viewBox="0 0 320 190" focusable="false"><circle cx="160" cy="94" r="64" fill="none" stroke="var(--rule)" stroke-dasharray="3 6"/><ellipse cx="160" cy="94" rx="94" ry="36" fill="none" stroke="var(--brick)" stroke-opacity=".3" transform="rotate(-18 160 94)"/><circle cx="238" cy="66" r="4" fill="var(--brick)"/><path d="M48 28h14m-7-7v14M266 151h14m-7-7v14" stroke="var(--grey)" stroke-width="1"/><rect x="79" y="54" width="162" height="100" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><path d="M80 55l80 65 80-65M80 153l56-53m104 53l-56-53" fill="none" stroke="var(--brick)" stroke-width="3"/><path d="M159 33v16m-8-8h16" stroke="var(--ink)" stroke-width="2"/><circle cx="160" cy="32" r="7" fill="var(--brick)"/></svg></span><span class="model-caption"><span class="model-title"><span data-l="en">Contact</span><span data-l="ru">Связаться</span></span><span class="model-description"><span data-l="en">AML · fraud · development</span><span data-l="ru">AML · фрод · разработка</span></span></span><span class="model-foot"><span data-l="en">Explore</span><span data-l="ru">Смотреть</span><span class="model-arrow">→</span></span></button><span class="tab-ink" aria-hidden="true"></span></div>
 
 <main>
 <section id="case" role="tabpanel" aria-labelledby="tab-case">
@@ -528,9 +589,8 @@ table.market{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:16p
     });
     moveInk();
     if(opts.scroll){
-      /* the bar is sticky, so its own rect lies once it is stuck: measure where it sits in the flow */
-      var top=document.querySelector('.hero').getBoundingClientRect().bottom+window.pageYOffset;
-      if(window.pageYOffset>top+1) window.scrollTo({top:top,behavior:'auto'});
+      var top=document.querySelector('main').getBoundingClientRect().top+window.pageYOffset;
+      window.scrollTo({top:Math.max(0,top-20),behavior:'auto'});
     }
     document.dispatchEvent(new CustomEvent('tabchange',{detail:{id:id}}));   /* fx/scroll.js measures again */
   }
