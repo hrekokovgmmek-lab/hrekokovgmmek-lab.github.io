@@ -2,7 +2,7 @@
 <html lang="en" data-lang="en" class="no-js">
 <head>
 <meta charset="utf-8">
-<script>/* ссылки бота на проверку монеты (?mint=, ?c=, ?p=) — на старую страницу проверки */(function(){try{var q=new URLSearchParams(location.search);if(q.has("mint")||q.has("c")||q.has("p"))location.replace("/coin.html"+location.search+location.hash)}catch(e){}})();</script>
+<script>/* ссылки бота на проверку монеты (?mint=, ?c=, ?p=) и мини-приложение Telegram (#tgWebAppData) — на страницу проверки */(function(){try{var q=new URLSearchParams(location.search);if(q.has("mint")||q.has("c")||q.has("p")||/[#&]tgWebAppData=/.test(location.hash))location.replace("/coin.html"+location.search+location.hash)}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Artem Vartanov</title>
 <meta name="description" content="On-chain analyst and Solana developer: fund-flow investigations, anti-fraud checks, fast trading systems. Every number measured.">
