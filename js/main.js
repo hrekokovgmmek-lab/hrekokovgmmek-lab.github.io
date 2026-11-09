@@ -3,6 +3,7 @@ import Lenis from '/vendor/lenis-1.1.13/lenis.mjs';
 import { initFx } from '/js/fx.js';
 import { initStory } from '/js/story.js';
 import { initStoryArt } from '/js/story-art.js';
+import { initStoryGlobe } from '/js/story-globe.js';
 
 const root = document.documentElement;
 const cfg = JSON.parse(document.getElementById('site-config').textContent);
@@ -116,3 +117,4 @@ setTimeout(() => root.classList.remove('intro'), 6000);
 initFx(S, addTicker, heroReady);
 initStory(S, addTicker);
 initStoryArt(S, addTicker);
+initStoryGlobe(S, addTicker);
