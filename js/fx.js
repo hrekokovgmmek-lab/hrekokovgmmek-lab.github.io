@@ -131,6 +131,39 @@ export function initFx(S, addTicker, heroReady) {
     });
   }
 
+  // ---- посты X: каждая карточка встаёт в самую короткую колонку (без JS остаются CSS-колонки, на телефоне — лента) ----
+  for (const box of document.querySelectorAll('.posts')) {
+    const cards = [...box.children];
+    const narrow = matchMedia('(max-width: 760px)');
+    let raf = 0;
+    const layout = () => {
+      raf = 0;
+      if (narrow.matches) {
+        box.classList.remove('masonry'); box.style.height = '';
+        cards.forEach((c) => { c.style.left = c.style.top = c.style.width = ''; });
+        return;
+      }
+      const gap = parseFloat(getComputedStyle(box).columnGap) || 18, W = box.clientWidth;
+      const n = Math.max(1, Math.floor((W + gap) / (300 + gap))), w = (W - (n - 1) * gap) / n; // 300 — как columns в site.css
+      box.classList.add('masonry');
+      cards.forEach((c) => { c.style.width = `${w}px`; });
+      const hs = new Array(n).fill(0);
+      for (const c of cards) {
+        const k = hs.indexOf(Math.min(...hs));
+        c.style.left = `${k * (w + gap)}px`; c.style.top = `${hs[k]}px`;
+        hs[k] += c.offsetHeight + gap;
+      }
+      box.style.height = `${Math.max(...hs) - gap}px`;
+    };
+    const later = () => { if (!raf) raf = requestAnimationFrame(layout); };
+    layout();
+    addEventListener('resize', later);
+    narrow.addEventListener?.('change', later);
+    if ('ResizeObserver' in window) { const ro = new ResizeObserver(later); cards.forEach((c) => ro.observe(c)); } // язык, шрифты
+    document.fonts?.ready.then(later);
+    box.querySelectorAll('img').forEach((im) => im.addEventListener('load', later, { once: true }));
+  }
+
   // ---- появления: один раз, только с движением ----
   if (!S.motion || !('IntersectionObserver' in window)) {
     document.querySelectorAll('.rise, .row').forEach((el) => el.classList.add('in'));

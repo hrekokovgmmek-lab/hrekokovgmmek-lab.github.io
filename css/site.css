@@ -207,7 +207,12 @@ html.anim .sec-title.rise.in .ls > span > span { transform: none; }
 .feed-profile { display: inline-flex; align-items: center; gap: 8px; color: var(--soft); padding: 10px 0; transition: color .3s; }
 .feed-profile:hover { color: var(--signal); }
 .feed-profile .ic { width: 16px; height: 16px; fill: currentColor; }
-.posts { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; align-items: start; }
+/* колонками, а не строками: карточки разной высоты (пост с картинкой вдвое выше) ложатся плотно, без дыр под короткими */
+.posts { columns: 300px; column-gap: 18px; }
+.posts > .post { break-inside: avoid; margin-bottom: 18px; }
+/* fx.js: в самую короткую колонку — низ ровнее, чем у CSS-колонок */
+.posts.masonry { columns: auto; position: relative; }
+.posts.masonry > .post { position: absolute; margin: 0; }
 .post { display: flex; flex-direction: column; gap: 12px; background: var(--card); border: 1px solid var(--card-line); border-radius: 10px;
   padding: 0 16px 16px; transition: transform .4s var(--ease), border-color .4s var(--ease); }
 .post:hover { transform: translateY(-4px); border-color: var(--signal); }
@@ -227,10 +232,10 @@ html.anim .sec-title.rise.in .ls > span > span { transform: none; }
 .photos a:hover .ph-date { opacity: 1; }
 @media (max-width: 860px) { .photos { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 760px) {
-  .posts { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; margin: 0 calc(-1 * var(--inset)); padding: 0 var(--inset) 8px;
+  .posts { columns: auto; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; margin: 0 calc(-1 * var(--inset)); padding: 0 var(--inset) 8px;
     scrollbar-width: none; }
   .posts::-webkit-scrollbar { display: none; }
-  .post { flex: none; width: 82vw; scroll-snap-align: center; }
+  .posts > .post { flex: none; width: 82vw; scroll-snap-align: center; margin-bottom: 0; }
   .photos { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .photos img { filter: none; }
   .ph-date { opacity: 1; }
