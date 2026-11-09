@@ -2,10 +2,6 @@
 import Lenis from '/vendor/lenis-1.1.13/lenis.mjs';
 import { initFx } from '/js/fx.js';
 import { initStory } from '/js/story.js';
-import { initStoryArt } from '/js/story-art.js';
-import { initStoryGlobe } from '/js/story-globe.js';
-import { initStoryCode } from '/js/story-code.js';
-import { initStoryTrade } from '/js/story-trade.js';
 
 const root = document.documentElement;
 const cfg = JSON.parse(document.getElementById('site-config').textContent);
@@ -139,7 +135,19 @@ setTimeout(() => root.classList.remove('intro'), 6000);
 
 initFx(S, addTicker, heroReady);
 initStory(S, addTicker);
-initStoryArt(S, addTicker);
-initStoryGlobe(S, addTicker);
-initStoryCode(S, addTicker);
-initStoryTrade(S, addTicker);
+// живые рисунки глав грузятся и запускаются, когда история близко (полтора экрана), — первый экран их не ждёт
+{
+  let started = false;
+  const startArt = () => {
+    if (started) return; started = true;
+    Promise.all(['/js/story-globe.js', '/js/story-code.js', '/js/story-trade.js', '/js/story-live.js'].map((m) => import(m)))
+      .then(([gl, cd, tr, lv]) => { gl.initStoryGlobe(S, addTicker); cd.initStoryCode(S, addTicker); tr.initStoryTrade(S, addTicker); lv.initStoryLive(S, addTicker); })
+      .catch((e) => console.error('рисунки глав не загрузились, остаются картинки', e));
+  };
+  const story = document.getElementById('story');
+  if (!story || new URLSearchParams(location.search).has('still') || !('IntersectionObserver' in window)) startArt();
+  else {
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); startArt(); } }, { rootMargin: '150% 0px' });
+    io.observe(story);
+  }
+}

@@ -21,12 +21,125 @@
 <link rel="preload" href="/assets/fonts/roboto-flex-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/geist-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/css/fonts.css?v=792e9bf5c8">
+<style>/* Шрифты OFL, файлы из Google Fonts 08.11.2026 (суммы — vendor/SOURCES.md). Наборы: latin, latin-ext, cyrillic, cyrillic-ext. */
+/* Geist · latin */
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/assets/fonts/geist-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Geist · latin-ext */
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/assets/fonts/geist-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* Geist · cyrillic */
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/assets/fonts/geist-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* Geist · cyrillic-ext */
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/assets/fonts/geist-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* Geist Mono · latin */
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/assets/fonts/geist-mono-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Geist Mono · latin-ext */
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/assets/fonts/geist-mono-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* Geist Mono · cyrillic */
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/assets/fonts/geist-mono-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* Geist Mono · cyrillic-ext */
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/assets/fonts/geist-mono-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* Roboto Flex · latin */
+@font-face {
+  font-family: 'Roboto Flex';
+  font-style: normal;
+  font-weight: 100 1000;
+  font-stretch: 25% 151%;
+  font-display: swap;
+  src: url(/assets/fonts/roboto-flex-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Roboto Flex · latin-ext */
+@font-face {
+  font-family: 'Roboto Flex';
+  font-style: normal;
+  font-weight: 100 1000;
+  font-stretch: 25% 151%;
+  font-display: swap;
+  src: url(/assets/fonts/roboto-flex-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* Roboto Flex · cyrillic */
+@font-face {
+  font-family: 'Roboto Flex';
+  font-style: normal;
+  font-weight: 100 1000;
+  font-stretch: 25% 151%;
+  font-display: swap;
+  src: url(/assets/fonts/roboto-flex-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* Roboto Flex · cyrillic-ext */
+@font-face {
+  font-family: 'Roboto Flex';
+  font-style: normal;
+  font-weight: 100 1000;
+  font-stretch: 25% 151%;
+  font-display: swap;
+  src: url(/assets/fonts/roboto-flex-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+</style>
 <link rel="stylesheet" href="/css/site.css?v=a68a5346f9">
 <style>:root{--studio:#F4F2EC;--ink:#100F0D;--paper:#F3EFE6;--soft:#8F8A7F;--line:#2A2723;--signal:#FF6B3D}html[data-lang="en"] [data-l]:not([data-l="en"]){display:none!important}html[data-lang="ru"] [data-l]:not([data-l="ru"]){display:none!important}</style>
 <script>(function(){var d=document.documentElement,L=["en", "ru"],l=null;d.classList.remove('no-js');d.classList.add('js');try{var q=new URLSearchParams(location.search).get('lang');if(L.indexOf(q)>=0)l=q}catch(e){}if(!l){try{l=localStorage.getItem('lang')}catch(e){}}if(L.indexOf(l)<0){var n=(navigator.language||'').toLowerCase();l=L.indexOf('ru')>=0&&n.indexOf('ru')===0?'ru':L[0]}d.lang=l;d.setAttribute('data-lang',l);if(!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('anim');if(!location.hash)d.classList.add('intro')}if(!location.hash&&'scrollRestoration' in history)history.scrollRestoration='manual'})();</script>
-<script type="importmap">{"imports": {"/js/field-lite.js": "/js/field-lite.js?v=cd86bececf", "/js/fx.js": "/js/fx.js?v=af43d19ad6", "/js/hero/canvases.js": "/js/hero/canvases.js?v=019b7c9fc0", "/js/hero/fluid.js": "/js/hero/fluid.js?v=76f45bdca0", "/js/hero/glsl.js": "/js/hero/glsl.js?v=1703db7d9c", "/js/hero/hud.js": "/js/hero/hud.js?v=d265411c98", "/js/hero/palettes.js": "/js/hero/palettes.js?v=5a8bba6796", "/js/hero/portrait.js": "/js/hero/portrait.js?v=6eb3cfaf79", "/js/hero/stage.js": "/js/hero/stage.js?v=fbee642003", "/js/main.js": "/js/main.js?v=6697c7a8f7", "/js/story-art.js": "/js/story-art.js?v=74ca79edc9", "/js/story-code.js": "/js/story-code.js?v=a46608054a", "/js/story-globe.js": "/js/story-globe.js?v=3f327d6f12", "/js/story-trade.js": "/js/story-trade.js?v=6978052b9e", "/js/story.js": "/js/story.js?v=d380c84e88", "/vendor/three-0.185.1/three.core.min.js": "/vendor/three-0.185.1/three.core.min.js?v=05b2609338", "/vendor/three-0.185.1/three.module.min.js": "/vendor/three-0.185.1/three.module.min.js?v=86bcee248b", "/vendor/lenis-1.1.13/lenis.mjs": "/vendor/lenis-1.1.13/lenis.mjs?v=1f6d3de9b2"}}</script>
-<script type="module" src="/js/main.js?v=6697c7a8f7"></script>
+<script type="importmap">{"imports": {"/js/field-lite.js": "/js/field-lite.js?v=cd86bececf", "/js/fx.js": "/js/fx.js?v=154e53addc", "/js/hero/canvases.js": "/js/hero/canvases.js?v=019b7c9fc0", "/js/hero/fluid.js": "/js/hero/fluid.js?v=76f45bdca0", "/js/hero/glsl.js": "/js/hero/glsl.js?v=1703db7d9c", "/js/hero/hud.js": "/js/hero/hud.js?v=d265411c98", "/js/hero/palettes.js": "/js/hero/palettes.js?v=5a8bba6796", "/js/hero/portrait.js": "/js/hero/portrait.js?v=6eb3cfaf79", "/js/hero/stage.js": "/js/hero/stage.js?v=fbee642003", "/js/main.js": "/js/main.js?v=bb3c646b23", "/js/story-art.js": "/js/story-art.js?v=74ca79edc9", "/js/story-code.js": "/js/story-code.js?v=a46608054a", "/js/story-globe.js": "/js/story-globe.js?v=3f327d6f12", "/js/story-live.js": "/js/story-live.js?v=b56b2bad59", "/js/story-trade.js": "/js/story-trade.js?v=6978052b9e", "/js/story.js": "/js/story.js?v=d380c84e88", "/vendor/three-0.185.1/three.core.min.js": "/vendor/three-0.185.1/three.core.min.js?v=05b2609338", "/vendor/three-0.185.1/three.module.min.js": "/vendor/three-0.185.1/three.module.min.js?v=86bcee248b", "/vendor/lenis-1.1.13/lenis.mjs": "/vendor/lenis-1.1.13/lenis.mjs?v=1f6d3de9b2"}}</script>
+<script type="module" src="/js/main.js?v=bb3c646b23"></script>
 <script type="application/json" id="site-config">{"langs": ["en", "ru"], "domain": "artemvartanov.com", "theme": {"studio": "#F4F2EC", "ink": "#100F0D", "paper": "#F3EFE6", "soft": "#8F8A7F", "line": "#2A2723", "signal": "#FF6B3D", "palette": "amber"}, "hero": {"headline": {"left": {"en": ["On-chain", "analyst."], "ru": ["Ончейн-", "аналитик."]}, "right": {"en": ["Solana", "developer."], "ru": ["Разработчик", "на Solana."]}}, "hint": {"mouse": {"en": ["Move the cursor to open", "Scroll for the story"], "ru": ["Проведи — откроется", "Листай глубже"]}, "touch": {"en": ["Tap to open", "Scroll for the story"], "ru": ["Коснись", "Листай глубже"]}}, "readout": {"title": {"en": "Mesh · 478 points", "ru": "Сетка лица · 478 точек"}, "yaw": "Yaw", "pitch": "Pitch", "states": {"tracking": "Tracking", "scanning": "Scanning", "split": "Split", "converting": "Converting", "dissolving": "Dissolving", "offline": "Offline"}, "tracked": [[468, "R EYE"], [473, "L EYE"], [1, "NOSE"], [61, ""], [291, ""], [152, "CHIN"]]}, "tuning": {"stageVh": 420, "beats": [0.1, 0.35, 0.53, 0.72], "storyEntersAt": 0.4, "depthStrength": 0.22, "planeSegments": [200, 300], "fovDeg": 28, "cropDesktop": [0.07, 0.86], "phone": {"breakpoint": 760, "hairTopV": 0.185, "hairTopScreen": 0.2, "minTopPx": 135, "perPxFactor": 0.508}, "dprMax": {"phone": 1.5, "desktop": 2}, "turn": {"yawRad": 0.27, "pitchRad": 0.105, "ease": 0.05, "idleAfterS": 4, "drift": {"yaw": 0.05, "pitch": 0.02, "touchYaw": 0.13, "touchPitch": 0.05}}, "fluid": {"simRes": 128, "dyeRes": 512, "pressureIters": 18, "curl": 5, "fade": 0.985, "fadeTouch": 0.9785, "ink": 1.8, "stepPx": 14, "maxSteps": 12, "force": 4200, "sleepSteps": 260, "inkRadius": 0.00026, "pushRadius": 0.00038, "squash": 2.6, "blurPasses": 3}, "mask": {"inkCut": [0.16, 0.19], "codeRim": [0.08, 0.12, 0.15, 0.18], "codeHz": 9}, "field": {"scalePx": 560, "levels": 13, "cell": [7, 14], "gridPx": 28, "swirlSigma2": 40000, "swirlAmt": 0.15, "bitHz": 1.2}, "eyes": {"radius": 0.024, "lookMax": 0.011, "lookEase": 0.15, "glow": [1.0, 0.6, 0.22]}, "machineCutV": 0.104, "scan": {"firstAtS": 2, "sweepS": 2.7, "pauseS": 1.0}, "dissolve": {"from": 0.23, "to": 1.22, "cameraPullback": 0.06}, "nameDecode": {"holdMs": 350, "durMs": 1100, "stepMs": 55, "fallbackMs": 5000}, "backShadow": 0.28, "faceBrightness": 0.9}, "machineConcept": "robot", "assets": {"face": "/assets/hero/face.webp?v=fa868ee5be", "machine": "/assets/hero/machine.webp?v=5a118910fe", "depth": "/assets/hero/depth.webp?v=785a9c841d", "mesh": "/assets/hero/mesh.json?v=c3fb53e485", "fallback": "/assets/hero/face.webp?v=fa868ee5be", "shadow": "/assets/hero/shadow.webp?v=37bb5fc9e1"}, "points": {"1": [0.50392, 0.48998], "10": [0.4991, 0.31891], "61": [0.44248, 0.54965], "152": [0.50606, 0.64387], "234": [0.33018, 0.46038], "291": [0.56809, 0.54991], "454": [0.67564, 0.45699], "468": [0.41904, 0.41331], "473": [0.58065, 0.41344]}}, "story": {"years": ["2023", "2025", "2025", "2026", "2026", "2026", "2026", "2026"], "fullTimeFrom": null, "stagger": [-1, 0.6, -1, 1, -0.6, 0.8, -0.8, 0]}}</script>
 </head>
 <body>
@@ -53,49 +166,49 @@
     <h2 class="story-title"><span data-l="en" class="ls"><span class="l1"><span>The</span></span><span class="l2 outline"><span>path.</span></span></span><span data-l="ru" class="ls"><span class="l1"><span>Путь</span></span><span class="l2 outline"><span>дальше.</span></span></span></h2>
     <div class="track" id="track"><article class="card wide" style="--ar:1.7778;--st:-1" data-i="0" data-year="2023">
   <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-web"/></svg></span><span class="yr mono">2023</span></div>
-    <div class="frame" data-globe="/assets/story/globe-land.json?v=0565a148f9" data-globe-cfg="{&quot;from&quot;:{&quot;lat&quot;:23.13,&quot;lon&quot;:113.26,&quot;label&quot;:{&quot;en&quot;:&quot;China&quot;,&quot;ru&quot;:&quot;Китай&quot;}},&quot;to&quot;:{&quot;lat&quot;:55.76,&quot;lon&quot;:37.62,&quot;label&quot;:{&quot;en&quot;:&quot;Russia&quot;,&quot;ru&quot;:&quot;Россия&quot;}},&quot;tag&quot;:{&quot;en&quot;:&quot;Illustration&quot;,&quot;ru&quot;:&quot;Иллюстрация&quot;}}"><img class="media" data-l="en" src="/assets/story/2023-globe-en.webp?v=4aa9f69189" alt="Clothing store" data-en="Clothing store" data-ru="Магазин одежды" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2023-globe-ru.webp?v=e7b19a7041" alt="Clothing store" data-en="Clothing store" data-ru="Магазин одежды" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+    <div class="frame" data-globe="/assets/story/globe-land.json?v=0565a148f9" data-globe-cfg="{&quot;from&quot;:{&quot;lat&quot;:23.13,&quot;lon&quot;:113.26,&quot;label&quot;:{&quot;en&quot;:&quot;China&quot;,&quot;ru&quot;:&quot;Китай&quot;}},&quot;to&quot;:{&quot;lat&quot;:55.76,&quot;lon&quot;:37.62,&quot;label&quot;:{&quot;en&quot;:&quot;Russia&quot;,&quot;ru&quot;:&quot;Россия&quot;}},&quot;tag&quot;:{&quot;en&quot;:&quot;Illustration&quot;,&quot;ru&quot;:&quot;Иллюстрация&quot;}}"><img class="media" data-l="en" src="/assets/story/2023-globe-en.webp?v=4aa9f69189" srcset="/assets/story/2023-globe-en-640.webp?v=bd4cdc176b 640w, /assets/story/2023-globe-en.webp?v=4aa9f69189 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="Clothing store" data-en="Clothing store" data-ru="Магазин одежды" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2023-globe-ru.webp?v=e7b19a7041" srcset="/assets/story/2023-globe-ru-640.webp?v=87bbc84fca 640w, /assets/story/2023-globe-ru.webp?v=e7b19a7041 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="Clothing store" data-en="Clothing store" data-ru="Магазин одежды" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
   <div class="cap"><div class="cap-year">2023</div><div class="cap-plat mono"><span data-l="en">Own online store</span><span data-l="ru">Свой интернет-магазин</span></div>
     <h3 class="cap-title"><span data-l="en">Clothing store</span><span data-l="ru">Магазин одежды</span></h3><p class="cap-line"><span data-l="en">Started a clothing store on my own: <b>buying in China</b>, delivery, margins and customers.</span><span data-l="ru">Сам запустил магазин одежды: <b>закупки в Китае</b>, доставка, расчёт прибыли и клиенты.</span></p></div>
 </article>
 <article class="card wide" style="--ar:1.7778;--st:0.6" data-i="1" data-year="2025">
   <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-web"/></svg></span><span class="yr mono">2025</span></div>
-    <div class="frame" data-trade="1" data-trade-cfg="{&quot;title&quot;:{&quot;en&quot;:&quot;Manual trade&quot;,&quot;ru&quot;:&quot;Ручная сделка&quot;},&quot;buy&quot;:{&quot;en&quot;:&quot;Buy&quot;,&quot;ru&quot;:&quot;Купить&quot;},&quot;sell&quot;:{&quot;en&quot;:&quot;Sell&quot;,&quot;ru&quot;:&quot;Продать&quot;},&quot;entry&quot;:{&quot;en&quot;:&quot;entry&quot;,&quot;ru&quot;:&quot;вход&quot;},&quot;exit&quot;:{&quot;en&quot;:&quot;exit&quot;,&quot;ru&quot;:&quot;выход&quot;},&quot;tag&quot;:{&quot;en&quot;:&quot;Illustration&quot;,&quot;ru&quot;:&quot;Иллюстрация&quot;}}"><img class="media" data-l="en" src="/assets/story/2025-trade-en.webp?v=4f06a395d0" alt="Trading by hand" data-en="Trading by hand" data-ru="Торговля руками" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2025-trade-ru.webp?v=c99f159656" alt="Trading by hand" data-en="Trading by hand" data-ru="Торговля руками" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+    <div class="frame" data-trade="1" data-trade-cfg="{&quot;title&quot;:{&quot;en&quot;:&quot;Manual trade&quot;,&quot;ru&quot;:&quot;Ручная сделка&quot;},&quot;buy&quot;:{&quot;en&quot;:&quot;Buy&quot;,&quot;ru&quot;:&quot;Купить&quot;},&quot;sell&quot;:{&quot;en&quot;:&quot;Sell&quot;,&quot;ru&quot;:&quot;Продать&quot;},&quot;entry&quot;:{&quot;en&quot;:&quot;entry&quot;,&quot;ru&quot;:&quot;вход&quot;},&quot;exit&quot;:{&quot;en&quot;:&quot;exit&quot;,&quot;ru&quot;:&quot;выход&quot;},&quot;tag&quot;:{&quot;en&quot;:&quot;Illustration&quot;,&quot;ru&quot;:&quot;Иллюстрация&quot;}}"><img class="media" data-l="en" src="/assets/story/2025-trade-en.webp?v=4f06a395d0" srcset="/assets/story/2025-trade-en-640.webp?v=1d2c377e99 640w, /assets/story/2025-trade-en.webp?v=4f06a395d0 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="Trading by hand" data-en="Trading by hand" data-ru="Торговля руками" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2025-trade-ru.webp?v=c99f159656" srcset="/assets/story/2025-trade-ru-640.webp?v=3ed372cfb5 640w, /assets/story/2025-trade-ru.webp?v=c99f159656 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="Trading by hand" data-en="Trading by hand" data-ru="Торговля руками" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
   <div class="cap"><div class="cap-year">2025</div><div class="cap-plat mono"><span data-l="en">Axiom · DEX Screener</span><span data-l="ru">Axiom · DEX Screener</span></div>
     <h3 class="cap-title"><span data-l="en">Trading by hand</span><span data-l="ru">Торговля руками</span></h3><p class="cap-line"><span data-l="en">Traded pump.fun coins by hand and followed wallets; <b>that journal</b> became the spec for my own system.</span><span data-l="ru">Торговал монетами pump.fun вручную и следил за кошельками; из <b>этого журнала</b> выросли требования к своей системе.</span></p></div>
 </article>
-<article class="card wide" style="--ar:2.0382;--st:-1" data-i="2" data-year="2025">
+<article class="card wide" style="--ar:1.7778;--st:-1" data-i="2" data-year="2025">
   <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg></span><span class="handle">memesniper</span><span class="yr mono">2025</span></div>
-    <div class="frame"><img class="media" src="/assets/story/2025-memesniper.webp?v=a2eec52049" alt="memesniper" data-en="memesniper" data-ru="memesniper" width="1280" height="628" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+    <div class="frame" data-live="sniper" data-live-cfg="{&quot;tag&quot;:{&quot;en&quot;:&quot;Illustration&quot;,&quot;ru&quot;:&quot;Иллюстрация&quot;},&quot;tab&quot;:{&quot;en&quot;:&quot;migrations&quot;,&quot;ru&quot;:&quot;миграции&quot;},&quot;caught&quot;:{&quot;en&quot;:&quot;signal&quot;,&quot;ru&quot;:&quot;сигнал&quot;},&quot;path&quot;:{&quot;en&quot;:&quot;path of one trade&quot;,&quot;ru&quot;:&quot;путь одной сделки&quot;},&quot;s1&quot;:{&quot;en&quot;:&quot;signal&quot;,&quot;ru&quot;:&quot;сигнал&quot;},&quot;s2&quot;:{&quot;en&quot;:&quot;pool decoded&quot;,&quot;ru&quot;:&quot;пул разобран&quot;},&quot;s3&quot;:{&quot;en&quot;:&quot;tx sent&quot;,&quot;ru&quot;:&quot;транзакция отправлена&quot;}}"><img class="media" data-l="en" src="/assets/story/2025-memesniper-en.webp?v=2c77f121c7" srcset="/assets/story/2025-memesniper-en-640.webp?v=311fcf26e5 640w, /assets/story/2025-memesniper-en.webp?v=2c77f121c7 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="memesniper" data-en="memesniper" data-ru="memesniper" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2025-memesniper-ru.webp?v=5154771cbc" srcset="/assets/story/2025-memesniper-ru-640.webp?v=c79c8187e1 640w, /assets/story/2025-memesniper-ru.webp?v=5154771cbc 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="memesniper" data-en="memesniper" data-ru="memesniper" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
   <div class="cap"><div class="cap-year">2025</div><div class="cap-plat mono"><span data-l="en">TypeScript · Node.js · Electron</span><span data-l="ru">TypeScript · Node.js · Electron</span></div>
     <h3 class="cap-title"><span data-l="en">memesniper</span><span data-l="ru">memesniper</span></h3><p class="cap-line"><span data-l="en">My bot for pump.fun → PumpSwap migrations: its own pool decoding, <b>under 1 s</b> from a signal to a sent transaction.</span><span data-l="ru">Мой бот для миграций pump.fun → PumpSwap: свой разбор пула, <b>меньше 1 с</b> от сигнала до отправленной транзакции.</span></p></div>
 </article>
 <article class="card wide" style="--ar:1.7778;--st:1" data-i="3" data-year="2026">
   <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-web"/></svg></span><span class="handle">memesniper</span><span class="yr mono">2026</span></div>
-    <div class="frame"><img class="media" data-l="en" src="/assets/story/2026-live-trades-en.webp?v=d16bb1a24f" alt="1,263 live trades" data-en="1,263 live trades" data-ru="1 263 живых сделки" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2026-live-trades-ru.webp?v=ccbecc7485" alt="1,263 live trades" data-en="1,263 live trades" data-ru="1 263 живых сделки" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+    <div class="frame" data-live="trades" data-live-cfg="{&quot;tag&quot;:{&quot;en&quot;:&quot;Illustration&quot;,&quot;ru&quot;:&quot;Иллюстрация&quot;},&quot;live&quot;:{&quot;en&quot;:&quot;live trades · 3–19 Sep 2026&quot;,&quot;ru&quot;:&quot;живых сделок · 3–19.09.2026&quot;},&quot;paper&quot;:{&quot;en&quot;:&quot;then paper trading&quot;,&quot;ru&quot;:&quot;дальше — бумага&quot;},&quot;tests&quot;:{&quot;en&quot;:&quot;tests&quot;,&quot;ru&quot;:&quot;автотестов&quot;},&quot;exps&quot;:{&quot;en&quot;:&quot;preregistered\nexperiments&quot;,&quot;ru&quot;:&quot;предрегистрированных\nопытов&quot;}}"><img class="media" data-l="en" src="/assets/story/2026-live-trades-en.webp?v=bb280b5528" srcset="/assets/story/2026-live-trades-en-640.webp?v=88eca380db 640w, /assets/story/2026-live-trades-en.webp?v=bb280b5528 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="1,263 live trades" data-en="1,263 live trades" data-ru="1 263 живых сделки" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2026-live-trades-ru.webp?v=2ccc3ee19a" srcset="/assets/story/2026-live-trades-ru-640.webp?v=80438d1597 640w, /assets/story/2026-live-trades-ru.webp?v=2ccc3ee19a 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="1,263 live trades" data-en="1,263 live trades" data-ru="1 263 живых сделки" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
   <div class="cap"><div class="cap-year">2026</div><div class="cap-plat mono"><span data-l="en">Solana mainnet</span><span data-l="ru">Основная сеть Solana</span></div>
     <h3 class="cap-title"><span data-l="en">1,263 live trades</span><span data-l="ru">1 263 живых сделки</span></h3><p class="cap-line"><span data-l="en">Live trades on mainnet from 3 to 19 Sep 2026, paper since; <b>682 tests</b> and 32 preregistered experiments.</span><span data-l="ru">Живые сделки в основной сети с 3 по 19.09.2026, дальше бумага; <b>682 автотеста</b> и 32 предрегистрированных опыта.</span></p></div>
 </article>
 <article class="card wide" style="--ar:1.7778;--st:-0.6" data-i="4" data-year="2026">
   <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-web"/></svg></span><span class="yr mono">2026</span></div>
-    <div class="frame"><img class="media" data-l="en" src="/assets/story/2026-showcase-pools-en.webp?v=68f34ede76" alt="Showcase pools" data-en="Showcase pools" data-ru="Пулы-витрины" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2026-showcase-pools-ru.webp?v=b69c20610f" alt="Showcase pools" data-en="Showcase pools" data-ru="Пулы-витрины" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+    <div class="frame" data-live="pools" data-live-cfg="{&quot;tag&quot;:{&quot;en&quot;:&quot;Illustration&quot;,&quot;ru&quot;:&quot;Иллюстрация&quot;},&quot;title&quot;:{&quot;en&quot;:&quot;16 coins · one hub&quot;,&quot;ru&quot;:&quot;16 монет · один концентратор&quot;},&quot;hub&quot;:{&quot;en&quot;:&quot;hub&quot;,&quot;ru&quot;:&quot;концентратор&quot;},&quot;creator&quot;:{&quot;en&quot;:&quot;funded the creator&quot;,&quot;ru&quot;:&quot;пополнял создателя&quot;},&quot;buyer&quot;:{&quot;en&quot;:&quot;funded the big buyer&quot;,&quot;ru&quot;:&quot;пополнял крупного покупателя&quot;}}"><img class="media" data-l="en" src="/assets/story/2026-showcase-pools-en.webp?v=7441b8db25" srcset="/assets/story/2026-showcase-pools-en-640.webp?v=0ddcc2a9d7 640w, /assets/story/2026-showcase-pools-en.webp?v=7441b8db25 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="Showcase pools" data-en="Showcase pools" data-ru="Пулы-витрины" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2026-showcase-pools-ru.webp?v=097b584dd6" srcset="/assets/story/2026-showcase-pools-ru-640.webp?v=cef5640d91 640w, /assets/story/2026-showcase-pools-ru.webp?v=097b584dd6 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="Showcase pools" data-en="Showcase pools" data-ru="Пулы-витрины" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
   <div class="cap"><div class="cap-year">2026</div><div class="cap-plat mono"><span data-l="en">PumpSwap · on chain</span><span data-l="ru">PumpSwap · с цепи</span></div>
     <h3 class="cap-title"><span data-l="en">Showcase pools</span><span data-l="ru">Пулы-витрины</span></h3><p class="cap-line"><span data-l="en">Traced 16 pump.fun coins on chain: <b>one hub</b> funded both the creator and the big buyer.</span><span data-l="ru">Проследил на цепи 16 монет pump.fun: <b>один концентратор</b> пополнял и создателя, и крупного покупателя.</span></p></div>
 </article>
 <article class="card wide" style="--ar:1.7778;--st:0.8" data-i="5" data-year="2026">
   <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-github"/></svg></span><span class="handle">hrekokovgmmek-lab</span><span class="yr mono">2026</span></div>
-    <div class="frame"><img class="media" src="/assets/story/2026-open-source.webp?v=6a765e6d01" alt="Open source" data-en="Open source" data-ru="Открытый код" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+    <div class="frame" data-live="repos" data-live-cfg="{&quot;tag&quot;:{&quot;en&quot;:&quot;Illustration&quot;,&quot;ru&quot;:&quot;Иллюстрация&quot;},&quot;user&quot;:&quot;hrekokovgmmek-lab&quot;,&quot;done&quot;:{&quot;en&quot;:&quot;6 projects · MIT license&quot;,&quot;ru&quot;:&quot;6 проектов · лицензия MIT&quot;},&quot;repos&quot;:[{&quot;name&quot;:&quot;solana-fund-tracer&quot;,&quot;desc&quot;:{&quot;en&quot;:&quot;Follow money back to its source and on to the exchange.&quot;,&quot;ru&quot;:&quot;Путь денег: к источнику и дальше до биржи.&quot;}},{&quot;name&quot;:&quot;pumpswap-fee-decoder&quot;,&quot;desc&quot;:{&quot;en&quot;:&quot;Where the fees of a PumpSwap trade go.&quot;,&quot;ru&quot;:&quot;Куда уходят комиссии сделки PumpSwap.&quot;}},{&quot;name&quot;:&quot;pumpfun-migration-alerts&quot;,&quot;desc&quot;:{&quot;en&quot;:&quot;Migration alerts with on-chain risk flags.&quot;,&quot;ru&quot;:&quot;Оповещения о миграциях с флагами риска.&quot;}},{&quot;name&quot;:&quot;solana-wallet-tracker&quot;,&quot;desc&quot;:{&quot;en&quot;:&quot;Live buys and sells of any wallet.&quot;,&quot;ru&quot;:&quot;Покупки и продажи кошелька вживую.&quot;}},{&quot;name&quot;:&quot;honest-backtest&quot;,&quot;desc&quot;:{&quot;en&quot;:&quot;An honesty report for any backtest.&quot;,&quot;ru&quot;:&quot;Отчёт о честности любого бэктеста.&quot;}},{&quot;name&quot;:&quot;research-ledger&quot;,&quot;desc&quot;:{&quot;en&quot;:&quot;Append-only log of results and preregistrations.&quot;,&quot;ru&quot;:&quot;Журнал результатов и предрегистраций.&quot;}}]}"><img class="media" data-l="en" src="/assets/story/2026-open-source-en.webp?v=d3dc213816" srcset="/assets/story/2026-open-source-en-640.webp?v=8c3f274507 640w, /assets/story/2026-open-source-en.webp?v=d3dc213816 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="Open source" data-en="Open source" data-ru="Открытый код" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2026-open-source-ru.webp?v=6b77db8ff9" srcset="/assets/story/2026-open-source-ru-640.webp?v=c00529fd9d 640w, /assets/story/2026-open-source-ru.webp?v=6b77db8ff9 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="Open source" data-en="Open source" data-ru="Открытый код" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
   <div class="cap"><div class="cap-year">2026</div><div class="cap-plat mono">GitHub</div>
     <h3 class="cap-title"><span data-l="en">Open source</span><span data-l="ru">Открытый код</span></h3><p class="cap-line"><span data-l="en">Six Solana projects under the MIT license: <b>fund tracing</b>, fee decoding, alerts, backtest honesty.</span><span data-l="ru">Шесть проектов для Solana под MIT: <b>трассировка денег</b>, разбор комиссий, оповещения, честность бэктеста.</span></p></div>
 </article>
 <article class="card wide" style="--ar:1.7778;--st:-0.8" data-i="6" data-year="2026">
   <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-web"/></svg><svg class="ic" aria-hidden="true"><use href="#i-telegram"/></svg></span><span class="yr mono">2026</span></div>
-    <div class="frame"><img class="media" src="/assets/story/2026-coin-check.webp?v=120a778026" alt="Coin check" data-en="Coin check" data-ru="Проверка монеты" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+    <div class="frame"><img class="media" src="/assets/story/2026-coin-check.webp?v=120a778026" srcset="/assets/story/2026-coin-check-640.webp?v=aeabe34064 640w, /assets/story/2026-coin-check.webp?v=120a778026 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="Coin check" data-en="Coin check" data-ru="Проверка монеты" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
   <div class="cap"><div class="cap-year">2026</div><div class="cap-plat mono">artemvartanov.com</div>
     <h3 class="cap-title"><span data-l="en">Coin check</span><span data-l="ru">Проверка монеты</span></h3><p class="cap-line"><span data-l="en">Paste a pump.fun coin and the chain answers <b>in big letters</b>. Free, nothing to sign.</span><span data-l="ru">Вставьте монету pump.fun — цепь отвечает <b>большими буквами</b>. Бесплатно, ничего подписывать не нужно.</span></p></div>
 </article>
 <article class="card wide" style="--ar:1.7778;--st:0" data-i="7" data-year="2026">
   <div class="shot"><div class="bar"><span class="icons"><svg class="ic" aria-hidden="true"><use href="#i-web"/></svg></span><span class="yr mono">2026</span></div>
-    <div class="frame" data-code="1" data-code-cfg="{&quot;tag&quot;:{&quot;en&quot;:&quot;Illustration&quot;,&quot;ru&quot;:&quot;Иллюстрация&quot;},&quot;done&quot;:{&quot;en&quot;:&quot;reproduced in sandbox&quot;,&quot;ru&quot;:&quot;воспроизведено в песочнице&quot;}}"><img class="media" data-l="en" src="/assets/story/2026-code-en.webp?v=ac9c258882" alt="Bug bounty" data-en="Bug bounty" data-ru="Багбаунти" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2026-code-ru.webp?v=abc5ec0f01" alt="Bug bounty" data-en="Bug bounty" data-ru="Багбаунти" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
+    <div class="frame" data-code="1" data-code-cfg="{&quot;tag&quot;:{&quot;en&quot;:&quot;Illustration&quot;,&quot;ru&quot;:&quot;Иллюстрация&quot;},&quot;done&quot;:{&quot;en&quot;:&quot;reproduced in sandbox&quot;,&quot;ru&quot;:&quot;воспроизведено в песочнице&quot;}}"><img class="media" data-l="en" src="/assets/story/2026-code-en.webp?v=ac9c258882" srcset="/assets/story/2026-code-en-640.webp?v=2a03da0057 640w, /assets/story/2026-code-en.webp?v=ac9c258882 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="Bug bounty" data-en="Bug bounty" data-ru="Багбаунти" width="1280" height="720" loading="lazy" decoding="async"><img class="media" data-l="ru" src="/assets/story/2026-code-ru.webp?v=abc5ec0f01" srcset="/assets/story/2026-code-ru-640.webp?v=b99eb617bc 640w, /assets/story/2026-code-ru.webp?v=abc5ec0f01 1280w" sizes="(max-width: 760px) 92vw, 680px" alt="Bug bounty" data-en="Bug bounty" data-ru="Багбаунти" width="1280" height="720" loading="lazy" decoding="async"><i class="curtain" aria-hidden="true"></i></div></div>
   <div class="cap"><div class="cap-year">2026</div><div class="cap-plat mono">Cantina · Solana</div>
     <h3 class="cap-title"><span data-l="en">Bug bounty</span><span data-l="ru">Багбаунти</span></h3><p class="cap-line"><span data-l="en">I read Solana programs for bugs: <b>16 protocols</b> so far, and every finding is reproduced by a test in a sandbox before it is sent.</span><span data-l="ru">Ищу уязвимости в программах Solana: <b>16 протоколов</b> прочитано, и каждую находку воспроизвожу тестом в песочнице до отправки.</span></p></div>
 </article></div>

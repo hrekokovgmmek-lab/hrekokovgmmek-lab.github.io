@@ -65,7 +65,8 @@ export function initFx(S, addTicker, heroReady) {
       const s = document.createElement('span'); s.dataset.c = ch; s.textContent = ch; line.appendChild(s); return s;
     });
     document.body.appendChild(el);
-    const ready = document.fonts ? document.fonts.load('850 100px "Roboto Flex"').then(() => document.fonts.ready) : Promise.resolve();
+    // ждём только свой шрифт (он в preload), а не все шрифты страницы: иначе надпись и первый экран появлялись поздно
+    const ready = document.fonts ? document.fonts.load('850 100px "Roboto Flex"').catch(() => {}) : Promise.resolve();
     ready.then(() => {
       for (const s of spans) { const w = s.getBoundingClientRect().width, fz = parseFloat(getComputedStyle(s).fontSize) || 1; s.style.width = (w / fz).toFixed(4) + 'em'; }
       spans.forEach((s) => { if (s.dataset.c !== '.') s.textContent = bit(); });
