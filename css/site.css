@@ -176,7 +176,13 @@ html.anim .card.cur .frame::after { opacity: 1; animation: cardscan 5s linear 1.
 .today::before { content: ''; position: absolute; inset: 0; background: rgba(11,11,11,.82); z-index: -1; }
 .sec-title { margin: 0 0 clamp(28px, 6vh, 64px); font-family: var(--display); font-weight: 850; font-stretch: 80%;
   font-size: clamp(44px, 7.2vw, 118px); line-height: .86; letter-spacing: -.005em; text-transform: uppercase; }
-.sec-title .ls > span { overflow: hidden; }
+/* окно появления строки: строка .86em уже букв — кратка Й/Ё (до .97em над строкой) и ножки Д/Ц/Щ (.14em под) не влезают;
+   clip-path шире строки на эти выступы и не меняет вёрстку */
+.sec-title .ls > span { clip-path: inset(-.24em -.12em -.12em -.12em); }
+html.anim .sec-title.rise .ls > span > span { transform: translateY(1.3em); }
+html.anim .sec-title.rise.in .ls > span > span { transform: none; }
+/* строка с Й/Ё под другой строкой: кратка не должна лечь на буквы сверху (при .86 она на .11em выше их базовой линии) */
+.sec-title .ls > .acc:not(:first-child) { margin-top: .2em; }
 .rows { list-style: none; margin: 0; padding: 0; }
 .row { position: relative; display: grid; grid-template-columns: 1.1fr 1.4fr; gap: 24px; align-items: center; padding: 26px 0; }
 .row::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--line); transform-origin: 0 50%; }
@@ -327,7 +333,8 @@ html.anim .rows .row.in::before { transform: scaleX(1); }
   .timeline ol { display: none; }
   .row { grid-template-columns: 1fr; gap: 10px; }
   .sec-title { font-size: max(28px, calc((100vw - 2 * var(--inset)) / 10.7)); }
-  .sec-title .ls > span { display: inline; }
+  .sec-title .ls > span { display: inline; clip-path: none; }
+  html.anim .sec-title.rise:not(.in) .ls > span > span { transform: translateY(110%); }
   .sec-title .ls > span + span::before { content: ' '; }
 }
 @media (orientation: portrait) and (min-width: 761px) {

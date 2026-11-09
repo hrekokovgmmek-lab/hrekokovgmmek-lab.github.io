@@ -189,6 +189,9 @@ export async function createPortrait({ THREE, scene, camera, U, cfg, S }) {
           void main() {
             vec2 css = gl_FragCoord.xy / uDpr; vec2 suv = gl_FragCoord.xy / (uRes * uDpr);
             float a = texture2D(uShadow, vUv).r * uShadowK * (1.0 - maskAt(css, suv));
+            // внизу тень доходит до краёв снимка: там футболка уже гаснет (9 % ширины), и тень лежала бы серой полосой
+            // с ровным срезом — гасим её у краёв раньше футболки
+            a *= smoothstep(0.05, 0.2, vUv.x) * smoothstep(0.95, 0.8, vUv.x);
             if (a < 0.003) discard;
             gl_FragColor = vec4(uShadowCol, a);
           }`,
