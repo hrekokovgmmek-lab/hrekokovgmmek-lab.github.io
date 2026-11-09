@@ -4,6 +4,7 @@ import { initFx } from '/js/fx.js';
 import { initStory } from '/js/story.js';
 import { initStoryArt } from '/js/story-art.js';
 import { initStoryGlobe } from '/js/story-globe.js';
+import { initStoryCode } from '/js/story-code.js';
 
 const root = document.documentElement;
 const cfg = JSON.parse(document.getElementById('site-config').textContent);
@@ -118,3 +119,4 @@ initFx(S, addTicker, heroReady);
 initStory(S, addTicker);
 initStoryArt(S, addTicker);
 initStoryGlobe(S, addTicker);
+initStoryCode(S, addTicker);
