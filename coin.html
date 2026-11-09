@@ -44,36 +44,45 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Coin check · Artem Vartanov</title>
 <meta name="description" content="Paste a pump.fun coin: a big verdict from the chain, the live market cap and chart, who holds it and who trades it. Free, nothing to sign, no keys.">
-<meta name="theme-color" content="#f4f2ec">
+<meta name="theme-color" content="#100f0d">
 <meta property="og:title" content="Is this pump.fun coin a trap? · Coin check">
 <meta property="og:description" content="Paste a pump.fun coin: a big verdict from the chain, the live market cap and chart, who holds it and who trades it. Free, nothing to sign, no keys.">
 <meta property="og:image" content="https://artemvartanov.com/og.png">
-<meta property="og:url" content="https://artemvartanov.com/">
-<link rel="canonical" href="https://artemvartanov.com/">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23f4f2ec'/%3E%3Cpath d='M10 44 L24 30 L34 38 L54 18' fill='none' stroke='%23a84b36' stroke-width='6'/%3E%3C/svg%3E">
+<meta property="og:url" content="https://artemvartanov.com/coin.html">
+<link rel="canonical" href="https://artemvartanov.com/coin.html">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="preconnect" href="https://api.geckoterminal.com" crossorigin>
 <link rel="preconnect" href="https://solana-rpc.publicnode.com" crossorigin>
 <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
 <script defer src="lwc.js"></script>
 <style>
-:root{--paper:#f4f2ec;--ink:#1f1f1f;--brick:#a84b36;--grey:#6f6b62;--rule:#dedad1;--ochre:#9a6b12;--moss:#4d6b3c;--card:#fbfaf6;--sand:#cdbf9f;
-  --ease:cubic-bezier(.2,.7,.2,1);--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+:root{--paper:#100f0d;--ink:#f3efe6;--brick:#ff6b3d;--grey:#8f8a7f;--rule:#2a2723;--ochre:#f2b84b;--moss:#7fb069;--card:#171512;--sand:#3a352d;
+  --edge:rgba(243,239,230,.2);--grid:#181714;--ease:cubic-bezier(.2,.7,.2,1);--mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --display:"Roboto Flex","Arial Narrow",sans-serif;--text:"Geist",ui-sans-serif,system-ui,sans-serif;color-scheme:dark}
 *{box-sizing:border-box}
-html{background:var(--paper);color:var(--ink);-webkit-text-size-adjust:100%;overflow-x:clip}
-body{margin:0 auto;max-width:1200px;padding:0 16px 40px;font:16px/1.5 "Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--paper)}
+html{background:var(--paper);color:var(--ink);-webkit-text-size-adjust:100%;overflow-x:clip;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px}
+body{margin:0 auto;max-width:1240px;padding:0 max(16px,3vw) 40px;font:16px/1.5 var(--text);background:transparent}
 :root[data-lang=en] [data-l=ru],:root[data-lang=ru] [data-l=en]{display:none}
 [hidden]{display:none!important}
 a{color:var(--ink);text-decoration-color:var(--brick);text-underline-offset:3px}
-.top{display:flex;align-items:center;gap:18px;padding:16px 0 4px;flex-wrap:wrap}
-.name{font-weight:500;text-decoration:none;font-size:15px}
-.nav{display:flex;gap:14px;font-size:14px;flex-wrap:wrap}
-.nav a{text-decoration:none;color:var(--grey)}
-.nav a[aria-current=page]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--brick);text-underline-offset:4px}
-.lang{margin-left:auto}
-.lang button{font:inherit;font-size:14px;background:none;border:0;padding:4px 6px;color:var(--grey);cursor:pointer}
-.lang button[aria-pressed=true]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--brick);text-underline-offset:4px}
-.hero h1{font-size:clamp(28px,5vw,44px);font-weight:500;line-height:1.1;letter-spacing:-.015em;margin:26px 0 6px}
-.hero p{color:var(--grey);margin:0;max-width:640px}
+/* шапка как у нового сайта: имя в две строки слева, меню справа */
+.top{display:flex;align-items:flex-start;gap:12px 28px;padding:20px 0 6px;flex-wrap:wrap}
+.wm{display:block;font:850 30px/.86 var(--display);font-stretch:125%;letter-spacing:-.01em;text-transform:uppercase;text-decoration:none;color:var(--ink);white-space:nowrap}
+.wm span{display:block}
+.nav{display:grid;grid-template-columns:auto auto;column-gap:22px;margin-left:auto;font:750 15px/1.3 var(--display);font-stretch:112%;text-transform:uppercase;justify-items:end}
+.nav a{text-decoration:none;color:var(--ink)}
+.nav a:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.nav a:nth-of-type(1){grid-area:1/1} .nav a:nth-of-type(2){grid-area:2/1} .nav a:nth-of-type(3){grid-area:1/2} .nav a:nth-of-type(4){grid-area:2/2}
+.nav a[aria-current=page]{color:var(--brick)}
+.lang{display:flex;gap:2px;align-self:flex-start}
+.lang button{font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;background:none;border:0;padding:4px 5px;color:var(--grey);cursor:pointer}
+.lang button[aria-pressed=true]{color:var(--ink)}
+@media (max-width:640px){.wm{font-size:24px}.lang{margin-left:auto}
+  .nav{order:3;width:100%;margin:8px 0 0;justify-content:start;justify-items:start;column-gap:22px;font-size:13px}.nav a{white-space:nowrap}}
+.hero h1{font:850 clamp(36px,6.4vw,80px)/.92 var(--display);text-transform:uppercase;letter-spacing:-.005em;margin:clamp(28px,6vh,64px) 0 14px}
+.hero p{color:#cfcac0;margin:0;max-width:640px;font-size:17px}
 body.has-coin .hero{display:none}
 /* a coin opened from a link (COIN_EARLY): no welcome block from the first paint, the footer below the fold until the
    coin's place is taken, so that nothing on screen moves when the page script opens the coin; that script waits for
@@ -92,41 +101,43 @@ body.has-coin .hero{display:none}
 @media (max-width:560px){.coin-link .verdict.checking small,.coin-link .sub:empty{min-height:3em}}
 .hero .more{margin:10px 0 0;font-size:15px}
 form{display:flex;gap:8px;margin:14px 0 0;max-width:760px}
-input{flex:1;min-width:0;font:15px/1.4 var(--mono);padding:10px 11px;border:1px solid var(--ink);background:var(--card);color:var(--ink);border-radius:0}
+input{flex:1;min-width:0;font:15px/1.4 var(--mono);padding:12px 13px;border:1px solid var(--edge);background:var(--card);color:var(--ink);border-radius:8px}
+input::placeholder{color:var(--grey)}
 input:focus{outline:2px solid var(--brick);outline-offset:1px}
-button.go{font:inherit;padding:9px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;border-radius:0}
+button.go{font:750 15px/1 var(--display);font-stretch:112%;text-transform:uppercase;padding:12px 20px;border:1px solid var(--brick);background:var(--brick);color:var(--paper);cursor:pointer;border-radius:8px}
+button.go:hover{filter:brightness(1.08)}
 .recent{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
-.recent button{font:13px var(--mono);background:none;border:1px solid var(--rule);padding:4px 8px;cursor:pointer;color:var(--ink)}
+.recent button{font:13px var(--mono);background:var(--card);border:1px solid var(--rule);border-radius:999px;padding:4px 10px;cursor:pointer;color:var(--ink)}
 .status{color:var(--grey);font-size:14px;min-height:1.5em;margin:10px 0 0}
 .status.err{color:var(--brick)}
-.verdict{margin:14px 0 0;padding:16px 18px;background:var(--grey);color:var(--paper);display:flex;flex-direction:column;gap:4px}
-.verdict b{font-size:clamp(30px,7vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.01em;text-transform:uppercase}
+.verdict{margin:14px 0 0;padding:18px 20px;background:var(--grey);color:var(--paper);display:flex;flex-direction:column;gap:4px;border-radius:10px}
+.verdict b{font:850 clamp(34px,7vw,64px)/1 var(--display);letter-spacing:-.005em;text-transform:uppercase}
 .verdict span{font-size:15px;opacity:.95}
 .verdict small{font-size:12px;opacity:.8}
 .verdict.danger{background:var(--brick)} .verdict.warn{background:var(--ochre)} .verdict.ok{background:var(--moss)}
 .head{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin:18px 0 0}
 .who{display:flex;gap:12px;align-items:flex-start;flex:1 1 300px;min-width:0}
-.logo{width:56px;height:56px;object-fit:cover;border:1px solid var(--rule);background:var(--card);flex:none}
-.coin h1{font-size:clamp(22px,4.5vw,32px);font-weight:500;line-height:1.15;margin:0;letter-spacing:-.01em;overflow-wrap:anywhere}
+.logo{width:56px;height:56px;object-fit:cover;border:1px solid var(--rule);background:var(--card);flex:none;border-radius:8px}
+.coin h1{font:800 clamp(24px,4.5vw,36px)/1.1 var(--display);margin:0;letter-spacing:-.005em;overflow-wrap:anywhere}
 .mint{font:12px var(--mono);color:var(--grey);background:none;border:0;padding:4px 0;cursor:pointer;text-align:left;overflow-wrap:anywhere}
 .socials{display:flex;gap:10px;font-size:13px;flex-wrap:wrap}
 .pricebox{flex:1 1 260px;min-width:0}
 .mc{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.mc b{font-size:clamp(34px,7vw,52px);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.015em;line-height:1;transition:color .6s}
+.mc b{font:800 clamp(36px,7vw,58px)/1 var(--display);font-variant-numeric:tabular-nums;letter-spacing:-.01em;transition:color .6s}
 .mc b.up{color:var(--moss)} .mc b.down{color:var(--brick)}
 .mc em{font-style:normal;color:var(--grey);font-size:13px}
 .live{font-size:12px;color:var(--grey);display:inline-flex;align-items:center;gap:6px}
 .live i{width:7px;height:7px;border-radius:50%;background:var(--moss);display:inline-block;animation:pulse 2s infinite}
 .sub{color:var(--grey);font-size:14px;margin:4px 0 6px;font-variant-numeric:tabular-nums}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{font-size:13px;padding:2px 8px;border:1px solid var(--rule);font-variant-numeric:tabular-nums}
+.chip{font:13px var(--mono);padding:3px 9px;border:1px solid var(--rule);border-radius:999px;font-variant-numeric:tabular-nums}
 .chip.up{color:var(--moss)} .chip.down{color:var(--brick)}
 .grid{display:flex;flex-direction:column;gap:22px;margin:20px 0 0}
 .col{display:contents}
 @media (min-width:980px){.grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px;align-items:start}
   .col{display:flex;flex-direction:column;gap:22px}}
-.card{border-top:1px solid var(--ink);padding:10px 0 0;min-width:0}
-.card h2{font-size:17px;font-weight:500;margin:0 0 2px}
+.card{border-top:1px solid var(--edge);padding:12px 0 0;min-width:0}
+.card h2{font:750 15px/1.3 var(--display);font-stretch:112%;text-transform:uppercase;letter-spacing:.01em;margin:0 0 4px}
 .hint{color:var(--grey);font-size:13px;margin:0 0 10px}
 .src{color:var(--grey);font-size:12px;margin:8px 0 0}
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule)}
@@ -141,7 +152,7 @@ button.go{font:inherit;padding:9px 16px;border:1px solid var(--ink);background:v
 .tfs button[aria-pressed=true]{color:var(--ink);border-color:var(--brick)}
 .tfs button:hover{color:var(--ink)}
 .tfs .sep{flex:1}
-.tfs #mode{color:var(--ink);border:1px solid var(--ink);padding:3px 9px;margin:0 2px 0 6px;border-bottom-width:1px}
+.tfs #mode{color:var(--ink);border:1px solid var(--edge);border-radius:6px;padding:3px 9px;margin:0 2px 0 6px;border-bottom-width:1px}
 .tfs #fit{color:var(--ink);font-size:15px;padding:3px 8px}
 /* the chart runs edge to edge of the window, past the page column */
 .chartcard{margin:20px calc(50% - 50vw) 0;width:100vw;max-width:100vw;padding:10px 16px 0}
@@ -174,12 +185,12 @@ button.go{font:inherit;padding:9px 16px;border:1px solid var(--ink);background:v
 .up{color:var(--moss)} .down{color:var(--brick)}
 .flow svg{display:block;width:100%;height:150px;background:var(--card);border:1px solid var(--rule)}
 .flowsum{font-size:15px;margin:0 0 8px;font-variant-numeric:tabular-nums}
-.progress{height:18px;border:1px solid var(--ink);background:var(--card);position:relative}
+.progress{height:18px;border:1px solid var(--edge);background:var(--card);position:relative}
 .progress i{position:absolute;left:0;top:0;bottom:0;background:var(--moss);transition:width 1s var(--ease)}
 .progress span{position:absolute;right:6px;top:-1px;font-size:12px;font-variant-numeric:tabular-nums}
 .empty{color:var(--grey);font-size:14px;padding:18px 0;text-align:center}
 .buy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.buy a{display:block;text-align:center;padding:10px 8px;border:1px solid var(--ink);text-decoration:none;transition:background .2s,color .2s}
+.buy a{display:block;text-align:center;padding:11px 8px;border:1px solid var(--edge);border-radius:8px;text-decoration:none;transition:background .2s,color .2s,border-color .2s}
 .buy a:hover,.buy a:active{background:var(--ink);color:var(--paper)}
 .buy a.ref::after{content:" ·";color:var(--brick)}
 .fine{color:var(--grey);font-size:13px;margin:8px 0 0}
@@ -203,7 +214,7 @@ button.go{font:inherit;padding:9px 16px;border:1px solid var(--ink);background:v
 footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:var(--grey);font-size:13px}
 @keyframes rise{to{opacity:1;transform:none}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-@keyframes slide{from{opacity:0;transform:translateY(-8px);background:#ebe7dc}to{opacity:1;transform:none;background:transparent}}
+@keyframes slide{from{opacity:0;transform:translateY(-8px);background:rgba(255,138,61,.14)}to{opacity:1;transform:none;background:transparent}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}
   .reveal{opacity:1;transform:none}}
 @media (max-width:560px){.chartwrap{height:360px} .legend{font-size:10px} .tiles b{font-size:16px} .row{grid-template-columns:44px minmax(0,1fr) auto;font-size:12px}}
@@ -211,8 +222,8 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
 </head>
 <body>
 <header class="top">
-  <a class="name" href="./">Artem Vartanov</a>
-  <nav class="nav" aria-label="site"><a href="./" aria-current="page"><span data-l="en">Check a coin</span><span data-l="ru">Проверить монету</span></a><a href="about.html#market"><span data-l="en">Launchpad numbers</span><span data-l="ru">Замеры площадок</span></a><a href="stories.html"><span data-l="en">Stories</span><span data-l="ru">Истории</span></a><a href="about.html"><span data-l="en">About</span><span data-l="ru">Обо мне</span></a></nav>
+  <a class="wm" href="/" aria-label="Artem Vartanov"><span>Artem</span><span>Vartanov</span></a>
+  <nav class="nav" aria-label="site"><a href="/#story"><span data-l="en">Story</span><span data-l="ru">История</span></a><a href="/#about"><span data-l="en">About me</span><span data-l="ru">Обо мне</span></a><a href="/#today"><span data-l="en">Where to find me</span><span data-l="ru">Где меня найти</span></a><a href="coin.html" aria-current="page"><span data-l="en">Check a coin</span><span data-l="ru">Проверить монету</span></a></nav>
   <nav class="lang" aria-label="language"><button data-set="en">en</button><button data-set="ru">ru</button></nav>
 </header>
 
@@ -220,7 +231,6 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
 <section class="hero">
   <h1><span data-l="en">Is this coin a trap?</span><span data-l="ru">Монета — ловушка или нет?</span></h1>
   <p data-l="en">Paste a pump.fun coin address or link. The chain answers in big letters, then the live market cap, the chart, who holds it and who trades it. Free, nothing to sign.</p><p data-l="ru">Вставьте адрес монеты pump.fun или ссылку. Ответ по цепи — большими буквами, а ниже капитализация вживую, график, у кого монеты и кто торгует. Бесплатно, ничего подписывать не нужно.</p>
-  <p class="more"><a href="about.html#market"><span data-l="en">All my launchpad numbers on one page: PumpSwap, pump.fun, Meteora, LaunchLab, Moonit →</span><span data-l="ru">Все мои замеры по лаунчпадам на одной странице: PumpSwap, pump.fun, Meteora, LaunchLab, Moonit →</span></a></p>
 </section>
 <form id="form" autocomplete="off">
   <label for="q" hidden><span data-l="en">coin address</span><span data-l="ru">адрес монеты</span></label>
@@ -571,7 +581,7 @@ const app = window.Telegram?.WebApp;
 const inTg = !!(app && app.platform && app.platform !== "unknown");
 if (inTg) {
   app.ready(); app.expand();
-  try { app.setHeaderColor("#f4f2ec"); app.setBackgroundColor("#f4f2ec"); } catch (e) {}
+  try { app.setHeaderColor("#100f0d"); app.setBackgroundColor("#100f0d"); } catch (e) {}
 }
 const haptic = () => { try { inTg && app.HapticFeedback.impactOccurred("light"); } catch (e) {} };
 function openUrl(url) {
@@ -590,8 +600,8 @@ const TF = {
 const S = { autoFit: true, mint: null, pool: null, curvePool: null, createdAt: null, tf: "1m", mode: "mc", supply: 1e9, bars: [], trades: [],
   market: null, report: null, info: null, seen: new Set(), timer: null, slow: null, price: null, mcap: null, run: 0 };
 const C = { chart: null, candles: null, volume: null };
-// the site's paper palette: moss for up, brick for down, ink and grey for the rest
-const UP = "#4d6b3c", DOWN = "#a84b36", BG = "#f4f2ec", GRID = "#e7e3da", TXT = "#6f6b62", INK = "#1f1f1f", RULE = "#dedad1";
+// the new site's dark palette: green for up, signal orange for down, paper and grey for the rest
+const UP = "#7fb069", DOWN = "#ff6b3d", BG = "#121110", GRID = "#1d1b18", TXT = "#8f8a7f", INK = "#f3efe6", RULE = "#2a2723";
 
 function status(text, isErr) { const s = $("#status"); s.textContent = text || ""; s.classList.toggle("err", !!isErr); }
 
@@ -631,7 +641,7 @@ function makeChart() {
   const LW = window.LightweightCharts;
   C.chart = LW.createChart(el, {
     autoSize: true,
-    layout: { background: { type: "solid", color: BG }, textColor: TXT, fontSize: 11, fontFamily: '"Helvetica Neue",Helvetica,Arial,sans-serif' },
+    layout: { background: { type: "solid", color: BG }, textColor: TXT, fontSize: 11, fontFamily: '"Geist Mono",ui-monospace,monospace' },
     grid: { vertLines: { color: GRID }, horzLines: { color: GRID } },
     rightPriceScale: { borderColor: RULE, scaleMargins: { top: 0.08, bottom: 0.24 } },
     timeScale: { borderColor: RULE, timeVisible: true, secondsVisible: !!TF[S.tf].trades, rightOffset: 6, barSpacing: 7, minBarSpacing: 0.5, tickMarkFormatter: tickLabel },
@@ -666,7 +676,7 @@ function refit() {
   else C.chart.timeScale().setVisibleLogicalRange({ from: n - 160, to: n + room });
 }
 const toBar = (k) => { const m = scaleBy(); return { time: k.t, open: k.o * m, high: k.h * m, low: k.l * m, close: k.c * m }; };
-const toVol = (k) => ({ time: k.t, value: k.v, color: k.c >= k.o ? "rgba(77,107,60,.32)" : "rgba(168,75,54,.32)" });
+const toVol = (k) => ({ time: k.t, value: k.v, color: k.c >= k.o ? "rgba(127,176,105,.32)" : "rgba(255,107,61,.32)" });
 function paint(fit) {
   if (!C.chart) makeChart();
   $("#chartNote").textContent = S.bars.length ? "" : T("No trades in this window yet.", "В этом окне сделок пока нет.");
