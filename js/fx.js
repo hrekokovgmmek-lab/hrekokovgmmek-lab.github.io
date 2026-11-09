@@ -166,7 +166,7 @@ export function initFx(S, addTicker, heroReady) {
 
   // ---- появления: один раз, только с движением ----
   if (!S.motion || !('IntersectionObserver' in window)) {
-    document.querySelectorAll('.rise, .row').forEach((el) => el.classList.add('in'));
+    document.querySelectorAll('.rise, .row, .rise-soft').forEach((el) => el.classList.add('in'));
     return;
   }
   const io = (sel, margin, fn) => {
@@ -176,6 +176,7 @@ export function initFx(S, addTicker, heroReady) {
   };
   io('.rise', '-12%', (el) => el.classList.add('in'));
   io('.rows .row', '-30%', (el) => el.classList.add('in'));
+  io('.rise-soft', '-15%', (el) => el.classList.add('in'));
   io('.tick', '-12%', tick);
 }
 

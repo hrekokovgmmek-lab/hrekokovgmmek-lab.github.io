@@ -5,6 +5,7 @@ import { initStory } from '/js/story.js';
 import { initStoryArt } from '/js/story-art.js';
 import { initStoryGlobe } from '/js/story-globe.js';
 import { initStoryCode } from '/js/story-code.js';
+import { initStoryTrade } from '/js/story-trade.js';
 
 const root = document.documentElement;
 const cfg = JSON.parse(document.getElementById('site-config').textContent);
@@ -34,6 +35,27 @@ function setLang(l) {
   dispatchEvent(new Event('langchange'));
 }
 for (const b of document.querySelectorAll('[data-set-lang]')) b.addEventListener('click', () => setLang(b.dataset.setLang));
+
+// ---------- меню на весь экран (узкий экран): кнопка «Меню», закрыть — крестик, Esc или выбор пункта ----------
+{
+  const btn = document.querySelector('.menu-btn'), menu = document.getElementById('menu');
+  if (btn && menu) {
+    const open = (on) => {
+      btn.setAttribute('aria-expanded', String(on));
+      if (on) {
+        menu.hidden = false; requestAnimationFrame(() => menu.classList.add('open')); S.lenis?.stop();
+        menu.querySelector('a')?.focus({ preventScroll: true });
+      } else {
+        menu.classList.remove('open'); S.lenis?.start();
+        setTimeout(() => { if (!menu.classList.contains('open')) menu.hidden = true; }, 320);
+      }
+    };
+    btn.addEventListener('click', () => open(true));
+    menu.querySelector('.menu-close').addEventListener('click', () => { open(false); btn.focus({ preventScroll: true }); });
+    for (const a of menu.querySelectorAll('a')) a.addEventListener('click', () => open(false));
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) open(false); });
+  }
+}
 setLang(root.dataset.lang || cfg.langs[0]);
 
 // ---------- размеры ----------
@@ -120,3 +142,4 @@ initStory(S, addTicker);
 initStoryArt(S, addTicker);
 initStoryGlobe(S, addTicker);
 initStoryCode(S, addTicker);
+initStoryTrade(S, addTicker);
