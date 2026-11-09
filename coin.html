@@ -2,7 +2,7 @@
 <html lang="en" data-lang="en">
 <head>
 <meta charset="utf-8">
-<script>(function(){var r=document.documentElement,l=null;try{l=new URLSearchParams(location.search).get('lang')}catch(e){}if(l!=='ru'&&l!=='en'){try{l=localStorage.getItem('lang')}catch(e){}}if(l!=='ru'&&l!=='en')l=(navigator.language||'').toLowerCase().indexOf('ru')===0?'ru':'en';r.setAttribute('data-lang',l);r.lang=l})();</script>
+<script>(function(){var r=document.documentElement;r.setAttribute('data-lang','en');r.lang='en'})();</script>
 <script>(function () {
   var root = document.documentElement, nav = navigator, net = nav.connection || {}, why = [], q = null, mq = null;
   try { q = new URLSearchParams(location.search).get('fx'); } catch (e) {}
@@ -67,7 +67,7 @@ body{margin:0 auto;max-width:1240px;padding:0 max(16px,3vw) 40px;font:16px/1.5 v
 :root[data-lang=en] [data-l=ru],:root[data-lang=ru] [data-l=en]{display:none}
 [hidden]{display:none!important}
 a{color:var(--ink);text-decoration-color:var(--brick);text-underline-offset:3px}
-/* шапка как у нового сайта: имя в две строки слева, меню справа */
+/* header as on the new home page: the name in two lines on the left, the menu on the right */
 .top{display:flex;align-items:flex-start;gap:12px 28px;padding:20px 0 6px;flex-wrap:wrap}
 .wm{display:block;font:850 30px/.86 var(--display);font-stretch:125%;letter-spacing:-.01em;text-transform:uppercase;text-decoration:none;color:var(--ink);white-space:nowrap}
 .wm span{display:block}
@@ -90,7 +90,6 @@ body.has-coin .hero{display:none}
 .coin-link .hero{display:none}
 .coin-link body:not(.has-coin) main{min-height:100vh}
 .coin-link body:not(.has-coin) .status::before{content:"Loading the coin…"}
-.coin-link[data-lang=ru] body:not(.has-coin) .status::before{content:"Загружаю монету…"}
 /* and the places of what the answers fill in, each gone as soon as it is taken: the recent coins' row and the verdict's
    note (the chain's answer brings both), the market's line and changes, the picture (until the answer about the token,
    when the holders' card shows, with data or without) */
@@ -223,22 +222,21 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
 <body>
 <header class="top">
   <a class="wm" href="/" aria-label="Artem Vartanov"><span>Artem</span><span>Vartanov</span></a>
-  <nav class="nav" aria-label="site"><a href="/#story"><span data-l="en">Story</span><span data-l="ru">История</span></a><a href="/#about"><span data-l="en">About me</span><span data-l="ru">Обо мне</span></a><a href="/#today"><span data-l="en">Where to find me</span><span data-l="ru">Где меня найти</span></a><a href="coin.html" aria-current="page"><span data-l="en">Check a coin</span><span data-l="ru">Проверить монету</span></a></nav>
-  <nav class="lang" aria-label="language"><button data-set="en">en</button><button data-set="ru">ru</button></nav>
+  <nav class="nav" aria-label="site"><a href="/#story"><span data-l="en">Story</span></a><a href="/#about"><span data-l="en">About me</span></a><a href="/#today"><span data-l="en">Where to find me</span></a><a href="coin.html" aria-current="page"><span data-l="en">Check a coin</span></a></nav>
 </header>
 
 <main>
 <section class="hero">
-  <h1><span data-l="en">Is this coin a trap?</span><span data-l="ru">Монета — ловушка или нет?</span></h1>
-  <p data-l="en">Paste a pump.fun coin address or link. The chain answers in big letters, then the live market cap, the chart, who holds it and who trades it. Free, nothing to sign.</p><p data-l="ru">Вставьте адрес монеты pump.fun или ссылку. Ответ по цепи — большими буквами, а ниже капитализация вживую, график, у кого монеты и кто торгует. Бесплатно, ничего подписывать не нужно.</p>
+  <h1><span data-l="en">Is this coin a trap?</span></h1>
+  <p data-l="en">Paste a pump.fun coin address or link. The chain answers in big letters, then the live market cap, the chart, who holds it and who trades it. Free, nothing to sign.</p>
 </section>
 <form id="form" autocomplete="off">
-  <label for="q" hidden><span data-l="en">coin address</span><span data-l="ru">адрес монеты</span></label>
+  <label for="q" hidden><span data-l="en">coin address</span></label>
   <input id="q" spellcheck="false" autocapitalize="off" placeholder="pump.fun coin address or link">
-  <button class="go" type="submit"><span data-l="en">Check</span><span data-l="ru">Проверить</span></button>
+  <button class="go" type="submit"><span data-l="en">Check</span></button>
 </form>
 <div class="recent" id="recent"></div>
-<noscript><p class="status err"><span data-l="en">The page needs JavaScript.</span><span data-l="ru">Странице нужен JavaScript.</span></p></noscript>
+<noscript><p class="status err"><span data-l="en">The page needs JavaScript.</span></p></noscript>
 <p class="status" id="status" role="status" aria-live="polite"></p>
 
 <div id="coin" hidden>
@@ -247,7 +245,7 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
     <div class="who"><img class="logo" id="logo" alt="" hidden referrerpolicy="no-referrer">
       <div class="coin"><h1 id="title"></h1><button class="mint" id="mintBtn" type="button" title="copy"></button><div class="socials" id="socials"></div></div></div>
     <div class="pricebox">
-      <div class="mc"><b id="price">…</b><em><span data-l="en">market cap</span><span data-l="ru">капитализация</span></em><span class="live"><i></i><span data-l="en">live</span><span data-l="ru">вживую</span></span></div>
+      <div class="mc"><b id="price">…</b><em><span data-l="en">market cap</span></em><span class="live"><i></i><span data-l="en">live</span></span></div>
       <div class="sub" id="sub"></div>
       <div class="chips" id="chips"></div>
     </div>
@@ -261,58 +259,58 @@ footer{margin:36px 0 0;padding:16px 0 0;border-top:1px solid var(--rule);color:v
   <div class="grid">
     <div class="col">
 <section class="card reveal" id="flowCard" style="order:6" hidden>
-      <h2><span data-l="en">Money in and out</span><span data-l="ru">Деньги: заходят или выходят</span></h2><p class="hint" data-l="en">Every buy adds its dollars, every sell takes them away. The line goes up while more money comes in than leaves.</p><p class="hint" data-l="ru">Каждая покупка прибавляет свои доллары, каждая продажа вычитает. Линия растёт, пока денег заходит больше, чем выходит.</p>
+      <h2><span data-l="en">Money in and out</span></h2><p class="hint" data-l="en">Every buy adds its dollars, every sell takes them away. The line goes up while more money comes in than leaves.</p>
       <div class="flow" id="flow"></div>
     </section>
 <section class="card reveal" id="sizeCard" style="order:8" hidden>
-      <h2><span data-l="en">Trade sizes</span><span data-l="ru">Размеры сделок</span></h2><p class="hint" data-l="en">Who is trading now: small buyers or whales. Big red bars at the bottom mean large sells.</p><p class="hint" data-l="ru">Кто торгует сейчас: мелкие покупатели или киты. Длинные красные полосы внизу — крупные продажи.</p>
+      <h2><span data-l="en">Trade sizes</span></h2><p class="hint" data-l="en">Who is trading now: small buyers or whales. Big red bars at the bottom mean large sells.</p>
       <div id="sizes"></div>
     </section>
 <section class="card reveal" id="whaleCard" style="order:9" hidden>
-      <h2><span data-l="en">Biggest wallets right now</span><span data-l="ru">Крупнейшие кошельки сейчас</span></h2><p class="hint" data-l="en">Wallets with the most money in the latest trades: green bought, red sold, the number is what they put in or took out.</p><p class="hint" data-l="ru">Кошельки с наибольшими суммами в последних сделках: зелёное — купили, красное — продали, справа — сколько вложили или вывели.</p>
+      <h2><span data-l="en">Biggest wallets right now</span></h2><p class="hint" data-l="en">Wallets with the most money in the latest trades: green bought, red sold, the number is what they put in or took out.</p>
       <div id="whales"></div>
     </section>
 <section class="card reveal" style="order:10">
-      <h2><span data-l="en">Latest trades</span><span data-l="ru">Последние сделки</span></h2>
+      <h2><span data-l="en">Latest trades</span></h2>
       <ul class="feed" id="feed"></ul>
     </section>
     </div>
     <div class="col">
 <section class="card reveal" style="order:2">
-      <h2><span data-l="en">Key numbers</span><span data-l="ru">Главные цифры</span></h2>
+      <h2><span data-l="en">Key numbers</span></h2>
       <div class="tiles" id="tiles"></div>
     </section>
 <section class="card reveal" style="order:3">
-      <h2><span data-l="en">Buy</span><span data-l="ru">Купить</span></h2>
+      <h2><span data-l="en">Buy</span></h2>
       <div class="buy" id="buy"></div>
       <p class="fine" id="signup"></p>
-      <p class="fine" data-l="en">Opens a trading terminal with this coin. Nothing is bought here and no keys are asked for.</p><p class="fine" data-l="ru">Откроется торговый терминал с этой монетой. Здесь ничего не покупается и ключи не нужны.</p>
+      <p class="fine" data-l="en">Opens a trading terminal with this coin. Nothing is bought here and no keys are asked for.</p>
     </section>
 <section class="card reveal" id="spreadCard" style="order:4" hidden>
-      <h2><span data-l="en">Who holds the coin</span><span data-l="ru">У кого монеты</span></h2><p class="hint" data-l="en">How the supply is spread. The bigger the red part, the fewer wallets can crash the price by selling.</p><p class="hint" data-l="ru">Как распределены монеты. Чем больше красная часть, тем меньше кошельков нужно, чтобы обрушить цену продажей.</p>
+      <h2><span data-l="en">Who holds the coin</span></h2><p class="hint" data-l="en">How the supply is spread. The bigger the red part, the fewer wallets can crash the price by selling.</p>
       <div id="spread"></div>
     </section>
 <section class="card reveal" id="pressCard" style="order:5" hidden>
-      <h2><span data-l="en">Buys against sells</span><span data-l="ru">Покупки против продаж</span></h2><p class="hint" data-l="en">Number of trades in each window: green buys, red sells. More green means buyers are in charge.</p><p class="hint" data-l="ru">Число сделок за каждый период: зелёное — покупки, красное — продажи. Больше зелёного — покупатели сильнее.</p>
+      <h2><span data-l="en">Buys against sells</span></h2><p class="hint" data-l="en">Number of trades in each window: green buys, red sells. More green means buyers are in charge.</p>
       <div id="press"></div>
     </section>
 <section class="card reveal" id="curveCard" style="order:7" hidden>
-      <h2><span data-l="en">pump.fun curve</span><span data-l="ru">Кривая pump.fun</span></h2><p class="hint" data-l="en">How much of the coin is sold on its launch curve.</p><p class="hint" data-l="ru">Сколько монет продано на стартовой кривой.</p>
+      <h2><span data-l="en">pump.fun curve</span></h2><p class="hint" data-l="en">How much of the coin is sold on its launch curve.</p>
       <div id="curve"></div>
     </section>
 <section class="card reveal" id="check" style="order:11" hidden>
-      <h2><span data-l="en">On-chain check</span><span data-l="ru">Проверка по цепи</span></h2>
+      <h2><span data-l="en">On-chain check</span></h2>
       <ul class="flags" id="flags"></ul>
       <table class="facts"><tbody id="facts"></tbody></table>
       <p class="fine" id="checkNote"></p>
-      <p class="fine"><a id="botlink" href="#" data-ext><span data-l="en">Holders by wallet and alerts are in the Telegram bot</span><span data-l="ru">Держатели по кошелькам и уведомления — в Telegram-боте</span></a></p>
+      <p class="fine"><a id="botlink" href="#" data-ext><span data-l="en">Holders by wallet and alerts are in the Telegram bot</span></a></p>
     </section>
     </div>
   </div>
 </div>
 </main>
 
-<footer><p data-l="en">Market cap, chart, trades, holders' spread: GeckoTerminal. Chain: public Solana nodes, read in your browser. Nothing is stored. Not advice to buy.</p><p data-l="ru">Капитализация, график, сделки, распределение держателей — GeckoTerminal. Цепь — публичные узлы Solana, читается в вашем браузере. Ничего не сохраняется. Не совет покупать.</p></footer>
+<footer><p data-l="en">Market cap, chart, trades, holders' spread: GeckoTerminal. Chain: public Solana nodes, read in your browser. Nothing is stored. Not advice to buy.</p></footer>
 <script type="module">const PAGE_RPC = "https://solana-rpc.publicnode.com", HOLDERS_RPC = "https://public.rpc.solanavibestation.com/", BOT = "artem_coinchek_bot", REFS = {"gmgn": "Ri639FUK", "axiom": "https://axiom.trade/@peni3", "trojan": "https://trojan.com/@ArtemVartanov", "pump": "AjarTestedFibre"}, LABELS = {
 "_about":"Public labels for the pump.fun coin check: terminals (programs and fee wallets) and exchange/bridge wallets. Built by build_labels.py from a white list.",
 "terminals":{
@@ -1235,11 +1233,8 @@ async function liveMarket(run) {
 }
 
 // ---------- language and controls ----------
-let pick = null;
-try { const q = new URLSearchParams(location.search).get("lang"); if (q === "ru" || q === "en") pick = q; } catch (e) {}
-if (!pick && inTg) pick = (app.initDataUnsafe?.user?.language_code || "").startsWith("ru") ? "ru" : "en";
-if (!pick) { try { pick = localStorage.getItem("lang"); } catch (e) {} }
-if (pick !== "ru" && pick !== "en") pick = (navigator.language || "").toLowerCase().startsWith("ru") ? "ru" : "en";
+// only English (since 09.11.2026): no ?lang=, stored choice, browser or Telegram language switches it
+const pick = "en";
 function setLang(l) {
   root.setAttribute("data-lang", l); root.lang = l;
   all("[data-set]").forEach((b) => b.setAttribute("aria-pressed", b.getAttribute("data-set") === l ? "true" : "false"));
@@ -1250,7 +1245,6 @@ function setLang(l) {
   if (S.mint) { renderAll(); renderHead(); renderCheck(); renderBuy(); renderTrades(S.trades.slice().reverse(), true); }
 }
 setLang(pick);
-all("[data-set]").forEach((b) => b.addEventListener("click", () => { const l = b.getAttribute("data-set"); setLang(l); try { localStorage.setItem("lang", l); } catch (e) {} }));
 $("#form").addEventListener("submit", (e) => { e.preventDefault(); haptic(); open($("#q").value); });
 $("#recent").addEventListener("click", (e) => { const m = e.target.closest("[data-mint]")?.dataset.mint; if (m) { $("#q").value = m; open(m); } });
 all(".tfs button[data-tf]").forEach((b) => b.addEventListener("click", () => { haptic(); setTf(b.dataset.tf); loadBars(true); }));
